@@ -53,17 +53,17 @@ int main(int argc, char **argv) {
   
   std::cout << "Waiting for a client to connect...\n";
   
-  while(1) {
-    int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
-    if (client_fd == -1) {
-      std::cerr << "Failed to accept client connection\n";
-      return 1;
-    }
-    std::cout << "Client connected\n";
+  int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
+  if (client_fd == -1) {
+    std::cerr << "Failed to accept client connection\n";
+    return 1;
+  }
+  std::cout << "Client connected\n";
 
-    int n = 0;
-    char buffer[1024];
-    
+  int n = 0;
+  char buffer[1024];
+
+  while(1) {
     memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
     n = read(client_fd, buffer, sizeof(buffer));
     if (n < 0) {
@@ -81,9 +81,8 @@ int main(int argc, char **argv) {
       std::cerr << "Failed to write message to socket.\n";
       return 1;
     }
-    close(client_fd);
   }
-  
+  close(client_fd);
   close(server_fd);
 
   return 0;
