@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
   char buffer[1024];
   
   memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
-  n = recv(client_fd, buffer, sizeof(buffer));
+  n = read(client_fd, buffer, sizeof(buffer));
   if (n < 0) {
     std::cerr << "Error reading from socket.\n";
     return 1;
