@@ -53,34 +53,36 @@ int main(int argc, char **argv) {
   
   std::cout << "Waiting for a client to connect...\n";
   
-  int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
-  if (client_fd == -1) {
-    std::cerr << "Failed to accept client connection\n";
-    return 1;
-  }
-  std::cout << "Client connected\n";
+  while(1) {
+    int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
+    if (client_fd == -1) {
+      std::cerr << "Failed to accept client connection\n";
+      return 1;
+    }
+    std::cout << "Client connected\n";
 
-  int n = 0;
-  char buffer[1024];
-  
-  memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
-  n = read(client_fd, buffer, sizeof(buffer));
-  if (n < 0) {
-    std::cerr << "Error reading from socket.\n";
-    return 1;
-  }
+    int n = 0;
+    char buffer[1024];
+    
+    memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
+    n = read(client_fd, buffer, sizeof(buffer));
+    if (n < 0) {
+      std::cerr << "Error reading from socket.\n";
+      return 1;
+    }
 
-  std::string HARDCODED_RESPONSE = "+PONG\r\n";
-  memset(buffer, 0, sizeof(buffer));
-  // bcopy(HARDCODED_RESPONSE.c_str(), buffer, HARDCODED_RESPONSE.length()); deprecated POSIX function
-  memcpy(buffer, HARDCODED_RESPONSE.c_str(), HARDCODED_RESPONSE.length());
-  
-  n = write(client_fd, buffer, HARDCODED_RESPONSE.length());
-  if (n < 0) {
-    std::cerr << "Failed to write message to socket.\n";
-    return 1;
+    std::string HARDCODED_RESPONSE = "+PONG\r\n";
+    memset(buffer, 0, sizeof(buffer));
+    // bcopy(HARDCODED_RESPONSE.c_str(), buffer, HARDCODED_RESPONSE.length()); deprecated POSIX function
+    memcpy(buffer, HARDCODED_RESPONSE.c_str(), HARDCODED_RESPONSE.length());
+    
+    n = write(client_fd, buffer, HARDCODED_RESPONSE.length());
+    if (n < 0) {
+      std::cerr << "Failed to write message to socket.\n";
+      return 1;
+    }
+    close(client_fd);
   }
-  close(client_fd);
   
   close(server_fd);
 
