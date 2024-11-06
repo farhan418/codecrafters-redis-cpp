@@ -110,6 +110,7 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
     memcpy(buffer, HARDCODED_RESPONSE.c_str(), HARDCODED_RESPONSE.length());
     
     n = write(client_fd, buffer, HARDCODED_RESPONSE.length());
+    std::cerr << "\nSend message: " << buffer << std::endl;
     if (n < 0) {
       std::cerr << "Failed to write message to socket.\n";
       return -1;
