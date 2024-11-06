@@ -64,7 +64,16 @@ int main(int argc, char **argv) {
       return 1;
     }
     std::cout << "Client connected\n";
-    std::thread t(handle_client, client_fd);
+    try {
+      std::thread t(handle_client, client_fd);
+      // t.detach();
+    }
+    catch(const std::exception& e) {
+      std::cerr << "\nException occurred in thread: " << e.what() << std::endl;
+    }
+    catch(...) {
+      std::cerr << "\nUnknown exception occurred in thread.\n";
+    }
   }
   
   close(server_fd);
@@ -80,7 +89,7 @@ int handle_client(int client_fd) {
     n = read(client_fd, buffer, sizeof(buffer));
     if (n < 0) {
       std::cerr << "Error reading from socket.\n";
-      return 1;
+      return -1;
     }
 
     std::string HARDCODED_RESPONSE = "+PONG\r\n";
@@ -91,11 +100,11 @@ int handle_client(int client_fd) {
     n = write(client_fd, buffer, HARDCODED_RESPONSE.length());
     if (n < 0) {
       std::cerr << "Failed to write message to socket.\n";
-      return 1;
+      return -1;
     }
     if (std::string(buffer).find("END") != std::string::npos)
       break;
   }
   close(client_fd);
-  return 1;
+  return 0;
 }
