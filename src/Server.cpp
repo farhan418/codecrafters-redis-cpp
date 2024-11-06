@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
   int client_addr_len = sizeof(client_addr);
   
   while(true) {
-    memset(client_addr, 0, sizeof(client_addr));
+    memset((void*)client_addr, 0, sizeof(client_addr));
     std::cout << "Waiting for a client to connect...\n";
 
     int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
