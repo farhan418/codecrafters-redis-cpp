@@ -88,7 +88,6 @@ int main(int argc, char **argv) {
     });
     t.detach();
   }
-  
   close(server_fd);
   return 0;
 }
