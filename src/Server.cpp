@@ -9,6 +9,8 @@
 #include <netdb.h>
 #include <thread>
 
+int handle_client(int);
+
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
   std::cout << std::unitbuf;
@@ -69,7 +71,6 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-
 int handle_client(int client_fd) {
   int n = 0;
   char buffer[1024];
@@ -92,8 +93,9 @@ int handle_client(int client_fd) {
       std::cerr << "Failed to write message to socket.\n";
       return 1;
     }
-    if (std::string(buffer) == "END")
-      close(client_fd);
+    if (std::string(buffer).find("END") != std::npos)
+      break;
   }
   close(client_fd);
+  return 1;
 }
