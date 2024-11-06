@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <thread>
 
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
@@ -51,15 +52,25 @@ int main(int argc, char **argv) {
   struct sockaddr_in client_addr;
   int client_addr_len = sizeof(client_addr);
   
-  std::cout << "Waiting for a client to connect...\n";
-  
-  int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
-  if (client_fd == -1) {
-    std::cerr << "Failed to accept client connection\n";
-    return 1;
-  }
-  std::cout << "Client connected\n";
+  while(true) {
+    std::cout << "Waiting for a client to connect...\n";
 
+    int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
+    if (client_fd == -1) {
+      std::cerr << "Failed to accept client connection\n";
+      return 1;
+    }
+    std::cout << "Client connected\n";
+    std::thread t(handle_client, client_fd);
+    // t.join()   // do not know if this is required
+  }
+  
+  close(server_fd);
+  return 0;
+}
+
+
+int handle_client(int client_fd) {
   int n = 0;
   char buffer[1024];
 
@@ -81,9 +92,8 @@ int main(int argc, char **argv) {
       std::cerr << "Failed to write message to socket.\n";
       return 1;
     }
+    if (std::string(buffer) == "END")
+      close(client_fd);
   }
   close(client_fd);
-  close(server_fd);
-
-  return 0;
 }
