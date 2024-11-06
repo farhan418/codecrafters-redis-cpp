@@ -115,8 +115,8 @@ int handle_client(int client_fd) {
       std::cerr << "Failed to write message to socket.\n";
       return -1;
     }
-    if (std::string(buffer).find("END") != std::string::npos)
-      break;
+    // if (std::string(buffer).find("END") != std::string::npos)
+    //   break;
   }
   close(client_fd);
   return 0;
