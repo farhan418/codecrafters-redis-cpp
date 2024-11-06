@@ -75,9 +75,9 @@ int main(int argc, char **argv) {
     //   std::cerr << "\nUnknown exception occurred in thread.\n";
     // }
 
-    std::thread t([client_fd](){
+    std::thread t([client_fd, client_addr](){
       try {
-        handle_client(client_fd);
+        handle_client(client_fd, client_addr);
       }
       catch(const std::exception& e) {
         std::cerr << "\nException occurred in thread: " << e.what() << std::endl;
