@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     // }
     // catch(...) {
     //   std::cerr << "\nUnknown exception occurred in thread.\n";
-    // }
+    // } 
 
     std::thread t([client_fd, client_addr](){
       try {
