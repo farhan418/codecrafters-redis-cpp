@@ -18,7 +18,6 @@ int main(int argc, char **argv) {
 
   // You can use print statements as follows for debugging, they'll be visible when running tests.
   // std::cout << "Logs from your program will appear here!\n";
-
   // Uncomment this block to pass the first stage
   
   int server_fd = socket(AF_INET, SOCK_STREAM, 0);
