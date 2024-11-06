@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
     std::cout << "Client connected\n";
     try {
       std::thread t(handle_client, client_fd);
-      // t.detach();
+      t.detach();
     }
     catch(const std::exception& e) {
       std::cerr << "\nException occurred in thread: " << e.what() << std::endl;
@@ -74,6 +74,19 @@ int main(int argc, char **argv) {
     catch(...) {
       std::cerr << "\nUnknown exception occurred in thread.\n";
     }
+
+    // std::thread t([client_fd](){
+    //   try {
+    //     handle_client(client_fd);
+    //   }
+    //   catch(const std::exception& e) {
+    //     std::cerr << "\nException occurred in thread: " << e.what() << std::endl;
+    //   }
+    //   catch(...) {
+    //     std::cerr << "\nUnknown exception occurred in thread.\n";
+    //   }
+    // });
+    // t.detach();
   }
   
   close(server_fd);
