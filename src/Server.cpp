@@ -9,7 +9,7 @@
 #include <netdb.h>
 #include <thread>
 
-int handle_client(int, struct sockaddr_in&);
+int handle_client(int, const struct sockaddr_in&);
 
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-int handle_client(int client_fd, struct sockaddr_in& client_addr) {
+int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
   int n = 0;
   char buffer[1024];
 
