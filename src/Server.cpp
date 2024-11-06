@@ -104,7 +104,7 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
       return -1;
     }
 
-    std::string HARDCODED_RESPONSE = R"+PONG\r\n";
+    std::string HARDCODED_RESPONSE = "+PONG\r\n";
     // const char* HARDCODED_RESPONSE = b"+PONG\r\n";
     memset(buffer, 0, sizeof(buffer));
     // bcopy(HARDCODED_RESPONSE.c_str(), buffer, HARDCODED_RESPONSE.length());  // deprecated POSIX function
