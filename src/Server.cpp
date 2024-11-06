@@ -55,6 +55,7 @@ int main(int argc, char **argv) {
   int client_addr_len = sizeof(client_addr);
   
   while(true) {
+    memset(client_addr, 0, sizeof(client_addr));
     std::cout << "Waiting for a client to connect...\n";
 
     int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
@@ -64,7 +65,6 @@ int main(int argc, char **argv) {
     }
     std::cout << "Client connected\n";
     std::thread t(handle_client, client_fd);
-    // t.join()   // do not know if this is required
   }
   
   close(server_fd);
