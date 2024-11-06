@@ -63,6 +63,7 @@ int main(int argc, char **argv) {
       return 1;
     }
     std::cout << "Client connected\n";
+    
     // try {
     //   std::thread t(handle_client, client_fd);
     //   t.detach();
