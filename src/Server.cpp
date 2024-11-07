@@ -150,18 +150,18 @@ public:
     std::vector<std::string> reply;
     if ("PING" == command[0]) {
       reply.push_back("PONG");
-      response = RespParser.serialize(reply, "simple_string");
+      response = RespParser::serialize(reply, "simple_string");
     }
     else if ("ECHO" == command[0]) {
       if (command.size() <2) {
         throw std::runtime_error("few arguments provided for ECHO command.");
       }
       reply.push_back(command[1]);
-      response = RespParser.serialize(reply, "bulk_string");
+      response = RespParser::serialize(reply, "bulk_string");
     }
     else {
       reply.push_back("-err invalid command : " + command[0]);
-      response = RespParser.serialize(reply, "error");
+      response = RespParser::serialize(reply, "error");
     }
     return response;
   }
