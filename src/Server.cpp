@@ -102,6 +102,9 @@ public:
     lastTokenIndex = 0;
     tokens.clear();
     tokens = split(respStr);
+    for(auto& element : tokens) {
+      std::cerr << element << "|, ";
+    }
   }
 
   std::string parseNextToken(const std::string& respStr) {
