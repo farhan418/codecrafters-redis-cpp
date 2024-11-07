@@ -62,5 +62,6 @@ public:
     }
     return RespParser::serialize(reply, data_type);
   }
+  
 };
 #endif  // REDISCOMMANDCENTER_HPP
