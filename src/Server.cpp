@@ -11,7 +11,9 @@
 #include <regex>
 
 int handle_client(int, const struct sockaddr_in&);
-std::string prepare_reply(const RespParser&);
+// std::string prepare_reply(const RespParser&);
+class RespParser;
+class RedisCommandCenter;
 
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
@@ -165,7 +167,6 @@ private:
   }
 
 public:
-
   std::vector<std::string> deserialize(const std::string& respToken) {
     std::vector<std::string> command;
 
