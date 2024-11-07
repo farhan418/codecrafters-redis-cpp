@@ -135,8 +135,10 @@ public:
     else if (data_type == "error") {
       result = "-" + vec[0] + DELIMETER;
     }
-    else
+    else {
       throw std::runtime_error("invalid data type, cannot serialize");
+    }
+    return result;
   }
 };
 
