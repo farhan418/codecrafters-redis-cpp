@@ -102,9 +102,9 @@ public:
     lastTokenIndex = 0;
     tokens.clear();
     tokens = split(respStr);
-    for(auto& element : tokens) {
-      std::cerr << element << "|, ";
-    }
+    // for(auto& element : tokens) {
+    //   std::cerr << element << "|, ";
+    // }
   }
 
   std::string parseNextToken(const std::string& respStr) {
@@ -256,8 +256,9 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
       std::cerr << "Error reading from socket.\n";
       return -1;
     }
-    resp_parser.resetParser(buffer);
+    resp_parser.resetParser(buffer());
     while(!resp_parser.isParsedAllTokens()) {
+      std::cerr << " in loop";
       std::vector<std::string> command = resp_parser.deserialize(resp_parser.parseNextToken(""));
       std::string response_str = rcc.process(command);
 
