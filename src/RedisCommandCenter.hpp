@@ -52,9 +52,9 @@ public:
       }
       data_type = "bulk_string";
       if (keyStore.count(command[1]) == 0)
-        reply = "-1";
+        reply.push_back("-1");
       else
-        reply = keyStore[command[1]];
+        reply.push_back(keyStore[command[1]]);
     }
     else {
       reply.push_back("-err invalid command : " + command[0]);
