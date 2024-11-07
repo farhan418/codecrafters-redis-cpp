@@ -11,6 +11,7 @@
 #include <regex>
 
 int handle_client(int, const struct sockaddr_in&);
+
 class RespParser {
 private:
   bool isParsed;
@@ -90,21 +91,21 @@ public:
     tokens.clear();
   }
 
-  // void resetParser() {
-    // isParsed = false;
-    // lastTokenIndex = 0;
-    // tokens.clear();
-  // }
-
-  void resetParser(const std::string& respStr) {
-    // resetParser();
+  void resetParser() {
     isParsed = false;
     lastTokenIndex = 0;
     tokens.clear();
+  }
+
+  void resetParser(const std::string& respStr) {
+    // resetParser();
+    lastTokenIndex = 0;
+    tokens.clear();
     tokens = split(respStr);
-    // for(auto& element : tokens) {
-    //   std::cerr << element << "|, ";
-    // }
+    isParsed = true;
+    for(auto& element : tokens) {
+      std::cerr << element << "|, ";
+    }
   }
 
   std::string parseNextToken(const std::string& respStr) {
@@ -260,6 +261,7 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
       std::cerr << "Error reading from socket.\n";
       return -1;
     }
+    std::cerr << "read " << n << " bytes : " << buffer << std::endl;
     resp_parser.resetParser(buffer);
     while(!resp_parser.isParsedAllTokens()) {
       std::cerr << " in loop";
