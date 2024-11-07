@@ -61,6 +61,7 @@ private:
 public:
   std::vector<std::string> deserialize(const std::string& respToken) {
     std::vector<std::string> command;
+    std::cerr << "\'" << respToken << "\' in deserialize, respToken[0] = " << respToken[0] << std::endl;
     switch(respToken[0]) {
       case '+':
       command.push_back(parse_simple_string(respToken));
@@ -79,7 +80,7 @@ public:
       break;
 
       default:
-      throw std::runtime_error("invalid respToken" + respToken);
+      throw std::runtime_error("invalid respToken \'" + respToken + "\'");
       break;
     }
     return command;
