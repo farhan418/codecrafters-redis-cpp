@@ -147,18 +147,21 @@ public:
 
   std::string process(const std::vector<std::string>& command) {
     std::string response;
+    std::vector<std::string> reply;
     if ("PING" == command[0]) {
-      response = RespParser.serialize("PONG", "simple_string");
-      break;
+      reply.push_back("PONG");
+      response = RespParser.serialize(reply, "simple_string");
     }
     else if ("ECHO" == command[0]) {
       if (command.size() <2) {
         throw std::runtime_error("few arguments provided for ECHO command.");
       }
-      response = RespParser.serialize(command[1], "bulk_string");
+      reply.push_back(command[1]);
+      response = RespParser.serialize(reply, "bulk_string");
     }
     else {
-      response = RespParser.serialize("-err invalid command : " + command[0], "error");
+      reply.push_back("-err invalid command : " + command[0]);
+      response = RespParser.serialize(reply, "error");
     }
     return response;
   }
