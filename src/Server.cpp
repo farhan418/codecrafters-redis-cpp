@@ -62,7 +62,7 @@ public:
   std::vector<std::string> deserialize(const std::string& respToken) {
     std::vector<std::string> command;
 
-    switch(respToken.at(0)) {
+    switch(respToken[0]) {
       case '+':
       command.push_back(parse_simple_string(respToken));
       break;
@@ -265,6 +265,7 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
         std::cerr << e << " |, ";
       std::string response_str = rcc.process(command);
       std::cerr << "afterwards, response_str : " << response_str;
+
       memset(buffer, 0, sizeof(buffer));
       memcpy(buffer, response_str.c_str(), response_str.length());
       n = write(client_fd, buffer, response_str.length());
