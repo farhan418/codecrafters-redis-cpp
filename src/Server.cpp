@@ -118,41 +118,6 @@ public:
     return lastTokenIndex == tokens.size();
   }
 
-  // std::vector<std::string> getNextCommand(const std::string& respToken, std::string& data_type) const {
-  //   // auto index = respToken.find(1, "\r\n");
-  //   // if(index == std::string::npos) {
-  //   //   throw std::runtime_error("Invalid token : \\r \\n not present at the end");
-  //   // }
-  //   std::vector<std::string> command;
-
-  //   switch(respToken.at(0)) {
-  //       case '+' :
-  //       data_type = "simple_string";
-  //       // command.push_back(parse_simple_string(respToken));
-  //       break;
-
-  //       case '-' :
-  //       data_type = "error";
-  //       // command.push_back(respToken);
-  //       break;
-
-  //       case '$' :
-  //       data_type = "bulk_string";
-  //       // command.push_back(parse_bulk_string(respToken));
-  //       break;
-
-  //       case '*' :
-  //       data_type = "array";
-  //       break;
-
-  //       default  : // unknown
-  //       throw std::runtime_error("unknown data type of token : " + respToken);
-  //       break;
-  //   }
-  //   command = deserialize(respToken);
-  //   return command;
-  // }
-
   static std::string serialize(const std::vector<std::string>& vec, const std::string& data_type) {
     const std::string DELIMETER = "\r\n";
     std::string result;
