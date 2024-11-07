@@ -260,8 +260,11 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
     while(!resp_parser.isParsedAllTokens()) {
       std::cerr << " in loop";
       std::vector<std::string> command = resp_parser.deserialize(resp_parser.parseNextToken(""));
+      std::cerr << "after in loop, ";
+      for(auto& e : command)
+        std::cerr << e << " |, ";
       std::string response_str = rcc.process(command);
-
+      std::cerr << "afterwards, response_str : " << response_str;
       memset(buffer, 0, sizeof(buffer));
       memcpy(buffer, response_str.c_str(), response_str.length());
       n = write(client_fd, buffer, response_str.length());
