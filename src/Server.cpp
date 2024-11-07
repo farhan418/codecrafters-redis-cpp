@@ -8,8 +8,10 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <thread>
+#include <regex>
 
 int handle_client(int, const struct sockaddr_in&);
+std::string prepare_reply(const RespParser&);
 
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
@@ -84,6 +86,8 @@ int main(int argc, char **argv) {
 int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
   int n = 0;
   char buffer[1024];
+  RespParser resp_parser;
+  RedisCommandCenter rcc;
 
   while(1) {
     memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
@@ -92,24 +96,215 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
       std::cerr << "Error reading from socket.\n";
       return -1;
     }
+    resp_parser.resetParser(buffer);
+    while(!resp_parser.isParsedAllTokens()) {
+      std::vector<std::string> command = resp_parser.deserialize(resp_parser.parseNextToken(""));
+      std::string response_str = rcc.process(command);
 
-    const std::string HARDCODED_RESPONSE = "+PONG\r\n";
-    // const char* HARDCODED_RESPONSE = b"+PONG\r\n";
-    memset(buffer, 0, sizeof(buffer));
-    // bcopy(HARDCODED_RESPONSE.c_str(), buffer, HARDCODED_RESPONSE.length());  // deprecated POSIX function
-    memcpy(buffer, HARDCODED_RESPONSE.c_str(), HARDCODED_RESPONSE.length());
-    // memcpy(buffer, HARDCODED_RESPONSE, sizeof(HARDCODED_RESPONSE));
-    
-    n = write(client_fd, buffer, HARDCODED_RESPONSE.length());
-    // n = write(client_fd, buffer, sizeof(HARDCODED_RESPONSE));
-    std::cerr << "\nSend message: " << buffer << std::endl;
-    if (n < 0) {
-      std::cerr << "Failed to write message to socket.\n";
-      return -1;
-    }
-    if (std::string(buffer).find("END") != std::string::npos)
-      break;
+      memset(buffer, 0, sizeof(buffer));
+      memcpy(buffer, response_str.c_str(), response_str.length());
+      n = write(client_fd, buffer, response_str.length());
+      std::cerr << "\nSent " << n <<" bytes : " << buffer << std::endl;
+      if (n < 0) {
+        std::cerr << "Failed to write message to socket.\n";
+        return -1;
+      }
+      if (std::string(buffer).find("END") != std::string::npos)
+        break;
+    } 
   }
   close(client_fd);
   return 0;
 }
+
+class RespParser {
+private:
+  bool isParsed;
+  long long lastTokenIndex;
+  std::vector<std::string> tokens;
+
+  std::vector<std::string> split(const std::string& respStr) const {
+    std::vector<std::string> result;
+    std::regex re("\r\n");
+    std::sregex_token_iterator first(respStr.begin(), respStr.end(), re, -1);
+    std::sregex_token_iterator last;
+    result.assign(first, last);
+    return result;
+  }
+
+  // void parse(const std::string& respStr) {
+  //   resetParser();
+  //   this->tokens = split(respStr);
+  //   isParsed = true;
+  // }
+
+  std::string parse_simple_string(const std::string& simple_string) {
+    return simple_string.substr(1, simple_string.length()-1);
+  }
+
+  std::string parse_bulk_string(const std::string& bulk_string) {
+    // auto index = bulk_string.find("\r\n", 1);
+    if (isParsedAllTokens()) {
+      throw std::runtime_error("error extracting bulk string: " + bulk_string);
+    }
+    // long long length = std::stol(bulk_string.substr(1,index-1));
+    // index += 2;
+    return parseNextToken("");
+  }
+
+  std::vector<std::string> parse_array(const std::string& array_string) {
+    long long length = std::stol(array_string.substr(1, array_string.length()-1));
+    // index += 2;
+    std::vector<std::string> command;
+    for (long long i = 0; i < length; i++) {
+      std::string next_token = parseNextToken("");
+      auto temp = deserialize(next_token);
+      command.push_back(temp[0]);
+    }
+    return command;
+  }
+
+public:
+
+  std::vector<std::string> deserialize(const std::string& respToken) {
+    std::vector<std::string> command;
+
+    switch(respToken.at(0)) {
+      case '+':
+      command.push_back(parse_simple_string(respToken));
+      break;
+
+      case '-':
+      command.push_back(respToken);
+      break;
+
+      case '$':
+      command.push_back(parse_bulk_string(respToken));
+      break;
+
+      case '*':
+      command = parse_array(respToken);
+      break;
+
+      default:
+      throw std::runtime_error("invalid respToken");
+      break;
+    }
+    return command;
+  }
+
+  RespParser() : isParsed(false), lastTokenIndex(0) {
+    tokens.clear();
+  }
+
+  // void resetParser() {
+    // isParsed = false;
+    // lastTokenIndex = 0;
+    // tokens.clear();
+  // }
+
+  void resetParser(const std::string& respStr) {
+    // resetParser();
+    isParsed = false;
+    lastTokenIndex = 0;
+    tokens.clear();
+    tokens = split(respStr);
+  }
+
+  std::string parseNextToken(const std::string& respStr) {
+    if (!isParsed) {
+      parse(respStr);
+    }
+    if (lastTokenIndex == tokens.size()) {
+      return "";  // empty string is false
+    }
+    return tokens[lastTokenIndex++];
+  }
+
+  bool isParsedAllTokens() const {
+    return lastTokenIndex == tokens.size();
+  }
+
+  // std::vector<std::string> getNextCommand(const std::string& respToken, std::string& data_type) const {
+  //   // auto index = respToken.find(1, "\r\n");
+  //   // if(index == std::string::npos) {
+  //   //   throw std::runtime_error("Invalid token : \\r \\n not present at the end");
+  //   // }
+  //   std::vector<std::string> command;
+
+  //   switch(respToken.at(0)) {
+  //       case '+' :
+  //       data_type = "simple_string";
+  //       // command.push_back(parse_simple_string(respToken));
+  //       break;
+
+  //       case '-' :
+  //       data_type = "error";
+  //       // command.push_back(respToken);
+  //       break;
+
+  //       case '$' :
+  //       data_type = "bulk_string";
+  //       // command.push_back(parse_bulk_string(respToken));
+  //       break;
+
+  //       case '*' :
+  //       data_type = "array";
+  //       break;
+
+  //       default  : // unknown
+  //       throw std::runtime_error("unknown data type of token : " + respToken);
+  //       break;
+  //   }
+  //   command = deserialize(respToken);
+  //   return command;
+  // }
+
+  static std::string serialize(const std::vector<std::string>& vec, const std::string& data_type) {
+    const std::string DELIMETER = "\r\n";
+    std::string result;
+
+    if (data_type == "simple_string")
+      result = "+" + vec[0] + DELIMETER;
+    else if (data_type == "bulk_string")
+      result = "$" + std::to_string(vec[0].length()) + DELIMETER + vec[0] + DELIMETER;
+    else if (data_type == "array") {
+      result = "*" + std::to_string(vec.size()) + DELIMETER;
+      for(auto& element : vec) {
+        result += "$" + std::to_string(element.length()) + DELIMETER + element + DELIMETER;
+      }
+    }
+    else if (data_type == "error") {
+      result = "-" + vec[0] + DELIMETER;
+    }
+    else
+      throw std::runtime_error("invalid data type, cannot serialize");
+  }
+};
+
+class RedisCommandCenter {
+private:
+public:
+  RedisCommandCenter(){}
+
+  std::string process(const std::vector<std::string>& command) {
+    std::string response;
+    switch(command[0]) {
+      case "PING":
+      response = RespParser.serialize("PONG", "simple_string");
+      break;
+
+      case "ECHO":
+      if (command.size() <2) {
+        throw std::runtime_error("few arguments provided for ECHO command.");
+      }
+      response = RespParser.serialize(command[1], "bulk_string");
+      break;
+
+      default:
+      response = RespParser.serialize("-err invalid command : " + vec[0], "error");
+      break;
+    }
+    return response;
+  }
+};
