@@ -214,7 +214,7 @@ public:
 
   std::string parseNextToken(const std::string& respStr) {
     if (!isParsed) {
-      parse(respStr);
+      resetParser(respStr);
     }
     if (lastTokenIndex == tokens.size()) {
       return "";  // empty string is false
@@ -290,21 +290,18 @@ public:
 
   std::string process(const std::vector<std::string>& command) {
     std::string response;
-    switch(command[0]) {
-      case "PING":
+    if ("PING" == command[0]) {
       response = RespParser.serialize("PONG", "simple_string");
       break;
-
-      case "ECHO":
+    }
+    else if ("ECHO" == command[0]) {
       if (command.size() <2) {
         throw std::runtime_error("few arguments provided for ECHO command.");
       }
       response = RespParser.serialize(command[1], "bulk_string");
-      break;
-
-      default:
-      response = RespParser.serialize("-err invalid command : " + vec[0], "error");
-      break;
+    }
+    else {
+      response = RespParser.serialize("-err invalid command : " + command[0], "error");
     }
     return response;
   }
