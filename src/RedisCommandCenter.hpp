@@ -14,7 +14,7 @@ private:
 public:
   RedisCommandCenter(){}
 
-  bool compareCaseInsensitive(const std::string& str1, const std::string& st2) {
+  bool compareCaseInsensitive(const std::string& str1, const std::string& str2) {
     std::string str1_lower = str1;
     std::string str2_lower = str2;
 
