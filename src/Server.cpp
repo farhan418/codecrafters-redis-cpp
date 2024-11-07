@@ -151,22 +151,26 @@ public:
   RedisCommandCenter(){}
 
   std::string process(const std::vector<std::string>& command) {
+    std::string data_type;
     std::string response;
     std::vector<std::string> reply;
     if ("PING" == command[0]) {
       reply.push_back("PONG");
-      response = RespParser::serialize(reply, "simple_string");
+      data_type = "simple_string";
+      response = RespParser::serialize(reply, data_type);
     }
     else if ("ECHO" == command[0]) {
       if (command.size() <2) {
         throw std::runtime_error("few arguments provided for ECHO command.");
       }
       reply.push_back(command[1]);
-      response = RespParser::serialize(reply, "bulk_string");
+      data_type = "bulk_string";
+      response = RespParser::serialize(reply, data_type);
     }
     else {
       reply.push_back("-err invalid command : " + command[0]);
-      response = RespParser::serialize(reply, "error");
+      data_type = "error";
+      response = RespParser::serialize(reply, data_type);
     }
     return response;
   }
