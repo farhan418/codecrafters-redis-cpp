@@ -9,8 +9,8 @@
 #include <netdb.h>
 #include <thread>
 
-#include "./RedisCommandCenter.hpp"
-#include "./RespParser.hpp"
+#include "RedisCommandCenter.hpp"
+#include "RespParser.hpp"
 
 int handle_client(int, const struct sockaddr_in&);
 
