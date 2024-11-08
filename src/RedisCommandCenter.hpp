@@ -140,7 +140,8 @@ public:
         response = RespParser::serialize(reply, data_type);
     }
     else if (command.size() >= 2 && 
-            compareCaseInsensitive("CONFIG GET", command[0] + command[1])) {
+            compareCaseInsensitive("CONFIG", command[0]) &&
+            compareCaseInsensitive("GET", command[1])) {
         if (command.size() < 3) {
             throw std::runtime_error("few arguments provided for GET command.");
         }
