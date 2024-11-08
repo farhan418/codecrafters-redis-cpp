@@ -83,7 +83,7 @@ public:
         data_type = "simple_string";
       }
       else {
-        throw std::runtime_error("Error while storing key value pair.")
+        throw std::runtime_error("Error while storing key value pair.");
       }
       
       if (command.size() == 5) {
