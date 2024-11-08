@@ -101,7 +101,7 @@ public:
         throw std::runtime_error("few arguments provided for GET command.");
       }
       data_type = "bulk_string";
-      reply.push_back(get_kv([command[1]));
+      reply.push_back(get_kv(command[1]));
     }
     else {
       reply.push_back("-err invalid command : " + command[0]);
