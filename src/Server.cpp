@@ -21,6 +21,10 @@ int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
+  std::cerr << "argc = " << argc << "argv = [";
+  for (auto& e : argv) {
+    std::cerr << e << "|, ";
+  }
 
   // You can use print statements as follows for debugging, they'll be visible when running tests.
   // std::cout << "Logs from your program will appear here!\n";
@@ -59,6 +63,9 @@ int main(int argc, char **argv) {
   struct sockaddr_in client_addr;
   int client_addr_len = sizeof(client_addr);
   
+  RedisCommandCenter::set_config_kv("dir", "/tmp/redis-data");
+  RedisCommandCenter::set_config_kv("dbfilename", "dbfilename");
+
   while(true) {
     memset(&client_addr, 0, sizeof(client_addr));
     std::cout << "Waiting for a client to connect...\n";
@@ -92,8 +99,6 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
   char buffer[1024];
   RespParser resp_parser;
   RedisCommandCenter rcc;
-  RedisCommandCenter::set_config_kv("dir", "/tmp/redis-data");
-  RedisCommandCenter::set_config_kv("dbfilename", "dbfilename");
 
   while(1) {
     memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
