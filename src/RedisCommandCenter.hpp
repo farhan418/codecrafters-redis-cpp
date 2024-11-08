@@ -42,9 +42,19 @@ public:
       if (command.size() < 3) {
         throw std::runtime_error("few arguments provided for SET command.");
       }
+      
       keyStore[command[1]] = command[2];
       reply.push_back("OK");
       data_type = "simple_string";
+
+      if (command.size() == 5) {
+        if (compareCaseInsensitive("PX", command[3])) {
+          thread t([&command](){
+            std::this_thread::sleep_for(std::chrono::milliseconds(std::stoi(command[4])));
+            keyStore.erase(command[1]);
+          });
+        }
+      }      
     }
     else if (compareCaseInsensitive("GET", command[0])) {
       if (command.size() < 2) {
@@ -62,6 +72,6 @@ public:
     }
     return RespParser::serialize(reply, data_type);
   }
-  
+
 };
 #endif  // REDISCOMMANDCENTER_HPP
