@@ -21,10 +21,10 @@ int main(int argc, char **argv) {
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
   
-  // std::cerr << "argc = " << argc << "argv = [";
-  // for (int i = 0; i < argc; i++) {
-  //   std::cerr << argv[i] << "|, ";
-  // }
+  std::cerr << "argc = " << argc << "argv = [";
+  for (int i = 0; i < argc; i++) {
+    std::cerr << argv[i] << "|, ";
+  }
   RedisCommandCenter::set_config_kv("dir", argv[2]);
   RedisCommandCenter::set_config_kv("dbfilename", argv[4]);
 
