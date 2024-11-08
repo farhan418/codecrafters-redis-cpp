@@ -143,11 +143,34 @@ public:
             compareCaseInsensitive("CONFIG", command[0]) &&
             compareCaseInsensitive("GET", command[1])) {
         if (command.size() < 3) {
-            throw std::runtime_error("few arguments provided for GET command.");
+            throw std::runtime_error("few arguments provided for CONFIG GET command.");
         }
         std::cerr << "\nin config get ";
         reply.push_back(command[2]);
         reply.push_back(get_config_kv(command[2]));
+        data_type = "array";
+        response = RespParser::serialize(reply, data_type);
+    }
+    else if (command.size() == 2 && 
+            compareCaseInsensitive("KEYS", command[0])) {
+        if (command.size() < 3) {
+            throw std::runtime_error("few arguments provided for KEY command.");
+        }
+        std::string pattern_text = command[1];
+        {
+            size_t pos = 0;
+            while (pos = pattern_text.find("*") != std::string::npos) {
+                pattern_text.replace(pos, "*", ".*");
+                pos += 2;
+            }
+            std::regex pattern(pattern_text);
+            std::lock_guard<std::mutex> guard(keyStoreMutex);
+            for (auto& pair : keyStore) {
+                if(std::regex_match(pair.first, pattern)) {
+                    reply.push_back(pair.first);
+                }
+            }
+        }
         data_type = "array";
         response = RespParser::serialize(reply, data_type);
     }
