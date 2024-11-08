@@ -144,9 +144,11 @@ public:
         if (command.size() < 3) {
             throw std::runtime_error("few arguments provided for GET command.");
         }
+        std::cerr << "\nin config get ";
         reply.push_back(command[2]);
         reply.push_back(get_config_kv(command[2]));
         data_type = "array";
+        response = RespParser::serialize(reply, data_type);
     }
     else {
       reply.push_back("-err invalid command : " + command[0]);
