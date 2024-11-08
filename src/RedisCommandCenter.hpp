@@ -60,11 +60,17 @@ public:
   }
 
   std::string process(const std::vector<std::string>& command) {
+    std::string response;
     std::string data_type;
     std::vector<std::string> reply;
+    std::cerr << "\nin process(...), command : ";
+    for (auto& c : command)
+        std::cerr << c << "|, ";
+
     if (compareCaseInsensitive("PING", command[0])) {
       reply.push_back("PONG");
       data_type = "simple_string";
+      response = RespParser::serialize(reply, data_type);
     }
     else if (compareCaseInsensitive("ECHO", command[0])) {
       if (command.size() <2) {
@@ -72,6 +78,7 @@ public:
       }
       reply.push_back(command[1]);
       data_type = "bulk_string";
+      response = RespParser::serialize(reply, data_type);
     }
     else if (compareCaseInsensitive("SET", command[0])) {
       if (command.size() < 3) {
@@ -94,7 +101,8 @@ public:
           });
           t.detach();
         }
-      }      
+      }
+      response = RespParser::serialize(reply, data_type);    
     }
     else if (compareCaseInsensitive("GET", command[0])) {
       if (command.size() < 2) {
@@ -102,12 +110,16 @@ public:
       }
       data_type = "bulk_string";
       reply.push_back(get_kv(command[1]));
+      if (reply[0] == "-1")
+        response = "$-1\r\n";
+      else
+        response = RespParser::serialize(reply, data_type);
     }
     else {
       reply.push_back("-err invalid command : " + command[0]);
       data_type = "error";
     }
-    return RespParser::serialize(reply, data_type);
+    return response;
   }
 
 };
