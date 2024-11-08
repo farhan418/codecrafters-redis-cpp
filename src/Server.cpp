@@ -22,8 +22,8 @@ int main(int argc, char **argv) {
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
   std::cerr << "argc = " << argc << "argv = [";
-  for (auto& e : argv) {
-    std::cerr << e << "|, ";
+  for (int i = 0; i < argc; i++) {
+    std::cerr << argv[i] << "|, ";
   }
 
   // You can use print statements as follows for debugging, they'll be visible when running tests.
