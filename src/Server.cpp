@@ -21,10 +21,13 @@ int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
-  std::cerr << "argc = " << argc << "argv = [";
-  for (int i = 0; i < argc; i++) {
-    std::cerr << argv[i] << "|, ";
-  }
+  
+  // std::cerr << "argc = " << argc << "argv = [";
+  // for (int i = 0; i < argc; i++) {
+  //   std::cerr << argv[i] << "|, ";
+  // }
+  RedisCommandCenter::set_config_kv("dir", argv[2]);
+  RedisCommandCenter::set_config_kv("dbfilename", argv[4]);
 
   // You can use print statements as follows for debugging, they'll be visible when running tests.
   // std::cout << "Logs from your program will appear here!\n";
@@ -63,9 +66,6 @@ int main(int argc, char **argv) {
   struct sockaddr_in client_addr;
   int client_addr_len = sizeof(client_addr);
   
-  RedisCommandCenter::set_config_kv("dir", "/tmp/redis-data");
-  RedisCommandCenter::set_config_kv("dbfilename", "dbfilename");
-
   while(true) {
     memset(&client_addr, 0, sizeof(client_addr));
     std::cout << "Waiting for a client to connect...\n";
