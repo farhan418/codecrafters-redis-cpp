@@ -6,13 +6,15 @@
 #include <string>
 #include <algorithm>
 #include <thread>
+#include <mutex>
 #include <chrono>
 #include "RespParser.hpp"
 
 
 class RedisCommandCenter {
 private:
-  std::map<std::string, std::string> keyStore;
+  static std::map<std::string, std::string> keyStore;
+  static std::mutex keyStoreMutex;
 public:
   RedisCommandCenter(){}
 
@@ -26,7 +28,22 @@ public:
     return str1_lower.compare(str2_lower) == 0;
   }
 
-  int delete_kv(const std::string& key) {
+  static std::string get_kv(const std::string& key) {
+    std::lock_guard<std::mutex> guard(keyStoreMutex);
+    if (keyStore.count(key) == 0) {
+        return -1;
+    }
+    return keyStore[key];
+  }
+
+  static int set_kv(const std::string& key, const std::string& value) {
+    std::lock_guard<std::mutex> guard(keyStoreMutex);
+    keyStore[key] = value;
+    return 0;
+  }
+
+  static int delete_kv(const std::string& key) {
+    std::lock_guard<std::mutex> guard(keyStoreMutex);
     if (keyStore.count(key) == 0) {
         return -1;
     }
@@ -53,13 +70,17 @@ public:
         throw std::runtime_error("few arguments provided for SET command.");
       }
       
-      keyStore[command[1]] = command[2];
-      reply.push_back("OK");
-      data_type = "simple_string";
-
+      if (0 == set_kv(command[1], command[2])) {
+        reply.push_back("OK");
+        data_type = "simple_string";
+      }
+      else {
+        throw std::runtime_error("Error while storing key value pair.")
+      }
+      
       if (command.size() == 5) {
         if (compareCaseInsensitive("PX", command[3])) {
-          std::thread t([&command, &keyStore](){
+          std::thread t([](){
             std::this_thread::sleep_for(std::chrono::milliseconds(std::stoi(command[4])));
             delete_kv(command[1]);
           });
@@ -71,10 +92,7 @@ public:
         throw std::runtime_error("few arguments provided for GET command.");
       }
       data_type = "bulk_string";
-      if (keyStore.count(command[1]) == 0)
-        reply.push_back("-1");
-      else
-        reply.push_back(keyStore[command[1]]);
+      reply.push_back(get_kv([command[1]));
     }
     else {
       reply.push_back("-err invalid command : " + command[0]);
@@ -84,4 +102,8 @@ public:
   }
 
 };
+
+std::map<std::string, std::string> RedisCommandCenter::keyStore;
+std::mutex RedisCommandCenter::keyStoreMutex;
+
 #endif  // REDISCOMMANDCENTER_HPP
