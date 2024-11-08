@@ -51,7 +51,7 @@ public:
 
       if (command.size() == 5) {
         if (compareCaseInsensitive("PX", command[3])) {
-          std::thread t([&command](){
+          std::thread t([&command, &keyStore](){
             std::this_thread::sleep_for(std::chrono::milliseconds(std::stoi(command[4])));
             keyStore.erase(command[1]);
           });
