@@ -15,6 +15,8 @@ class RedisCommandCenter {
 private:
   static std::map<std::string, std::string> keyStore;
   static std::mutex keyStoreMutex;
+  static std::map<std::string, std::string> configStore;
+  static std::mutex configStoreMutex;
 public:
   RedisCommandCenter(){}
 
@@ -57,6 +59,28 @@ public:
     }
     keyStore.erase(key);
     return 0;
+  }
+
+  static std::string get_config_kv(const std::string& key) {
+    std::lock_guard<std::mutex> guard(configStoreMutex);
+    if (configStore.count(key) == 0) {
+        return "-1";
+    }
+    return configStore[key];
+  }
+
+  static int set_config_kv(const std::string& key, const std::string& value) {
+    try {
+        std::lock_guard<std::mutex> guard(configStoreMutex);
+        configStore[key] = value;
+        return 0;
+    }
+    catch (std::exception& e) {
+        return -1;
+    }
+    catch(...) {
+        return -1;
+    }
   }
 
   std::string process(const std::vector<std::string>& command) {
@@ -115,6 +139,15 @@ public:
       else
         response = RespParser::serialize(reply, data_type);
     }
+    else if (command.size() >= 2 && 
+            compareCaseInsensitive("CONFIG GET", command[0] + command[1])) {
+        if (command.size() < 3) {
+            throw std::runtime_error("few arguments provided for GET command.");
+        }
+        reply.push_back(command[2]);
+        reply.push_back(get_config_kv(command[2]));
+        data_type = "array";
+    }
     else {
       reply.push_back("-err invalid command : " + command[0]);
       data_type = "error";
@@ -126,5 +159,7 @@ public:
 
 std::map<std::string, std::string> RedisCommandCenter::keyStore;
 std::mutex RedisCommandCenter::keyStoreMutex;
+std::map<std::string, std::string> RedisCommandCenter::configStore;
+std::mutex RedisCommandCenter::configStoreMutex;
 
 #endif  // REDISCOMMANDCENTER_HPP

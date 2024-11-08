@@ -92,6 +92,8 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
   char buffer[1024];
   RespParser resp_parser;
   RedisCommandCenter rcc;
+  RedisCommandCenter::set_config_kv("dir", "/tmp/redis-data");
+  RedisCommandCenter::set_config_kv("dbfilename", "dbfilename");
 
   while(1) {
     memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
