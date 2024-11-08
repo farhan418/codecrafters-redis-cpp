@@ -160,7 +160,7 @@ public:
         {
             size_t pos = 0;
             while (pos = pattern_text.find("*") != std::string::npos) {
-                pattern_text.replace(pos, std::to_string("*"), std::to_string(".*"));
+                pattern_text.replace(pos, std::string("*"), std::string(".*"));
                 pos += 2;
             }
             std::regex pattern(pattern_text);
