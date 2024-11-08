@@ -31,15 +31,23 @@ public:
   static std::string get_kv(const std::string& key) {
     std::lock_guard<std::mutex> guard(keyStoreMutex);
     if (keyStore.count(key) == 0) {
-        return -1;
+        return "-1";
     }
     return keyStore[key];
   }
 
   static int set_kv(const std::string& key, const std::string& value) {
-    std::lock_guard<std::mutex> guard(keyStoreMutex);
-    keyStore[key] = value;
-    return 0;
+    try {
+        std::lock_guard<std::mutex> guard(keyStoreMutex);
+        keyStore[key] = value;
+        return 0;
+    }
+    catch (std::exception& e) {
+        return -1;
+    }
+    catch(...) {
+        return -1;
+    }
   }
 
   static int delete_kv(const std::string& key) {
@@ -84,6 +92,7 @@ public:
             std::this_thread::sleep_for(std::chrono::milliseconds(std::stoi(command[4])));
             delete_kv(command[1]);
           });
+          t.detach();
         }
       }      
     }
