@@ -26,6 +26,14 @@ public:
     return str1_lower.compare(str2_lower) == 0;
   }
 
+  int delete_kv(const std::string& key) {
+    if (keyStore.count(key) == 0) {
+        return -1;
+    }
+    keyStore.erase(key);
+    return 0;
+  }
+
   std::string process(const std::vector<std::string>& command) {
     std::string data_type;
     std::vector<std::string> reply;
@@ -53,7 +61,7 @@ public:
         if (compareCaseInsensitive("PX", command[3])) {
           std::thread t([&command, &keyStore](){
             std::this_thread::sleep_for(std::chrono::milliseconds(std::stoi(command[4])));
-            keyStore.erase(command[1]);
+            delete_kv(command[1]);
           });
         }
       }      
