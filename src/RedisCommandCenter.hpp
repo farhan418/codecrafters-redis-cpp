@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <thread>
+#include <chrono>
 #include "RespParser.hpp"
 
 
@@ -49,7 +51,7 @@ public:
 
       if (command.size() == 5) {
         if (compareCaseInsensitive("PX", command[3])) {
-          thread t([&command](){
+          std::thread t([&command](){
             std::this_thread::sleep_for(std::chrono::milliseconds(std::stoi(command[4])));
             keyStore.erase(command[1]);
           });
