@@ -129,6 +129,7 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
         break;
     } 
   }
+  
   close(client_fd);
   return 0;
 }
