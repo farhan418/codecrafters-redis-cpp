@@ -28,13 +28,9 @@ int main(int argc, char **argv) {
   RedisCommandCenter::set_config_kv("dir", argv[2]);
   RedisCommandCenter::set_config_kv("dbfilename", argv[4]);
 
-  // You can use print statements as follows for debugging, they'll be visible when running tests.
-  // std::cout << "Logs from your program will appear here!\n";
-  // Uncomment this block to pass the first stage
-  
   int server_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (server_fd < 0) {
-   std::cerr << "Failed to create server socket\n";
+   std::cerr << "\nFailed to create server socket\n";
    return 1;
   }
 
@@ -42,7 +38,7 @@ int main(int argc, char **argv) {
   // ensures that we don't run into 'Address already in use' errors
   int reuse = 1;
   if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
-    std::cerr << "setsockopt failed\n";
+    std::cerr << "\nsetsockopt failed\n";
     return 1;
   }
   
@@ -65,11 +61,11 @@ int main(int argc, char **argv) {
   struct sockaddr_in client_addr;
   int client_addr_len = sizeof(client_addr);
   
-  while(true) {
+  while(true) { 
     memset(&client_addr, 0, sizeof(client_addr));
     std::cout << "Waiting for a client to connect...\n";
 
-    int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
+    int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t*) &client_addr_len);
     if (client_fd == -1) {
       std::cerr << "Failed to accept client connection\n";
       return 1;
@@ -129,7 +125,7 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
         break;
     } 
   }
-  
+
   close(client_fd);
   return 0;
 }
