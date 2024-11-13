@@ -46,7 +46,7 @@ public:
       db_file_path = *result;
     result = get_config_kv("dbfilename");
     if(result)
-      db_file_path += *result;
+      db_file_path += "/" + *result;
     return rdb_file_reader.readFile(db_file_path);
   }
   
