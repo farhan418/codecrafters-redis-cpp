@@ -83,12 +83,12 @@ private:
         while (byte = read_byte() != 0xFA) {
             version += std::to_string(byte);
         }
+        DEBUG_LOG("Redis version : " + version);
         if (0 != version.find("REDIS")) {
             DEBUG_LOG("This file does not follow redis protocol or is not a rdb file, filename : " + filename);
             return 1;
         }
-        DEBUG_LOG("Redis version : " + version);
-        DEBUG_LOG("Metadata (string encoded key-value pairs): ");
+        DEBUG_LOG("Reading metadata (string encoded key-value pairs): ");
         
         int counter = 0;
         while(peek_next_byte() != 0xFE)
