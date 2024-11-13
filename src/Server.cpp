@@ -34,12 +34,12 @@ int main(int argc, char **argv) {
   RedisCommandCenter::set_config_kv("dir", argv[2]);
   RedisCommandCenter::set_config_kv("dbfilename", argv[4]);
   if (0 != RedisCommandCenter::read_rdb_file()) {
-    DEBUG_LOG("\nFailed to read rdb file.");
+    DEBUG_LOG("Failed to read rdb file.");
   }
 
   int server_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (server_fd < 0) {
-   DEBUG_LOG("\nFailed to create server socket\n");
+   DEBUG_LOG("Failed to create server socket\n");
    return 1;
   }
 
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
   // ensures that we don't run into 'Address already in use' errors
   int reuse = 1;
   if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
-    DEBUG_LOG("\nsetsockopt failed\n");
+    DEBUG_LOG("setsockopt failed\n");
     return 1;
   }
   
@@ -86,10 +86,10 @@ int main(int argc, char **argv) {
         handle_client(client_fd, client_addr);
       }
       catch(const std::exception& e) {
-        DEBUG_LOG("\nException occurred in thread: " + std::string(e.what()) + "\n");
+        DEBUG_LOG("Exception occurred in thread: " + std::string(e.what()) + "\n");
       }
       catch(...) {
-        DEBUG_LOG("\nUnknown exception occurred in thread.\n");
+        DEBUG_LOG("Unknown exception occurred in thread.\n");
       }
     });
     t.detach();

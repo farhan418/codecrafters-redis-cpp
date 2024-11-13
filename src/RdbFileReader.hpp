@@ -30,10 +30,10 @@ public:
         this->filename = filename;
         rdb_file.open(this->filename, std::ios::binary);
         if (!rdb_file.is_open()) {
-            DEBUG_LOG("\nsomething went wrong, cannot open file : " + filename + "\n");
+            DEBUG_LOG("something went wrong, cannot open file : " + filename + "\n");
             return 1;
         }
-        DEBUG_LOG("\nReading file : " + filename + "\n");
+        DEBUG_LOG("Reading file : " + filename + "\n");
         if (0 != read_header_and_metadata())
             return 1;
 
@@ -72,41 +72,41 @@ private:
             value[i] = read_byte();
         
         if (std::string(value) != "REDIS") {
-            DEBUG_LOG("\nThis file does not follow redis protocol or is not a rdb file, filename : " + filename);
+            DEBUG_LOG("This file does not follow redis protocol or is not a rdb file, filename : " + filename);
             return 1;
         }
 
+        std::string version(value);
         memset(value, 0, sizeof(value));
         uint8_t byte;
-        std::string version;
         while (byte = read_byte() != 0xFA) {
             version += std::to_string(byte);
         }
-        DEBUG_LOG("\nRedis version : " + std::string(value) + version);
-        DEBUG_LOG("\nMetadata (string encoded key-value pairs): ");
+        DEBUG_LOG("Redis version : " + version);
+        DEBUG_LOG("Metadata (string encoded key-value pairs): ");
         
         int counter = 0;
         while(peek_next_byte() != 0xFE)
         {
             std::string key = read_length_encoded_string();
             std::string value = read_length_encoded_string();
-            DEBUG_LOG("\nKey : " + key + "\nValue : " + value);
-            if (++counter == 10) break;
+            DEBUG_LOG("Key : " + key + "\nValue : " + value);
+            if (++counter == 3) break;
         }
-
+        DEBUG_LOG("exiting read_header_and_metadata");
         return 0;
     }
 
     int read_database() {
         if (0xFE != read_byte()) {
-            DEBUG_LOG("\nDatabase section should be here.\n");
+            DEBUG_LOG("Database section should be here.\n");
             return 1;
         }
 
         uint32_t database_index = read_size_encoded_number();
 
         if (0xFB != read_byte()) {
-            DEBUG_LOG("\nHash table size information section should be here.\n");
+            DEBUG_LOG("Hash table size information section should be here.\n");
             return 1;
         }
 
@@ -153,7 +153,7 @@ private:
             break;
 
             default :
-            DEBUG_LOG("\nCurrently only supporting ValueType = StringEncoding\n");
+            DEBUG_LOG("Currently only supporting ValueType = StringEncoding\n");
             return 1;
             break;
         }
@@ -172,7 +172,7 @@ private:
         uint8_t byte;
         rdb_file.read(reinterpret_cast<char*>(&byte), 1);
         if(rdb_file.gcount() != 1) {
-            DEBUG_LOG("\nError reading data from " + filename);
+            DEBUG_LOG("Error reading data from " + filename);
             return 1;
         }
         cursor_index += 1;

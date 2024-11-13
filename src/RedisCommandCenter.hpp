@@ -131,7 +131,7 @@ public:
           return RespParser::serialize(reply, data_type);
         }
 
-        DEBUG_LOG("\nin config get ");
+        DEBUG_LOG("in config get ");
         reply.push_back(command[2]);
         auto result = get_config_kv(command[2]);
         if (result.has_value()) {
