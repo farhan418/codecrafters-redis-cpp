@@ -85,10 +85,10 @@ private:
         // memset(value, 0, sizeof(value));
         uint8_t byte;
         // int i = 0;
-        while (true) {
-            byte = read_byte();
+        while (byte = read_byte() != 0xFA) {
             version += static_cast<char>(byte);
             std::cerr << "\nbyte = " << byte << "\nversion = " << version;
+            
             // value[i++] = byte;
             // std::cerr << "\nread byte " << byte << ", value[i-1] = " << value[i-1] << "\n";
             // DEBUG_LOG("value[ " + std::to_string(i-1) + "]=" + value[i-1]);
