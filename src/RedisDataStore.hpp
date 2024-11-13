@@ -37,7 +37,7 @@ public:
     std::optional<std::string> get_kv(const std::string& key) {
         std::lock_guard<std::mutex> guard(rds_mutex);  // do I need to lock mutex for getting key, value ?
         auto it = key_value_map.find(key);
-        if (it == key_value_map.end();) {
+        if (it == key_value_map.end()) {
             return std::nullopt;
         }
         return key_value_map[key];
@@ -60,7 +60,8 @@ public:
         try {
             std::lock_guard<std::mutex> guard(rds_mutex);
             key_value_map[key] = value;
-            key_expiry_pq.push({key, expiry_time_ms});
+            if (expiry_time_ms != UINT64_MAX)
+               key_expiry_pq.push({key, expiry_time_ms});
         }
         catch (std::exception& e) {
             return_status = -1;
@@ -72,14 +73,16 @@ public:
     }
 
     int delete_kv(const std::string& key) {
-        std::lock_guard<std::mutex> guard(rds_mutex);
-        auto it = key_value_map.find(key);
-        if (it == key_value_map.end()) {
-            return -1;
-        }
-        key_value_map.erase(key);
+        do {
+            std::lock_guard<std::mutex> guard(rds_mutex);
+            auto it = key_value_map.find(key);
+            if (it == key_value_map.end()) {
+                return -1;
+            }
+            key_value_map.erase(key);
+        } while(false);
+        delete_pair_from_pq(key);
         // if (it = key_expiry_pq.find(key) != key_expiry_pq.end())  // no need to check because erase does not throw exception
-            key_expiry_pq.erase(key);
         return 0;
     }
 
@@ -116,6 +119,24 @@ private:
         }
     }
 
+    int delete_pair_from_pq(const std::string& key) {
+        std::vector<std::pair<std::string, uint64_t>> temp;
+        std::lock_guard<std::mutex> guard(rds_mutex);
+        while (!key_expiry_pq.empty()) {
+            auto top = key_expiry_pq.top();
+            key_expiry_pq.pop();
+            if (top->first != key) {
+                temp.push_back(top);
+            }
+            else {
+                break;
+            }
+        }
+        for(auto& p : temp) {
+            key_expiry_pq.push(p);
+        }
+    }
+
     uint64_t get_current_time_ms() {
         auto now = std::chrono::system_clock::now();  // time point object
         auto duration = now.time_since_epoch();
@@ -130,6 +151,7 @@ private:
     };
 
     static std::map<std::string, std::string> key_value_map;
+    // priority queue is meant to store only the keys with expiry so as to get the earliest expiring key
     static std::priority_queue<std::pair<std::string, uint64_t>, std::vector<std::pair<std::string, uint64_t>>, ExpiryComparator> key_expiry_pq;
     static bool is_continue_monitoring; 
     static uint8_t rds_object_counter;
@@ -150,6 +172,5 @@ std::mutex RedisDataStore::rds_mutex;
 // std::map<std::string, uint64_t> RedisDataStore::key_expiry_map;
 // uint32_t RedisDataStore::daemon_thread_sleep_duration_ms;
 // std::vector<std::thread> RedisDataStore::daemon_thread_pool;
-
 
 #endif  // REDISDATASTORE_HPP
