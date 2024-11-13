@@ -83,12 +83,11 @@ private:
         std::stringstream ss;
         while((byte = read_byte()) != 0xFA) {
             // value[i++] = byte;
-            char c = byte;
-            version += c;
+            // char c = byte;
+            version += byte;
             ss.str("");
             ss << "byte = " << byte << ", version = " << version; 
             DEBUG_LOG(ss.str());
-            // ss/ << "\nvalue[" << i << "] = " << value[i];
         }
 
         // std::string version(value);
