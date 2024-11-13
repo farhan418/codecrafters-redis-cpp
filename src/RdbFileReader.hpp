@@ -98,15 +98,13 @@ private:
         DEBUG_LOG("Redis version : " + version);
         DEBUG_LOG("Reading metadata (string encoded key-value pairs): ");
         
-        int counter = 0;
         std::string key; 
         std::string value; 
-        while(peek_next_byte() != 0xFE) {
+        while(peek_next_byte() == 0xFA) {
             // read_key_value_pair(key, value);
             key = read_length_encoded_string();
             value = read_length_encoded_string();
             DEBUG_LOG("Key : " + key + ", Value : " + value);
-            if (++counter == 3) break;
         }
         DEBUG_LOG("exiting read_header_and_metadata()...");
         return 0;
