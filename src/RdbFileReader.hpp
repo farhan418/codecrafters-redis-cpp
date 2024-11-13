@@ -82,6 +82,7 @@ private:
         uint8_t byte;
         while (byte = read_byte() != 0xFA) {
             version += std::to_string(byte);
+            DEBUG_LOG("byte :" + static_cast<char>(byte) + ", version = " + version);
         }
         DEBUG_LOG("Redis version : " + version);
         if (0 != version.find("REDIS")) {
