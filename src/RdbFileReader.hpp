@@ -106,7 +106,7 @@ private:
         std::string key;
         std::string value;
         uint32_t count_ht_total = 0;
-        uint32_t count_ht_with_expiry = 0
+        uint32_t count_ht_with_expiry = 0;
 
         uint32_t size_hash_table_total = read_size_encoded_number();
         uint32_t size_hash_table_with_expiry = read_size_encoded_number();
