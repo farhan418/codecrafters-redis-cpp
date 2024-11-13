@@ -66,24 +66,31 @@ private:
     }
 
     int read_header_and_metadata() {
-        char value[9];
+        // char value[9];
+        // uint8_t byte;
+        // int i = 0;
+        // memset(value, 0, sizeof(value));
+        // do {
+        //     byte = read_byte();
+        //     if (byte != 0xFA) {
+        //         value[i++] = byte;
+        //         std::cerr << "\nbyte = " << byte << "value[" << i << "] = " << value[i];
+        //     }
+        // } while(byte != 0xFA);
+
         uint8_t byte;
-        int i = 0;
-        memset(value, 0, sizeof(value));
-        do {
-            byte = read_byte();
-            if (byte != 0xFA) {
-                value[i++] = byte;
-                std::cerr << "\nbyte = " << byte << "value[" << i << "] = " << value[i];
-            }
-        } while(byte != 0xFA);
+        std::string version;
+        std::stringstream ss;
+        while(byte = read_byte() != 0xFA) {
+            // value[i++] = byte;
+            version += static_cast<char>(byte);
+            ss.str("");
+            ss << "byte = " << byte << ", version = " << version; 
+            DEBUG_LOG(ss.str());
+            // ss/ << "\nvalue[" << i << "] = " << value[i];
+        }
 
-        // while(byte = read_byte() != 0xFA) {
-        //     value[i++] = byte;
-        //     std::cerr << "\nvalue[" << i << "] = " << value[i];
-        // }
-
-        std::string version(value);
+        // std::string version(value);
         if (0 != version.find("REDIS")) {
             DEBUG_LOG("This file does not follow redis protocol or is not a rdb file, filename : " + filename);
             return 1;
