@@ -161,6 +161,9 @@ private:
 
     int read_key_value_pair(std::string& key, std::string& value) {
         uint8_t byte = read_byte();
+        std::stringstream ss;  
+        ss << "from read_key_value_pair(), byte = " << byte;
+        DEBUG_LOG(ss);
         switch(byte) {
             case static_cast<uint8_t>(ValueType::StringEncoding) :  // value is String encoded
             key = read_length_encoded_string();
