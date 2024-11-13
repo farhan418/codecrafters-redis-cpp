@@ -163,7 +163,7 @@ private:
 
     uint8_t read_byte() {
         uint8_t byte;
-        rdb_file.read(reinterpret_cast<char*>&byte, 1);
+        rdb_file.read(reinterpret_cast<char*>(&byte), 1);
         if(rdb_file.gcount() != 1) {
             std::cerr << "\nError reading data from " << filename << std::endl;
             return 1;
