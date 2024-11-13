@@ -78,6 +78,7 @@ private:
 
         // std::string version(value);
         // memset(value, 0, sizeof(value));
+        std::string version;
         uint8_t byte;
         while (byte = read_byte() != 0xFA) {
             version += std::to_string(byte);
