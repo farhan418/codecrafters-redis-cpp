@@ -84,6 +84,7 @@ private:
         int i = 0;
         while (byte = read_byte() != 0xFA) {
             value[i++] = byte;
+            std::cerr << "\nread byte " << byte << ", value[i-1] = " << value[i-1];
             DEBUG_LOG("value[ " + std::to_string(i-1) + "]=" + value[i-1]);
             // version += std::to_string(byte);
             // DEBUG_LOG("byte :" + static_cast<char>(byte) + ", version = " + version);
