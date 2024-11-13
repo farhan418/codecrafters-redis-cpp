@@ -15,11 +15,12 @@
 #include "RespParser.hpp"
 // #include "RdbFileReader.hpp"
 
-// #define DEBUG_LOG(msg) {\
-// auto now = std::chrono::system_clock::now();\
-// std::time_t now_time = std::chrono::system_clock::to_time_t(now);\
-// std::cerr << "[" << now_time << "] [" << __FILE__ << ":" << __LINE__ << "] " << (msg) << std::endl; }
-
+#ifndef DEBUG_LOG
+#define DEBUG_LOG(msg)\
+auto now = std::chrono::system_clock::now();\
+std::time_t now_time = std::chrono::system_clock::to_time_t(now);\
+std::cerr << "[" << now_time << "] [" << __FILE__ << ":" << __LINE__ << "] " << (msg) << std::endl;
+#endif
 
 int handle_client(int, const struct sockaddr_in&);
 
