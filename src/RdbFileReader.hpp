@@ -72,8 +72,10 @@ private:
         memset(value, 0, sizeof(value));
         do {
             byte = read_byte();
-            value[i++] = byte;
-            std::cerr << "\nvalue[" << i << "] = " << value[i];
+            if (byte != 0xFA) {
+                value[i++] = byte;
+                std::cerr << "\nbyte = " << byte << "value[" << i << "] = " << value[i];
+            }
         } while(byte != 0xFA);
 
         // while(byte = read_byte() != 0xFA) {
