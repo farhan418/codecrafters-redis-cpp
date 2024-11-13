@@ -8,6 +8,7 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <ctime>
 #include <cstdint>
 #include "RespParser.hpp"
 #include "RedisDataStore.hpp"
@@ -133,7 +134,7 @@ public:
           data_type = "error";
           return RespParser::serialize(reply, data_type);
         }
-        
+
         DEBUG_LOG("\nin config get ");
         reply.push_back(command[2]);
         auto result = get_config_kv(command[2]);
