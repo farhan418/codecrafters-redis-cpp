@@ -163,6 +163,7 @@ private:
         uint8_t byte = read_byte();
         std::stringstream ss;  
         ss << "from read_key_value_pair(), byte = " << byte;
+        if (byte == 0) DEBUG_LOG("from from read_key_value_pair(), byte is 0");
         DEBUG_LOG(ss.str());
         switch(byte) {
             case static_cast<uint8_t>(ValueType::StringEncoding) :  // value is String encoded
