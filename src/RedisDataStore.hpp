@@ -15,6 +15,12 @@
 // typedef std::pair<std::string, std::string> KVPair;
 typedef std::pair<std::string, uint64_t> KEPair;
 
+struct ExpiryComparator {
+        bool operator()(const KEPair& left, const KEPair& right) {
+            return left.second > right.second;  // for min-heap
+        }
+};
+
 class RedisDataStore {
 public:
     RedisDataStore() {
@@ -48,20 +54,17 @@ public:
     }
     
     int set_kv(const std::string& key, const std::string& value, const uint64_t& expiry_time_ms = UINT64_MAX) {
-        uint8_t return_status = 0;
+        uint8_t status = 0;
         try {
             std::lock_guard<std::mutex> guard(rds_mutex);
             key_value_map[key] = value;
             if (expiry_time_ms != UINT64_MAX)
                key_expiry_pq.push({key, expiry_time_ms});
         }
-        catch (std::exception& e) {
-            return_status = -1;
-        }
         catch(...) {
-            return_status = -1;
+            status = -1;
         }
-        return return_status;
+        return status;
     }
 
     int delete_kv(const std::string& key) {
@@ -72,9 +75,24 @@ public:
                 return -1;
             }
             key_value_map.erase(key);
-        } while(false);
+        } while(false);  // to unlock rds_mutex because it needs to be locked in delete_pair_from_pq(key)
         delete_pair_from_pq(key);
-        // if (it = key_expiry_pq.find(key) != key_expiry_pq.end())  // no need to check because erase does not throw exception
+        return 0;
+    }
+
+    int get_keys_with_pattern(std::vector<std::string>& vec, std::string pattern_text) {
+        size_t pos = 0;
+        while (pos = pattern_text.find("*") != std::string::npos) {
+            pattern_text.replace(pos, 1, ".*");
+            pos += 2;
+        }
+        std::regex pattern(pattern_text);
+        std::lock_guard<std::mutex> guard(rds_mutex);
+        for (auto& pair : key_value_map) {
+            if(std::regex_match(pair.first, pattern)) {
+                reply.push_back(pair.first);
+            }
+        }
         return 0;
     }
 
@@ -115,17 +133,11 @@ private:
         return 0;
     }
 
-    uint64_t get_current_time_ms() {
+    static uint64_t get_current_time_ms() {
         auto now = std::chrono::system_clock::now();  // time point object
         auto duration = now.time_since_epoch();
         return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     }
-
-    struct ExpiryComparator {
-        bool operator()(const KEPair& left, const KEPair& right) {
-            return left.second > right.second;  // for min-heap
-        }
-    };
 
     static std::map<std::string, std::string> key_value_map;
     // priority queue is meant to store only the keys with expiry so as to get the earliest expiring key

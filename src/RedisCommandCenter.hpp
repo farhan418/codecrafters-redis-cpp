@@ -8,13 +8,14 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <cstdint>
 #include "RespParser.hpp"
 #include "RedisDataStore.hpp"
 
 
 class RedisCommandCenter {
 public:
-  RedisCommandCenter(){}
+  RedisCommandCenter() {};
 
   static std::string get_config_kv(const std::string& key) {
     std::lock_guard<std::mutex> guard(configStoreMutex);
@@ -25,80 +26,89 @@ public:
   }
 
   static int set_config_kv(const std::string& key, const std::string& value) {
+    int status = 0;
     try {
         std::lock_guard<std::mutex> guard(configStoreMutex);
         configStore[key] = value;
-        return 0;
-    }
-    catch (std::exception& e) {
-        return -1;
     }
     catch(...) {
-        return -1;
+        status = -1;
     }
+    return status;
   }
 
   std::string process(const std::vector<std::string>& command) {
     std::string response;
     std::string data_type;
     std::vector<std::string> reply;
+
     std::cerr << "\nin process(...), command : ";
     for (auto& c : command)
         std::cerr << c << "|, ";
 
+    // command PING
     if (compareCaseInsensitive("PING", command[0])) {
       reply.push_back("PONG");
       data_type = "simple_string";
       response = RespParser::serialize(reply, data_type);
     }
+    // command ECHO
     else if (compareCaseInsensitive("ECHO", command[0])) {
       if (command.size() <2) {
-        throw std::runtime_error("few arguments provided for ECHO command.");
+        reply.push_back("-few arguments provided for ECHO command.");
+        data_type = "error";
       }
-      reply.push_back(command[1]);
-      data_type = "bulk_string";
+      else {
+        reply.push_back(command[1]);
+        data_type = "bulk_string";
+      }
       response = RespParser::serialize(reply, data_type);
     }
+    // command SET, SET key value PX ms
     else if (compareCaseInsensitive("SET", command[0])) {
       if (command.size() < 3) {
-        throw std::runtime_error("few arguments provided for SET command.");
+        reply.push_back("-few arguments provided for SET command.");
+        data_type = "error";
+        return RespParser::serialize(reply, data_type);;
+      }
+
+      uint64_t expiry_time_ms = UINT64_MAX;
+      if (5 == command.size() && compareCaseInsensitive("PX", command[3])) {
+        expiry_time_ms = std::stol(command[4]);
       }
       
-      if (0 == RedisDataStore::set_kv(command[1], command[2])) {
+      if (0 == redis_data_store.set_kv(command[1], command[2], expiry_time_ms)) {
         reply.push_back("OK");
         data_type = "simple_string";
       }
       else {
-        throw std::runtime_error("Error while storing key value pair.");
-      }
-      
-      if (command.size() == 5) {
-        if (compareCaseInsensitive("PX", command[3])) {
-          std::thread t([&command](){
-            std::this_thread::sleep_for(std::chrono::milliseconds(std::stoi(command[4])));
-            RedisDataStore::delete_kv(command[1]);
-          });
-          t.detach();
-        }
+        reply.push_back("-Error while storing key value pair.");
+        data_type = "error";
       }
       response = RespParser::serialize(reply, data_type);    
     }
+    // command GET key
     else if (compareCaseInsensitive("GET", command[0])) {
       if (command.size() < 2) {
-        throw std::runtime_error("few arguments provided for GET command.");
+        reply.push_back("-few arguments provided for GET command.");
+        data_type = "error";
+        return RespParser::serialize(reply, data_type);
       }
       data_type = "bulk_string";
-      reply.push_back(RedisDataStore::get_kv(command[1]));
-      if (reply[0] == "-1")
+      reply.push_back(redis_data_store.get_kv(command[1]));
+      if (reply[0] == std::nullopt)
         response = "$-1\r\n";
       else
         response = RespParser::serialize(reply, data_type);
     }
+    // command CONFIG GET
     else if (command.size() >= 2 && 
             compareCaseInsensitive("CONFIG", command[0]) &&
             compareCaseInsensitive("GET", command[1])) {
         if (command.size() < 3) {
-            throw std::runtime_error("few arguments provided for CONFIG GET command.");
+          reply.push_back("-few arguments provided for CONFIG GET command.");
+          data_type = "error";
+          return RespParser::serialize(reply, data_type);
         }
         std::cerr << "\nin config get ";
         reply.push_back(command[2]);
@@ -106,32 +116,23 @@ public:
         data_type = "array";
         response = RespParser::serialize(reply, data_type);
     }
+    // command KEYS
     else if (command.size() == 2 && 
             compareCaseInsensitive("KEYS", command[0])) {
         if (command.size() < 3) {
-            throw std::runtime_error("few arguments provided for KEY command.");
+          reply.push_back("-few arguments provided for KEY command.");
+          data_type = "error";
+          return RespParser::serialize(reply, data_type);
+            // throw std::runtime_error("few arguments provided for KEY command.");
         }
-        std::string pattern_text = command[1];
-        {
-            size_t pos = 0;
-            while (pos = pattern_text.find("*") != std::string::npos) {
-                pattern_text.replace(pos, 1, ".*");
-                pos += 2;
-            }
-            std::regex pattern(pattern_text);
-            std::lock_guard<std::mutex> guard(keyStoreMutex);
-            for (auto& pair : keyStore) {
-                if(std::regex_match(pair.first, pattern)) {
-                    reply.push_back(pair.first);
-                }
-            }
-        }
+        redis_data_store.get_keys_with_pattern(reply, command[1]);
         data_type = "array";
         response = RespParser::serialize(reply, data_type);
     }
     else {
       reply.push_back("-err invalid command : " + command[0]);
       data_type = "error";
+      response = RespParser::serialize(reply, data_type);
     }
     return response;
   }
@@ -149,9 +150,11 @@ private:
 
   static std::map<std::string, std::string> configStore;
   static std::mutex configStoreMutex;
+  static RedisDataStore redis_data_store;
 };
 
 std::map<std::string, std::string> RedisCommandCenter::configStore;
 std::mutex RedisCommandCenter::configStoreMutex;
+RedisDataStore RedisCommandCenter::redis_data_store;
 
 #endif  // REDISCOMMANDCENTER_HPP
