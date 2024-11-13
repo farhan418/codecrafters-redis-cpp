@@ -81,7 +81,7 @@ private:
         uint8_t byte;
         std::string version;
         std::stringstream ss;
-        while(byte = read_byte() != 0xFA) {
+        while((byte = read_byte()) != 0xFA) {
             // value[i++] = byte;
             char c = byte;
             version += c;
