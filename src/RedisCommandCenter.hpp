@@ -13,6 +13,11 @@
 #include "RedisDataStore.hpp"
 #include "RdbFileReader.hpp"
 
+#define DEBUG_LOG(msg) {\
+auto now = std::chrono::system_clock::now();\
+std::time_t now_time = std::chrono::system_clock::to_time_t(now);\
+std::cerr << "[" << now_time << "] [" << __FILE__ << ":" << __LINE__ << "] " << msg;\
+}
 
 class RedisCommandCenter {
 public:
@@ -56,9 +61,11 @@ public:
     std::string data_type;
     std::vector<std::string> reply;
 
-    std::cerr << "\nin process(...), command : ";
+    std::string debug_message = "\nin process(...), command : ";
     for (auto& c : command)
-        std::cerr << c << "|, ";
+        debug_message += c + "|, ";
+
+    DEBUG_LOG(debug_message);
 
     // command PING
     if (compareCaseInsensitive("PING", command[0])) {
@@ -126,7 +133,8 @@ public:
           data_type = "error";
           return RespParser::serialize(reply, data_type);
         }
-        std::cerr << "\nin config get ";
+        
+        DEBUG_LOG("\nin config get ");
         reply.push_back(command[2]);
         auto result = get_config_kv(command[2]);
         if (result.has_value()) {

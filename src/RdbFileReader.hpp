@@ -25,10 +25,10 @@ public:
         this->filename = filename;
         rdb_file.open(this->filename, std::ios::binary);
         if (!rdb_file.is_open()) {
-            std::cerr << "\nsomething went wrong, cannot open file : " << filename << std::endl;
+            DEBUG_LOG("\nsomething went wrong, cannot open file : " + filename + "\n");
             return 1;
         }
-        std::cerr << "\nReading file : " << filename << std::endl;
+        DEBUG_LOG("\nReading file : " + filename + "\n");
         if (0 != read_header_and_metadata())
             return 1;
 
@@ -67,7 +67,7 @@ private:
             value[i] = read_byte();
         
         if (std::string(value) != "REDIS") {
-            std::cerr << "\nThis file does not follow redis protocol or is not a rdb file, filename : " << filename << std::endl;
+            DEBUG_LOG("\nThis file does not follow redis protocol or is not a rdb file, filename : " + filename + "\n";
             return 1;
         }
 
@@ -77,14 +77,14 @@ private:
         while (byte = read_byte() != 0xFA) {
             version += std::to_string(byte);
         }
-        std::cerr << "\nRedis version : " << value << version;
-        std::cerr << "\nMetadata (string encoded key-value pairs): ";
+        DEBUG_LOG("\nRedis version : " + std::to_string(value) + version);
+        DEBUG_LOG("\nMetadata (string encoded key-value pairs): ");
         
         while(peek_next_byte() != 0xFE)
         {
             std::string key = read_length_encoded_string();
             std::string value = read_length_encoded_string();
-            std::cerr << "\nKey : " << key << "\nValue : " << value << std::endl;
+            DEBUG_LOG("\nKey : " + key + "\nValue : " + value + std::endl);
         }
 
         return 0;
@@ -92,14 +92,14 @@ private:
 
     int read_database() {
         if (0xFE != read_byte()) {
-            std::cerr << "\nDatabase section should be here.\n";
+            DEBUG_LOG("\nDatabase section should be here.\n");
             return 1;
         }
 
         uint32_t database_index = read_size_encoded_number();
 
         if (0xFB != read_byte()) {
-            std::cerr << "\nHash table size information section should be here.\n";
+            DEBUG_LOG("\nHash table size information section should be here.\n");
             return 1;
         }
 
@@ -146,7 +146,7 @@ private:
             break;
 
             default :
-            std::cerr << "\nCurrently only supporting ValueType = StringEncoding\n";
+            DEBUG_LOG("\nCurrently only supporting ValueType = StringEncoding\n");
             return 1;
             break;
         }
@@ -165,7 +165,7 @@ private:
         uint8_t byte;
         rdb_file.read(reinterpret_cast<char*>(&byte), 1);
         if(rdb_file.gcount() != 1) {
-            std::cerr << "\nError reading data from " << filename << std::endl;
+            DEBUG_LOG("\nError reading data from " + filename + std::endl);
             return 1;
         }
         cursor_index += 1;

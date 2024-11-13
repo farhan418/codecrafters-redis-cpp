@@ -8,6 +8,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <thread>
+#include <chrono>
+#include <ctime>
 
 #include "RedisCommandCenter.hpp"
 #include "RespParser.hpp"
@@ -22,19 +24,21 @@ int main(int argc, char **argv) {
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
   
-  std::cerr << "argc = " << argc << "argv = [";
+  std::string debug_message = "argc = " << std::to_string(argc) << "argv = [";
   for (int i = 0; i < argc; i++) {
-    std::cerr << argv[i] << "|, ";
+    debug_message += std::to_string(argv[i]) + "|, ";
   }
+  DEBUG_LOG(debug_message);
+
   RedisCommandCenter::set_config_kv("dir", argv[2]);
   RedisCommandCenter::set_config_kv("dbfilename", argv[4]);
   if (0 != RedisCommandCenter::read_rdb_file()) {
-    std::cerr << "\nFailed to read rdb file.";
+    DEBUG_LOG("\nFailed to read rdb file.");
   }
 
   int server_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (server_fd < 0) {
-   std::cerr << "\nFailed to create server socket\n";
+   DEBUG_LOG("\nFailed to create server socket\n");
    return 1;
   }
 
@@ -42,7 +46,7 @@ int main(int argc, char **argv) {
   // ensures that we don't run into 'Address already in use' errors
   int reuse = 1;
   if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
-    std::cerr << "\nsetsockopt failed\n";
+    DEBUG_LOG("\nsetsockopt failed\n");
     return 1;
   }
   
@@ -52,13 +56,13 @@ int main(int argc, char **argv) {
   server_addr.sin_port = htons(6379);
   
   if (bind(server_fd, (struct sockaddr *) &server_addr, sizeof(server_addr)) != 0) {
-    std::cerr << "Failed to bind to port 6379\n";
+    DEBUG_LOG("Failed to bind to port 6379\n");
     return 1;
   }
   
   int connection_backlog = 5;
   if (listen(server_fd, connection_backlog) != 0) {
-    std::cerr << "listen failed\n";
+    DEBUG_LOG("listen failed\n");
     return 1;
   }
   
@@ -67,24 +71,24 @@ int main(int argc, char **argv) {
   
   while(true) { 
     memset(&client_addr, 0, sizeof(client_addr));
-    std::cout << "Waiting for a client to connect...\n";
+    DEBUG_LOG("Waiting for a client to connect...\n");
 
     int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t*) &client_addr_len);
     if (client_fd == -1) {
-      std::cerr << "Failed to accept client connection\n";
+      DEBUG_LOG("Failed to accept client connection\n");
       return 1;
     }
-    std::cout << "Client connected\n";
+    DEBUG_LOG("Client connected\n");
      
     std::thread t([client_fd, client_addr](){
       try {
         handle_client(client_fd, client_addr);
       }
       catch(const std::exception& e) {
-        std::cerr << "\nException occurred in thread: " << e.what() << std::endl;
+        DEBUG_LOG("\nException occurred in thread: " + e.what() + "\n");
       }
       catch(...) {
-        std::cerr << "\nUnknown exception occurred in thread.\n";
+        DEBUG_LOG("\nUnknown exception occurred in thread.\n");
       }
     });
     t.detach();
@@ -103,26 +107,32 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
     memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
     n = read(client_fd, buffer, sizeof(buffer));
     if (n < 0) {
-      std::cerr << "Error reading from socket.\n";
+      DEBUG_LOG("Error reading from socket.\n");
       return -1;
     }
-    std::cerr << "read " << n << " bytes : " << buffer << std::endl;
+    debug_message = "read " + std::to_string(n) + " bytes : ";
+    for (auto& c : buffer) 
+      debug_message += c;
+    DEBUG_LOG(debug_message);
     resp_parser.resetParser(buffer);
     while(!resp_parser.isParsedAllTokens()) {
-      std::cerr << " in loop";
+      DEBUG_LOG(" in loop parsing command...");
       std::vector<std::string> command = resp_parser.deserialize(resp_parser.parseNextToken(""));
-      std::cerr << "after in loop, ";
+      DEBUG_LOG("after in loop parsing command...");
       for(auto& e : command)
         std::cerr << e << " |, ";
       std::string response_str = rcc.process(command);
-      std::cerr << "afterwards, response_str : " << response_str;
+      DEBUG_LOG("afterwards, response_str : " + response_str);
 
       memset(buffer, 0, sizeof(buffer));
       memcpy(buffer, response_str.c_str(), response_str.length());
       n = write(client_fd, buffer, response_str.length());
-      std::cerr << "\nSent " << n <<" bytes : " << buffer << std::endl;
+      debug_message = "\nSent " + std::to_string(n) + " bytes : ";
+      for (auto& c : buffer)
+        debug_message += c;
+      DEBUG_LOG(debug_message);
       if (n < 0) {
-        std::cerr << "Failed to write message to socket.\n";
+        DEBUG_LOG("Failed to write message to socket.\n");
         return -1;
       }
       if (std::string(buffer).find("END") != std::string::npos)
