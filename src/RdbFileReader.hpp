@@ -2,7 +2,7 @@
 #define RDBFILEREADER_HPP
 
 #include <iostream>
-#include <ifstream>
+#include <fstream>
 #include <string>
 #include <cstdint>
 #include "RedisDataStore.hpp"
