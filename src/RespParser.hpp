@@ -6,6 +6,13 @@
 #include <regex>
 #include <string>
 
+
+#define DEBUG_LOG(msg) {\
+auto now = std::chrono::system_clock::now();\
+std::time_t now_time = std::chrono::system_clock::to_time_t(now);\
+std::cerr << "[" << now_time << "] [" << __FILE__ << ":" << __LINE__ << "] " << (msg) << std::endl; }
+
+
 class RespParser {
 private:
   bool isParsed;
@@ -46,7 +53,7 @@ private:
 public:
   std::vector<std::string> deserialize(const std::string& respToken) {
     std::vector<std::string> command;
-    std::cerr << "\'" << respToken << "\' in deserialize, respToken[0] = " << respToken[0] << std::endl;
+    DEBUG_LOG("\'" + respToken + "\' in deserialize, respToken[0] = " + respToken[0]);
     switch(respToken[0]) {
       case '+':
       command.push_back(parse_simple_string(respToken));
