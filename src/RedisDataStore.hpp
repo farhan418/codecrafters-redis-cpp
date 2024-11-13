@@ -12,6 +12,9 @@
 #include <vector>
 #include <cstdint>
 
+// typedef std::pair<std::string, std::string> KVPair;
+typedef std::pair<std::string, uint64_t> KEPair;
+
 class RedisDataStore {
 public:
     RedisDataStore() {
@@ -29,6 +32,7 @@ public:
         if (rds_object_counter == 0) {
             is_continue_monitoring = false;
             if (monitor_thread.joinable()) {
+                // std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 monitor_thread.join();
             }
         }
@@ -42,19 +46,7 @@ public:
         }
         return key_value_map[key];
     }
-
-    // int set_kv(const std::string& key, const std::string& value) {
-    //     uint8_t return_status = 0;
-    //     try {
-    //         std::lock_guard<std::mutex> guard(rds_mutex);
-    //         key_value_map[key] = value;
-    //     }
-    //     catch(...) {
-    //         return_status = -1;
-    //     }
-    //     return return_status;
-    // }
-
+    
     int set_kv(const std::string& key, const std::string& value, const uint64_t& expiry_time_ms = UINT64_MAX) {
         uint8_t return_status = 0;
         try {
@@ -87,16 +79,13 @@ public:
     }
 
 private:
-    void monitor_keys_for_expiry() {
-
+    static void monitor_keys_for_expiry() {
         while(is_continue_monitoring) {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            // std::lock_guard<std::mutex> guard(rds_mutex);
-
             while (!key_expiry_pq.empty()) {
-                auto key_value_pair = key_expiry_pq.top();
-                std::string key = key_value_pair.first;
-                uint64_t key_expiry_time = key_expiry_pq.second;
+                auto kv_pair = key_expiry_pq.top();
+                std::string key = kv_pair.first;
+                uint64_t key_expiry_time = kv_pair.second;
                 if (key_expiry_time > get_current_time_ms())
                     break;
                 // delete_kv(key); // but this is slow
@@ -104,28 +93,16 @@ private:
                 key_value_map.erase(key);
                 key_expiry_pq.pop();
             }
-
-            // for(auto it = key_expiry_map.begin(); it != key_expiry_map.end(); ) {
-            //     if (it->second < get_current_time_ms()) {
-            //         // std::lock_guard<std::mutex> guard(key_value_map_mutex);
-            //         std::cerr << "\nDeleting key=" << it->first << ", value=" << key_value_map[it->first] << "\n";
-            //         key_value_map.erase(it->first);
-            //         it = key_expiry_map.erase(it);
-            //     }
-            //     else {
-            //         ++it;
-            //     }
-            // }
         }
     }
 
     int delete_pair_from_pq(const std::string& key) {
-        std::vector<std::pair<std::string, uint64_t>> temp;
+        std::vector<KEPair> temp;
         std::lock_guard<std::mutex> guard(rds_mutex);
         while (!key_expiry_pq.empty()) {
             auto top = key_expiry_pq.top();
             key_expiry_pq.pop();
-            if (top->first != key) {
+            if (top.first != key) {
                 temp.push_back(top);
             }
             else {
@@ -135,24 +112,24 @@ private:
         for(auto& p : temp) {
             key_expiry_pq.push(p);
         }
+        return 0;
     }
 
     uint64_t get_current_time_ms() {
         auto now = std::chrono::system_clock::now();  // time point object
         auto duration = now.time_since_epoch();
         return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-            
     }
 
     struct ExpiryComparator {
-        bool operator()(const std::pair<std::string, uint64_t>& left, const std::pair<std::string, uint64_t>& right) {
+        bool operator()(const KEPair& left, const KEPair& right) {
             return left.second > right.second;  // for min-heap
         }
     };
 
     static std::map<std::string, std::string> key_value_map;
     // priority queue is meant to store only the keys with expiry so as to get the earliest expiring key
-    static std::priority_queue<std::pair<std::string, uint64_t>, std::vector<std::pair<std::string, uint64_t>>, ExpiryComparator> key_expiry_pq;
+    static std::priority_queue<KEPair, std::vector<KEPair>, ExpiryComparator> key_expiry_pq;
     static bool is_continue_monitoring; 
     static uint8_t rds_object_counter;
     static std::thread monitor_thread;
@@ -164,7 +141,7 @@ private:
 };
 
 std::map<std::string, std::string> RedisDataStore::key_value_map;
-std::priority_queue<std::pair<std::string, uint64_t>, std::vector<std::pair<std::string, uint64_t>>, ExpiryComparator> RedisDataStore::key_expiry_pq;
+std::priority_queue<KEPair, std::vector<KEPair>, ExpiryComparator> RedisDataStore::key_expiry_pq;
 bool RedisDataStore::is_continue_monitoring = false;
 uint8_t RedisDataStore::rds_object_counter;
 std::thread RedisDataStore::monitor_thread;
