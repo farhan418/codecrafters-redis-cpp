@@ -11,10 +11,10 @@
 #include "RedisDataStore.hpp"
 #include "RedisCommandCenter.hpp"
 
-#define DEBUG_LOG(msg) {\
-auto now = std::chrono::system_clock::now();\
-std::time_t now_time = std::chrono::system_clock::to_time_t(now);\
-std::cerr << "[" << now_time << "] [" << __FILE__ << ":" << __LINE__ << "] " << msg; }
+// #define DEBUG_LOG(msg) {\
+// auto now = std::chrono::system_clock::now();\
+// std::time_t now_time = std::chrono::system_clock::to_time_t(now);\
+// std::cerr << "[" << now_time << "] [" << __FILE__ << ":" << __LINE__ << "] " << (msg) << std::endl; }
 
 enum class ValueType : uint8_t {
     StringEncoding = 0,
