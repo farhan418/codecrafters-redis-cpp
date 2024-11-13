@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
   
   std::string debug_message = "argc = " << std::to_string(argc) << "argv = [";
   for (int i = 0; i < argc; i++) {
-    debug_message += std::to_string(argv[i]) + "|, ";
+    debug_message += std::string(argv[i]) + "|, ";
   }
   DEBUG_LOG(debug_message);
 
@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
         handle_client(client_fd, client_addr);
       }
       catch(const std::exception& e) {
-        DEBUG_LOG("\nException occurred in thread: " + e.what() + "\n");
+        DEBUG_LOG("\nException occurred in thread: " + std::string(e.what()) + "\n");
       }
       catch(...) {
         DEBUG_LOG("\nUnknown exception occurred in thread.\n");

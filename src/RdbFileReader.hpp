@@ -77,7 +77,7 @@ private:
         while (byte = read_byte() != 0xFA) {
             version += std::to_string(byte);
         }
-        DEBUG_LOG("\nRedis version : " + std::to_string(value) + version);
+        DEBUG_LOG("\nRedis version : " + std::string(value) + version);
         DEBUG_LOG("\nMetadata (string encoded key-value pairs): ");
         
         while(peek_next_byte() != 0xFE)
