@@ -44,7 +44,7 @@ public:
     auto result = get_config_kv("dir");
     if (result.has_value())
       db_file_path = *result;
-    auto result = get_config_kv("dbfilename");
+    result = get_config_kv("dbfilename");
     if(result)
       db_file_path += *result;
     return rdb_file_reader.readFile(db_file_path);
@@ -128,9 +128,14 @@ public:
         }
         std::cerr << "\nin config get ";
         reply.push_back(command[2]);
-        reply.push_back(get_config_kv(command[2]));
-        data_type = "array";
-        response = RespParser::serialize(reply, data_type);
+        auto result = get_config_kv(command[2]);
+        if (result.has_value()) {
+          data_type = "array";
+          reply.push_back(*result);
+          response = RespParser::serialize(reply, data_type);
+        }
+        else 
+          response = "$-1\r\n";
     }
     // command KEYS
     else if (command.size() == 2 && 
