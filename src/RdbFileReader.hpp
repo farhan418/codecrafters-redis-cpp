@@ -81,9 +81,10 @@ private:
         uint8_t byte;
         std::string version;
         std::stringstream ss;
-        while((byte = read_byte()) != 0xFA) {
+        while(peek_next_byte() != 0xFA) {
             // value[i++] = byte;
             // char c = byte;
+            byte = read_byte();
             version += byte;
             ss.str("");
             ss << "byte = " << byte << ", version = " << version << ", cursor_index = " << cursor_index; 
@@ -101,6 +102,7 @@ private:
         std::string key; 
         std::string value; 
         while(peek_next_byte() == 0xFA) {
+            read_byte();  // read 0xFA
             // read_key_value_pair(key, value);
             key = read_length_encoded_string();
             value = read_length_encoded_string();
