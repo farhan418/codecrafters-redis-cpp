@@ -87,7 +87,7 @@ private:
         // int i = 0;
         while (true) {
             byte = read_byte();
-            version += std::string(static_cast<char>(byte));
+            version += static_cast<char>(byte);
             std::cerr << "\nbyte = " << byte << "\nversion = " << version;
             // value[i++] = byte;
             // std::cerr << "\nread byte " << byte << ", value[i-1] = " << value[i-1] << "\n";
