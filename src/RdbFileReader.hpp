@@ -70,10 +70,16 @@ private:
         uint8_t byte;
         int i = 0;
         memset(value, 0, sizeof(value));
-        while(byte = read_byte() != 0xFA) {
+        do {
+            byte = read_byte();
             value[i++] = byte;
             std::cerr << "\nvalue[" << i << "] = " << value[i];
-        }
+        } while(byte != 0xFA);
+
+        // while(byte = read_byte() != 0xFA) {
+        //     value[i++] = byte;
+        //     std::cerr << "\nvalue[" << i << "] = " << value[i];
+        // }
 
         std::string version(value);
         if (0 != version.find("REDIS")) {
@@ -113,7 +119,7 @@ private:
             DEBUG_LOG("Key : " + key + "\nValue : " + value);
             if (++counter == 3) break;
         } while(peek_next_byte() != 0xFE);
-        
+
         DEBUG_LOG("exiting read_header_and_metadata");
         return 0;
     }
