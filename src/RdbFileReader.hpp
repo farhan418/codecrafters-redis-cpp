@@ -86,7 +86,7 @@ private:
             // char c = byte;
             version += byte;
             ss.str("");
-            ss << "byte = " << byte << ", version = " << version; 
+            ss << "byte = " << byte << ", version = " << version << ", cursor_index = " << cursor_index; 
             DEBUG_LOG(ss.str());
         }
 
@@ -95,29 +95,7 @@ private:
             DEBUG_LOG("This file does not follow redis protocol or is not a rdb file, filename : " + filename);
             return 1;
         }
-
-        // std::string version(value);
-        // memset(value, 0, sizeof(value));
-        // char value[10];
-        // memset(value, 0, sizeof(value));
-        // uint8_t byte;
-        // // int i = 0;
-        // while (byte = read_byte() != 0xFA) {
-        //     version += static_cast<char>(byte);
-        //     std::cerr << "\nbyte = " << byte << "\nversion = " << version;
-            
-            // value[i++] = byte;
-            // std::cerr << "\nread byte " << byte << ", value[i-1] = " << value[i-1] << "\n";
-            // DEBUG_LOG("value[ " + std::to_string(i-1) + "]=" + value[i-1]);
-            // version += std::to_string(byte);
-            // DEBUG_LOG("byte :" + static_cast<char>(byte) + ", version = " + version);
-        // }
-        // std::string version(value);
         DEBUG_LOG("Redis version : " + version);
-        if (0 != version.find("REDIS")) {
-            DEBUG_LOG("This file does not follow redis protocol or is not a rdb file, filename : " + filename);
-            return 1;
-        }
         DEBUG_LOG("Reading metadata (string encoded key-value pairs): ");
         
         int counter = 0;
