@@ -211,7 +211,7 @@ private:
             }
         }
         else {  // msb = 3
-            byte = byte & 0x3F;  // last 6 bits
+            byte = read_byte() & 0x3F;  // last 6 bits
             if (byte == 0) {
                 str = std::to_string(read_little_endian_number(1));
             }
