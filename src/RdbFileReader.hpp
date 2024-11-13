@@ -124,7 +124,7 @@ private:
                 expiry_time_ms = read_little_endian_number(4);
                 count_ht_with_expiry++;
             }
-            else if (byte == ValueType::StringEncoding) {}
+            else if (byte == static_cast<uint8_t>(ValueType::StringEncoding)) {}
             else {
                 throw std::runtime_error("\nNot supported valueType for value in key, value pair\n");
             }
@@ -275,7 +275,7 @@ private:
         return length;
     }
 
-    uint64_t read_little_endian_number_string(int num_bytes) {
+    uint64_t read_little_endian_number(int num_bytes) {
         uint64_t number = 0;  // reads max 8 bytes number
         for(int i = 0; i < num_bytes; i++) {
             uint64_t temp = read_byte();
