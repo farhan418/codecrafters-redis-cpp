@@ -66,10 +66,12 @@ private:
     }
 
     int read_header_and_metadata() {
-        char value[10];
+        char value[9];
+        uint8_t byte;
+        int i = 0;
         memset(value, 0, sizeof(value));
-        for(int i = 0; i < 10; i++) {
-            value[i] = read_byte();
+        while(byte = read_byte() != 0xFA) {
+            value[i++] = byte;
             std::cerr << "\nvalue[" << i << "] = " << value[i];
         }
 
@@ -104,13 +106,14 @@ private:
         DEBUG_LOG("Reading metadata (string encoded key-value pairs): ");
         
         int counter = 0;
-        while(peek_next_byte() != 0xFE)
-        {
+        
+        do {
             std::string key = read_length_encoded_string();
             std::string value = read_length_encoded_string();
             DEBUG_LOG("Key : " + key + "\nValue : " + value);
             if (++counter == 3) break;
-        }
+        } while(peek_next_byte() != 0xFE);
+        
         DEBUG_LOG("exiting read_header_and_metadata");
         return 0;
     }
