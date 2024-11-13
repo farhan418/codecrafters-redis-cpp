@@ -66,21 +66,25 @@ private:
     }
 
     int read_header_and_metadata() {
-        char value[6];
-        memset(value, 0, sizeof(value));
-        for(int i = 0; i < 5; i++)
-            value[i] = read_byte();
+        // char value[6];
+        // memset(value, 0, sizeof(value));
+        // for(int i = 0; i < 5; i++)
+        //     value[i] = read_byte();
         
-        if (std::string(value) != "REDIS") {
-            DEBUG_LOG("This file does not follow redis protocol or is not a rdb file, filename : " + filename);
-            return 1;
-        }
+        // if (std::string(value) != "REDIS") {
+        //     DEBUG_LOG("This file does not follow redis protocol or is not a rdb file, filename : " + filename);
+        //     return 1;
+        // }
 
-        std::string version(value);
-        memset(value, 0, sizeof(value));
+        // std::string version(value);
+        // memset(value, 0, sizeof(value));
         uint8_t byte;
         while (byte = read_byte() != 0xFA) {
             version += std::to_string(byte);
+        }
+        if (0 != version.find("REDIS")) {
+            DEBUG_LOG("This file does not follow redis protocol or is not a rdb file, filename : " + filename);
+            return 1;
         }
         DEBUG_LOG("Redis version : " + version);
         DEBUG_LOG("Metadata (string encoded key-value pairs): ");
