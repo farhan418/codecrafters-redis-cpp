@@ -102,6 +102,7 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
   char buffer[1024];
   RespParser resp_parser;
   RedisCommandCenter rcc;
+  std::string debug_message;
 
   while(true) {
     memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
