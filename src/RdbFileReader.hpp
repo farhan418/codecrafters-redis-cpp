@@ -8,7 +8,7 @@
 #include "RedisDataStore.hpp"
 #include "RedisCommandCenter.hpp"
 
-enum class ValueType {
+enum class ValueType : uint8_t {
     StringEncoding = 0,
     ListEncoding = 1,
     SetEncoding = 2
@@ -117,11 +117,11 @@ private:
 
             count_ht_total++;
             if (byte == 0xFC) {
-                expiry_time_ms = read_little_endian_number(num_bytes=8);
+                expiry_time_ms = read_little_endian_number(8);
                 count_ht_with_expiry++;
             }
             else if (byte == 0xFD) {
-                expiry_time_ms = read_little_endian_number(num_bytes=4);
+                expiry_time_ms = read_little_endian_number(4);
                 count_ht_with_expiry++;
             }
             else if (byte == ValueType::StringEncoding) {}
@@ -186,10 +186,10 @@ private:
         else {  // msb = 3
             byte = byte & 0x3F;  // last 6 bits
             if (byte == 0) {
-                str = std::to_string(read_little_endian_number(num_bytes=1));
+                str = std::to_string(read_little_endian_number(1));
             }
             else if (byte == 1) {
-                str = std::to_string(read_little_endian_number(num_bytes = 2));
+                str = std::to_string(read_little_endian_number(2));
             }
             else if (byte == 2) {
                 str = std::to_string(read_little_endian_number(4));
@@ -219,7 +219,7 @@ private:
         // else {  // msb == 3
             // byte = byte & 0x3F;  // last 6 bits
             // if (byte == 0) {
-            //     str = read_little_endian(num_bytes=1);
+            //     str = read_little_endian(1);
             // }
             // else if (byte == 1) {
             //     str = read_little_endian(num_bytes = 2);
