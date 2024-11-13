@@ -80,7 +80,7 @@ public:
         return 0;
     }
 
-    int get_keys_with_pattern(std::vector<std::string>& vec, std::string pattern_text) {
+    int get_keys_with_pattern(std::vector<std::string>& reply, std::string pattern_text) {
         size_t pos = 0;
         while (pos = pattern_text.find("*") != std::string::npos) {
             pattern_text.replace(pos, 1, ".*");

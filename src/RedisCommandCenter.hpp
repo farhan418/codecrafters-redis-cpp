@@ -94,12 +94,14 @@ public:
         data_type = "error";
         return RespParser::serialize(reply, data_type);
       }
-      data_type = "bulk_string";
-      reply.push_back(redis_data_store.get_kv(command[1]));
-      if (reply[0] == std::nullopt)
-        response = "$-1\r\n";
-      else
+      auto result = redis_data_store.get_kv(command[1]);
+      if (result.has_value()) {
+        reply.push_back(*result);
+        data_type = "bulk_string";
         response = RespParser::serialize(reply, data_type);
+      }
+      else 
+        response = "$-1\r\n";
     }
     // command CONFIG GET
     else if (command.size() >= 2 && 
