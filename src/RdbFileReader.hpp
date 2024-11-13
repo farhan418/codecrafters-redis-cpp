@@ -80,7 +80,7 @@ private:
             value[i] = read_byte();
         
         if (std::string(value) != "REDIS") {
-            DEBUG_LOG("\nThis file does not follow redis protocol or is not a rdb file, filename : " + filename + "\n";
+            DEBUG_LOG("\nThis file does not follow redis protocol or is not a rdb file, filename : " + filename);
             return 1;
         }
 

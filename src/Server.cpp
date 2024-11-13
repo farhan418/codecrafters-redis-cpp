@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
   
-  std::string debug_message = "argc = " << std::to_string(argc) << "argv = [";
+  std::string debug_message = "argc = " + std::to_string(argc) + "argv = [";
   for (int i = 0; i < argc; i++) {
     debug_message += std::string(argv[i]) + "|, ";
   }
