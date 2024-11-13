@@ -66,30 +66,36 @@ private:
     }
 
     int read_header_and_metadata() {
-        // char value[6];
-        // memset(value, 0, sizeof(value));
-        // for(int i = 0; i < 5; i++)
-        //     value[i] = read_byte();
-        
-        // if (std::string(value) != "REDIS") {
-        //     DEBUG_LOG("This file does not follow redis protocol or is not a rdb file, filename : " + filename);
-        //     return 1;
-        // }
+        char value[6];
+        memset(value, 0, sizeof(value));
+        for(int i = 0; i < 5; i++) {
+            value[i] = read_byte();
+            std::cerr << "\nvalue[" << i << "] = " << value[i];
+        }
+
+        std::string version(value);
+        if (0 != version.find("REDIS")) {
+            DEBUG_LOG("This file does not follow redis protocol or is not a rdb file, filename : " + filename);
+            return 1;
+        }
 
         // std::string version(value);
         // memset(value, 0, sizeof(value));
-        char value[10];
-        memset(value, 0, sizeof(value));
+        // char value[10];
+        // memset(value, 0, sizeof(value));
         uint8_t byte;
-        int i = 0;
-        while (byte = read_byte() != 0xFA) {
-            value[i++] = byte;
-            std::cerr << "\nread byte " << byte << ", value[i-1] = " << value[i-1] << "\n";
-            DEBUG_LOG("value[ " + std::to_string(i-1) + "]=" + value[i-1]);
+        // int i = 0;
+        while (true) {
+            byte = read_byte();
+            version += std::string(byte);
+            std::cerr << "\nbyte = " << byte << "\nversion = " << version;
+            // value[i++] = byte;
+            // std::cerr << "\nread byte " << byte << ", value[i-1] = " << value[i-1] << "\n";
+            // DEBUG_LOG("value[ " + std::to_string(i-1) + "]=" + value[i-1]);
             // version += std::to_string(byte);
             // DEBUG_LOG("byte :" + static_cast<char>(byte) + ", version = " + version);
         }
-        std::string version(value);
+        // std::string version(value);
         DEBUG_LOG("Redis version : " + version);
         if (0 != version.find("REDIS")) {
             DEBUG_LOG("This file does not follow redis protocol or is not a rdb file, filename : " + filename);
