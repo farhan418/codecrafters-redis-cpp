@@ -99,11 +99,12 @@ private:
         DEBUG_LOG("Reading metadata (string encoded key-value pairs): ");
         
         int counter = 0;
-        
-        do {
-            std::string key = read_length_encoded_string();
-            std::string value = read_length_encoded_string();
-            DEBUG_LOG("Key : " + key + "\nValue : " + value);
+        std::string key; 
+        std::string value; 
+        do 
+        {
+            read_key_value_pair(key, value);
+            DEBUG_LOG("Key : " + key + ", Value : " + value);
             if (++counter == 3) break;
         } while(peek_next_byte() != 0xFE);
 
