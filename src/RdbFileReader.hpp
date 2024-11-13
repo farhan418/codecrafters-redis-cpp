@@ -79,7 +79,7 @@ private:
         // std::string version(value);
         // memset(value, 0, sizeof(value));
         char value[10];
-        memset(&value, 0, sizeof(value));
+        memset(value, 0, sizeof(value));
         uint8_t byte;
         int i = 0;
         while (byte = read_byte() != 0xFA) {
