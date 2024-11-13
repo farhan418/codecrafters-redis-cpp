@@ -8,6 +8,12 @@
 #include "RedisDataStore.hpp"
 #include "RedisCommandCenter.hpp"
 
+#define DEBUG_LOG(msg) {\
+auto now = std::chrono::system_clock::now();\
+std::time_t now_time = std::chrono::system_clock::to_time_t(now);\
+std::cerr << "[" << now_time << "] [" << __FILE__ << ":" << __LINE__ << "] " << msg;\
+}
+
 enum class ValueType : uint8_t {
     StringEncoding = 0,
     ListEncoding = 1,
@@ -84,7 +90,7 @@ private:
         {
             std::string key = read_length_encoded_string();
             std::string value = read_length_encoded_string();
-            DEBUG_LOG("\nKey : " + key + "\nValue : " + value + std::endl);
+            DEBUG_LOG("\nKey : " + key + "\nValue : " + value);
         }
 
         return 0;
@@ -165,7 +171,7 @@ private:
         uint8_t byte;
         rdb_file.read(reinterpret_cast<char*>(&byte), 1);
         if(rdb_file.gcount() != 1) {
-            DEBUG_LOG("\nError reading data from " + filename + std::endl);
+            DEBUG_LOG("\nError reading data from " + filename);
             return 1;
         }
         cursor_index += 1;
