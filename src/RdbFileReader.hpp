@@ -66,9 +66,9 @@ private:
     }
 
     int read_header_and_metadata() {
-        char value[6];
+        char value[10];
         memset(value, 0, sizeof(value));
-        for(int i = 0; i < 5; i++) {
+        for(int i = 0; i < 10; i++) {
             value[i] = read_byte();
             std::cerr << "\nvalue[" << i << "] = " << value[i];
         }
@@ -83,18 +83,18 @@ private:
         // memset(value, 0, sizeof(value));
         // char value[10];
         // memset(value, 0, sizeof(value));
-        uint8_t byte;
-        // int i = 0;
-        while (byte = read_byte() != 0xFA) {
-            version += static_cast<char>(byte);
-            std::cerr << "\nbyte = " << byte << "\nversion = " << version;
+        // uint8_t byte;
+        // // int i = 0;
+        // while (byte = read_byte() != 0xFA) {
+        //     version += static_cast<char>(byte);
+        //     std::cerr << "\nbyte = " << byte << "\nversion = " << version;
             
             // value[i++] = byte;
             // std::cerr << "\nread byte " << byte << ", value[i-1] = " << value[i-1] << "\n";
             // DEBUG_LOG("value[ " + std::to_string(i-1) + "]=" + value[i-1]);
             // version += std::to_string(byte);
             // DEBUG_LOG("byte :" + static_cast<char>(byte) + ", version = " + version);
-        }
+        // }
         // std::string version(value);
         DEBUG_LOG("Redis version : " + version);
         if (0 != version.find("REDIS")) {
