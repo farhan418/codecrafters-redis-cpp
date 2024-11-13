@@ -101,14 +101,14 @@ private:
         int counter = 0;
         std::string key; 
         std::string value; 
-        do 
-        {
-            read_key_value_pair(key, value);
+        while(peek_next_byte() != 0xFE) {
+            // read_key_value_pair(key, value);
+            key = read_length_encoded_string();
+            value = read_length_encoded_string();
             DEBUG_LOG("Key : " + key + ", Value : " + value);
             if (++counter == 3) break;
-        } while(peek_next_byte() != 0xFE);
-
-        DEBUG_LOG("exiting read_header_and_metadata");
+        }
+        DEBUG_LOG("exiting read_header_and_metadata()...");
         return 0;
     }
 
@@ -163,7 +163,7 @@ private:
         uint8_t byte = read_byte();
         std::stringstream ss;  
         ss << "from read_key_value_pair(), byte = " << byte;
-        if (byte == 0) DEBUG_LOG("from from read_key_value_pair(), byte is 0");
+        if (byte == 0) DEBUG_LOG("from from read_key_value_pair(), byte is 0"); 
         DEBUG_LOG(ss.str());
         switch(byte) {
             case static_cast<uint8_t>(ValueType::StringEncoding) :  // value is String encoded
@@ -174,7 +174,6 @@ private:
             default :
             DEBUG_LOG("Currently only supporting ValueType = StringEncoding\n");
             return 1;
-            break;
         }
         return 0;
     }
@@ -200,13 +199,12 @@ private:
 
     std::string read_length_encoded_string() {
         std::string str;
-
         uint8_t byte = peek_next_byte();
         uint8_t msb = byte >> 6;
         if (msb != 3) { // msb is 0 or 1 or 2
             uint32_t length = read_size_encoded_number();
             for(uint32_t i = 0; i < length; i++) {
-                str += std::to_string(read_byte());
+                str += static_cast<char>(read_byte());
             }
         }
         else {  // msb = 3
@@ -224,39 +222,6 @@ private:
                 throw std::runtime_error("\nInvalid, compression is not expected in this project.");
             }
         }
-
-        // if (msb >= 0 && msb <= 2) {
-        //     length = read_size_encoded_number();
-        //     length = byte & 0b00111111;  // 6 LSBs
-        // }
-        // else if (msb == 1) {
-        //     length = length | (byte & 0b00111111);
-        //     byte = read_byte();
-        //     length = length << 8;
-        //     length = length | byte;  // 14 bit length
-        // }
-        // else if (msb == 2) {
-        //     for (int i = 0; i < 4; i++) {
-        //         byte = read_byte();
-        //         length = length | byte;
-        //         length = length << 8;  // 32 bit length
-        //     }
-        // }
-        // else {  // msb == 3
-            // byte = byte & 0x3F;  // last 6 bits
-            // if (byte == 0) {
-            //     str = read_little_endian(1);
-            // }
-            // else if (byte == 1) {
-            //     str = read_little_endian(num_bytes = 2);
-            // }
-            // else if (byte == 2) {
-            //     str = read_little_endian(4);
-            // }
-            // else if (byte == 3) {  // LZF compression
-            //     throw std::runtime_error("\nInvalid, compression is not expected in this project.");
-            // }
-        // }
         return str;
     }
 
@@ -281,23 +246,10 @@ private:
         }
         else if (msb == 0x11) {
             std::runtime_error("\nNot a number, but string is stored.");
-            // uint8_t last_6_bits = byte & 0x3F;
-            // if (last_6_bits == 0) {
-            //     length = 1;  // next 1 byte
-            //     length = read_little_endian(1);
-            // }
-            // else if (last_6_bits == 1) {
-            //     length = 2;  // next 2 bytes
-            //     length = read_little_endian(2);
-            // }
-            // else if (last_6_bits == 2) {
-            //     length = 4;  // next 4 bytes
-            //     length = read_little_endian(4);
-            // }
-            // else if (last_6_bits == 3) {
-            //     std::runtime_error("\nInvalid for this project.\n");
-            // }
         }
+        std::stringstream ss;  
+        ss << "from read_size_encoded_number(), length = " << length;
+        DEBUG_LOG(ss.str());
         return length;
     }
 
@@ -308,6 +260,9 @@ private:
             temp = temp << (i * 8);
             number = number | temp;
         }
+        std::stringstream ss;  
+        ss << "from read_little_endian_number(), num_bytes = " << num_bytes << ", number = " << number;
+        DEBUG_LOG(ss.str());
         return number;
     }
 
