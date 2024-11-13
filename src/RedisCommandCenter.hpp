@@ -11,16 +11,17 @@
 #include <cstdint>
 #include "RespParser.hpp"
 #include "RedisDataStore.hpp"
+#include "RdbFileReader.hpp"
 
 
 class RedisCommandCenter {
 public:
   RedisCommandCenter() {};
 
-  static std::string get_config_kv(const std::string& key) {
+  static std::optional<std::string> get_config_kv(const std::string& key) {
     std::lock_guard<std::mutex> guard(configStoreMutex);
     if (configStore.count(key) == 0) {
-        return "-1";
+        return std::nullopt;
     }
     return configStore[key];
   }
@@ -36,6 +37,19 @@ public:
     }
     return status;
   }
+
+  static int read_rdb_file() {
+    RdbFileReader rdb_file_reader;
+    std::string db_file_path;
+    auto result = get_config_kv("dir");
+    if (result.has_value())
+      db_file_path = *result;
+    auto result = get_config_kv("dbfilename");
+    if(result)
+      db_file_path += *result;
+    return rdb_file_reader.readFile(db_file_path);
+  }
+  
 
   std::string process(const std::vector<std::string>& command) {
     std::string response;

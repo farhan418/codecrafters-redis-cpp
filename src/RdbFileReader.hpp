@@ -28,6 +28,7 @@ public:
             std::cerr << "\nsomething went wrong, cannot open file : " << filename << std::endl;
             return 1;
         }
+        std::cerr << "\nReading file : " << filename << std::endl;
         if (0 != read_header_and_metadata())
             return 1;
 
@@ -130,27 +131,6 @@ private:
             
             read_key_value_pair(key, value);
             redis_data_store_obj.set_kv(key, value);
-
-            // key = read_length_encoded_string();
-            // value = read_length_encoded_string();
-            
-
-            // if (byte == ValueType::StringEncoding) {  // key-value without expiry
-            //     count_ht_total += 1;
-            // }
-            // else if (byte == 0xFC) {  // with expiry in ms
-            //     uint64_t expiry_time_ms = read_little_endian_number(8);  // 8 bytes
-            //     read_key_value_pair(key, value);
-            //     RedisDataStore::set_kv(key, value, expiry_time_ms);
-            // }
-            // else if (byte == 0xFD) {  // with expiry in seconds
-            //     uint32_t expiry_time_s = read_little_endian_number(4);  // 4 bytes
-            //     read_key_value_pair(key, value);
-            //     RedisDataStore::set_kv(key, value, expiry_time_s);
-            // }
-            // else {
-            //     std::runtime_error("\nInvalid, byte " + std::to_string(byte) + " should have been 00 or FC or FD.\n");
-            // }
             
         }
 

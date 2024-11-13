@@ -11,6 +11,7 @@
 
 #include "RedisCommandCenter.hpp"
 #include "RespParser.hpp"
+// #include "RdbFileReader.hpp"
 
 
 int handle_client(int, const struct sockaddr_in&);
@@ -27,6 +28,9 @@ int main(int argc, char **argv) {
   }
   RedisCommandCenter::set_config_kv("dir", argv[2]);
   RedisCommandCenter::set_config_kv("dbfilename", argv[4]);
+  if (0 != RedisCommandCenter::read_rdb_file()) {
+    std::cerr << "\nFailed to read rdb file.";
+  }
 
   int server_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (server_fd < 0) {
@@ -95,7 +99,7 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
   RespParser resp_parser;
   RedisCommandCenter rcc;
 
-  while(1) {
+  while(true) {
     memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
     n = read(client_fd, buffer, sizeof(buffer));
     if (n < 0) {
