@@ -85,11 +85,13 @@ private:
         DEBUG_LOG("\nRedis version : " + std::string(value) + version);
         DEBUG_LOG("\nMetadata (string encoded key-value pairs): ");
         
+        int count = 0;
         while(peek_next_byte() != 0xFE)
         {
             std::string key = read_length_encoded_string();
             std::string value = read_length_encoded_string();
             DEBUG_LOG("\nKey : " + key + "\nValue : " + value);
+            if (++counter == 10) break;
         }
 
         return 0;
