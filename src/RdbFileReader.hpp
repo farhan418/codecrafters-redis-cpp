@@ -128,7 +128,7 @@ private:
             else {
                 throw std::runtime_error("\nNot supported valueType for value in key, value pair\n");
             }
-            
+
             read_key_value_pair(key, value);
             redis_data_store_obj.set_kv(key, value);
             
@@ -140,7 +140,7 @@ private:
     int read_key_value_pair(std::string& key, std::string& value) {
         uint8_t byte = read_byte();
         switch(byte) {
-            case ValueType::StringEncoding :  // value is String encoded
+            case static_cast<uint8_t>(ValueType::StringEncoding) :  // value is String encoded
             key = read_length_encoded_string();
             value = read_length_encoded_string();
             break;
