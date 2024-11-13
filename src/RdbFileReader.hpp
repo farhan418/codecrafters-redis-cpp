@@ -119,6 +119,7 @@ private:
         }
 
         uint32_t database_index = read_size_encoded_number();
+        DEBUG_LOG("from read_database(), database_index = " + std::to_string(database_index));
 
         if (0xFB != read_byte()) {
             DEBUG_LOG("Hash table size information section should be here.\n");
@@ -133,16 +134,22 @@ private:
         uint32_t size_hash_table_total = read_size_encoded_number();
         uint32_t size_hash_table_with_expiry = read_size_encoded_number();
 
+        std::stringstream ss;  
+        ss << "size_hash_table_total = " << size_hash_table_total << ", size_hash_table_with_expiry" << size_hash_table_with_expiry;
+        DEBUG_LOG(ss.str());
+
         for(uint32_t i = 0; i < size_hash_table_total; i++) {
-            uint8_t byte = read_byte();
+            uint8_t byte = peek_next_byte();
             uint64_t expiry_time_ms = UINT64_MAX;
 
             count_ht_total++;
             if (byte == 0xFC) {
+                read_byte();
                 expiry_time_ms = read_little_endian_number(8);
                 count_ht_with_expiry++;
             }
             else if (byte == 0xFD) {
+                read_byte();
                 expiry_time_ms = read_little_endian_number(4);
                 count_ht_with_expiry++;
             }
@@ -153,7 +160,6 @@ private:
 
             read_key_value_pair(key, value);
             redis_data_store_obj.set_kv(key, value);
-            
         }
 
         return 0;
@@ -212,7 +218,7 @@ private:
         }
         else {  // msb = 3
             byte = read_byte() & 0x3F;  // last 6 bits
-            if (byte == 0) {
+             if (byte == 0) {
                 str = std::to_string(read_little_endian_number(1));
             }
             else if (byte == 1) {
