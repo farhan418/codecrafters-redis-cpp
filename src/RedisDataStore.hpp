@@ -104,8 +104,9 @@ public:
         for(auto& pair : key_value_map) {
             DEBUG_LOG("key=" + pair.first + ", value = " + pair.second);
         }
-        if (key_expiry_pq.empty())
+        if (key_expiry_pq.empty()) {
             DEBUG_LOG("key_expiry_pq is empty");
+        }
         else {
             std::priority_queue<decltype(key_expiry_pq)::value_type> temp_pq = key_expiry_pq;
             while(!temp_pq.empty()) {
