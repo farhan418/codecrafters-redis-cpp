@@ -108,7 +108,8 @@ public:
             DEBUG_LOG("key_expiry_pq is empty");
         }
         else {
-            std::priority_queue<decltype(key_expiry_pq)::value_type> temp_pq = key_expiry_pq;
+            // std::priority_queue<decltype(key_expiry_pq)::value_type> temp_pq = key_expiry_pq;
+            auto temp_pq = key_expiry_pq;
             while(!temp_pq.empty()) {
                 auto& pair = temp_pq.top();
                 DEBUG_LOG("key = " + pair.first + ", expiry = " + std::to_string(pair.second));
