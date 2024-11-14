@@ -19,14 +19,15 @@
 
 
 int handle_client(int, const struct sockaddr_in&);
-argparse::ArgumentParser process_cmdline_args(int, char**);
+argparse::ArgumentParser process_cmdline_args(int, char**, argparse::ArgumentParser&);
 
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
 
-  argparse::ArgumentParser arg_parser = process_cmdline_args(argc, argv);
+  argparse::ArgumentParser arg_parser("Redis Server");
+  process_cmdline_args(argc, argv, arg_parser);
   uint16_t port_number = arg_parser.get<uint16_t>("--port");
 
   if (auto dir = arg_parser.present("--dir")) {
@@ -169,14 +170,14 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
   return 0;
 }
 
-argparse::ArgumentParser process_cmdline_args(int argc, char** argv) {
+argparse::ArgumentParser process_cmdline_args(int argc, char** argv, argparse::ArgumentParser& argument_parser) {
   std::string debug_message = "argc = " + std::to_string(argc) + "argv = [";
   for (int i = 0; i < argc; i++) {
     debug_message += std::string(argv[i]) + "|, ";
   }
   DEBUG_LOG(debug_message);
 
-  argparse::ArgumentParser argument_parser("Redis Server");
+  // argparse::ArgumentParser argument_parser();
   
   argument_parser.add_argument("--dir")
     .help("path to the directory containing Redis RDB file");
