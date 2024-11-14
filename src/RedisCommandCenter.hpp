@@ -95,7 +95,7 @@ public:
         expiry_time_ms = std::stol(command[4]);
       }
       
-      if (0 == redis_data_store.set_kv(command[1], command[2], expiry_time_ms)) {
+      if (0 == redis_data_store_obj.set_kv(command[1], command[2], expiry_time_ms)) {
         reply.push_back("OK");
         data_type = "simple_string";
       }
@@ -112,7 +112,7 @@ public:
         data_type = "error";
         return RespParser::serialize(reply, data_type);
       }
-      auto result = redis_data_store.get_kv(command[1]);
+      auto result = redis_data_store_obj.get_kv(command[1]);
       if (result.has_value()) {
         reply.push_back(*result);
         data_type = "bulk_string";
@@ -152,7 +152,8 @@ public:
         //     // throw std::runtime_error("few arguments provided for KEY command.");
         // }
         DEBUG_LOG("command[0]=" + command[0] + ", command[1]=" + command[1]);
-        if (0 != redis_data_store.get_keys_with_pattern(reply, command[1])) {
+        redis_data_store_obj.display_all_key_value_pairs();
+        if (0 != redis_data_store_obj.get_keys_with_pattern(reply, command[1])) {
           throw std::runtime_error("error occurred while fetching keys");
         }
         data_type = "array";
@@ -183,11 +184,11 @@ private:
 
   static std::map<std::string, std::string> configStore;
   static std::mutex configStoreMutex;
-  static RedisDataStore redis_data_store;
+  static RedisDataStore redis_data_store_obj;
 };
 
 std::map<std::string, std::string> RedisCommandCenter::configStore;
 std::mutex RedisCommandCenter::configStoreMutex;
-RedisDataStore RedisCommandCenter::redis_data_store;
+RedisDataStore RedisCommandCenter::redis_data_store_obj;
 
 #endif  // REDISCOMMANDCENTER_HPP
