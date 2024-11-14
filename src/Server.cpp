@@ -31,7 +31,12 @@ int main(int argc, char **argv) {
   }
   DEBUG_LOG(debug_message);
 
-  if (argc == 5) { 
+  uint16_t port_number = 6379;
+  if (argc == 2 && ("--port" == argv[1])) {
+    port_number = std::stoi(argv[2]);
+  }
+
+  if (argc == 5 && ("--dir" == argv[1]) && ("--dbfilename" == argv[3])) { 
     RedisCommandCenter::set_config_kv("dir", argv[2]);
     RedisCommandCenter::set_config_kv("dbfilename", argv[4]);
     if (0 != RedisCommandCenter::read_rdb_file()) {
@@ -56,7 +61,7 @@ int main(int argc, char **argv) {
   struct sockaddr_in server_addr;
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = INADDR_ANY;
-  server_addr.sin_port = htons(6379);
+  server_addr.sin_port = htons(port_number);
   
   if (bind(server_fd, (struct sockaddr *) &server_addr, sizeof(server_addr)) != 0) {
     DEBUG_LOG("Failed to bind to port 6379\n");
