@@ -103,6 +103,8 @@ public:
         for(auto& pair : key_value_map) {
             DEBUG_LOG("key=" + pair.first + ", value = " + std;pair.second));
         }
+        return 0;
+    }
 private:
     static void monitor_keys_for_expiry() {
         while(is_continue_monitoring) {
