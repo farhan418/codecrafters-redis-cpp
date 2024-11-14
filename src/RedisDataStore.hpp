@@ -11,6 +11,7 @@
 #include <queue>
 #include <vector>
 #include <cstdint>
+#include <algorithm>
 #include "logging_utility.hpp"
 
 // typedef std::pair<std::string, std::string> KVPair;
@@ -59,8 +60,13 @@ public:
         try {
             std::lock_guard<std::mutex> guard(rds_mutex);
             key_value_map[key] = value;
-            if (expiry_time_ms != UINT64_MAX)
-               key_expiry_pq.push({key, get_current_time_ms() + expiry_time_ms});
+            if (expiry_time_ms != UINT64_MAX) {
+                key_expiry_pq.push({key, get_current_time_ms() + expiry_time_ms});
+
+                // if max 1000 millisecond delay is ok. If real time system, make monitor_thread_sleep_duration = 0, and remove the below linees
+                monitor_thread_sleep_duration = std::min(max_delay_ms, ((key_expiry_pq.top().second / 2)-min_delay_ms));  // max sleep duration of 1 second i.e. 1000 ms
+                monitor_thread_sleep_duration = std::max(min_delay_ms, monitor_thread_sleep_duration);
+            }
         }
         catch(...) {
             status = -1;
@@ -121,7 +127,7 @@ public:
 private:
     static void monitor_keys_for_expiry() {
         while(is_continue_monitoring) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            std::this_thread::sleep_for(std::chrono::milliseconds(monitor_thread_sleep_duration));
             DEBUG_LOG("display all keys then check...");
             display_all_key_value_pairs();
             while (!key_expiry_pq.empty()) {
@@ -170,6 +176,10 @@ private:
     static uint8_t rds_object_counter;
     static std::thread monitor_thread;
     static std::mutex rds_mutex;
+    static uint64_t monitor_thread_sleep_duration;
+    static const uint16_t min_delay_ms;
+    static const uint16_t max_delay_ms;
+
     // static std::map<std::string, uint64_t> key_expiry_map;
     // static std::mutex key_expiry_map_mutex;
     // static uint64_t daemon_thread_sleep_duration_ms;
@@ -182,6 +192,9 @@ bool RedisDataStore::is_continue_monitoring = false;
 uint8_t RedisDataStore::rds_object_counter;
 std::thread RedisDataStore::monitor_thread;
 std::mutex RedisDataStore::rds_mutex;
+uint64_t RedisDataStore::monitor_thread_sleep_duration = 1000;  // max sleep duration allowed
+const uint16_t RedisDataStore::min_delay_ms = 10;  // lowest sleep duration allowed for monitor thread
+const uint16_t RedisDataStore::max_delay_ms = 1000;  // max sleep duration allowed for monitor thread
 // std::map<std::string, uint64_t> RedisDataStore::key_expiry_map;
 // uint32_t RedisDataStore::daemon_thread_sleep_duration_ms;
 // std::vector<std::thread> RedisDataStore::daemon_thread_pool;
