@@ -189,9 +189,9 @@ private:
         uint8_t byte = read_byte();
         cursor_index -= 1;
         rdb_file.seekg(currentpos);
-        std::stringstream ss;  
-        ss << "from peek_next_byte(), byte read = \'" << byte << "\'" << ", cursor_index = " << cursor_index;
-        DEBUG_LOG(ss.str());
+        // std::stringstream ss;  
+        // ss << "from peek_next_byte(), byte read = \'" << byte << "\'" << ", cursor_index = " << cursor_index;
+        // DEBUG_LOG(ss.str());
         return byte;
     }
 
