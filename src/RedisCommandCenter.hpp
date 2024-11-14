@@ -169,11 +169,11 @@ public:
       if (command.size() >= 2)
         required_section = command[1];
       get_info(reply, required_section);
-      data_type = "array";
       std::stringstream ss;  
       for(auto& e : reply) 
         ss << e << ",| ";
       DEBUG_LOG(ss.str());
+      data_type = "bulk_string";
       response = RespParser::serialize(reply, data_type);
     }
     // Invalid command

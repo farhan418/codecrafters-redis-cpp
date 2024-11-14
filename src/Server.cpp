@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   process_cmdline_args(argc, argv, arg_parser);
   DEBUG_LOG("in main after return");
   uint16_t port_number = arg_parser.get<int>("--port");
-  DEBUG_LOG("in main after getting port_number");
+  DEBUG_LOG("in main after getting port_number = " + std::to_string(port_number));
 
   if (auto dir = arg_parser.present("--dir")) {
     if (auto dbfilename = arg_parser.present("--dbfilename")) {
