@@ -128,7 +128,7 @@ private:
     static void monitor_keys_for_expiry() {
         while(is_continue_monitoring) {
             std::this_thread::sleep_for(std::chrono::milliseconds(monitor_thread_sleep_duration));
-            DEBUG_LOG("display all keys then check...");
+            DEBUG_LOG("monitor_thread_sleep_duration = " + std::to_string(monitor_thread_sleep_duration));
             display_all_key_value_pairs();
             while (!key_expiry_pq.empty()) {
                 auto kv_pair = key_expiry_pq.top();
@@ -192,7 +192,7 @@ bool RedisDataStore::is_continue_monitoring = false;
 uint8_t RedisDataStore::rds_object_counter;
 std::thread RedisDataStore::monitor_thread;
 std::mutex RedisDataStore::rds_mutex;
-uint64_t RedisDataStore::monitor_thread_sleep_duration = 1000;  // max sleep duration allowed
+uint64_t RedisDataStore::monitor_thread_sleep_duration = 10;  // max sleep duration allowed
 const uint16_t RedisDataStore::min_delay_ms = 10;  // lowest sleep duration allowed for monitor thread
 const uint16_t RedisDataStore::max_delay_ms = 1000;  // max sleep duration allowed for monitor thread
 // std::map<std::string, uint64_t> RedisDataStore::key_expiry_map;
