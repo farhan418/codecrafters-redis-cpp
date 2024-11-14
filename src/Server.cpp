@@ -31,10 +31,12 @@ int main(int argc, char **argv) {
   }
   DEBUG_LOG(debug_message);
 
-  RedisCommandCenter::set_config_kv("dir", argv[2]);
-  RedisCommandCenter::set_config_kv("dbfilename", argv[4]);
-  if (0 != RedisCommandCenter::read_rdb_file()) {
-    DEBUG_LOG("Failed to read rdb file.");
+  if (argc == 5) { 
+    RedisCommandCenter::set_config_kv("dir", argv[2]);
+    RedisCommandCenter::set_config_kv("dbfilename", argv[4]);
+    if (0 != RedisCommandCenter::read_rdb_file()) {
+      DEBUG_LOG("Failed to read rdb file.");
+    } 
   }
 
   int server_fd = socket(AF_INET, SOCK_STREAM, 0);
