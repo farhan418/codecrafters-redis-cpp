@@ -105,7 +105,7 @@ private:
         }
 
         uint32_t database_index = read_size_encoded_number();
-        DEBUG_LOG("from read_database(), database_index = " + std::to_string(database_index));
+        DEBUG_LOG("database_index = " + std::to_string(database_index));
 
         if (0xFB != read_byte()) {
             DEBUG_LOG("Hash table size information section should be here.\n");
@@ -162,12 +162,12 @@ private:
     int read_key_value_pair(std::string& key, std::string& value) {
         uint8_t byte = read_byte();
         // std::stringstream ss;  
-        // ss << "from read_key_value_pair(), byte = " << byte;
-        // if (byte == 0) DEBUG_LOG("from from read_key_value_pair(), byte is 0"); 
+        // ss << "byte = " << byte;
+        // if (byte == 0) DEBUG_LOG("byte is 0"); 
         // DEBUG_LOG(ss.str());
         switch(byte) {
             case static_cast<uint8_t>(ValueType::StringEncoding) :  // value is String encoded
-            // DEBUG_LOG("from read_key_value_pair(), reading string encoded kv pair");
+            // DEBUG_LOG("reading string encoded kv pair");
             key = read_length_encoded_string();
             value = read_length_encoded_string();
             break;
@@ -185,7 +185,7 @@ private:
         cursor_index -= 1;
         rdb_file.seekg(currentpos);
         // std::stringstream ss;  
-        // ss << "from peek_next_byte(), byte read = \'" << byte << "\'" << ", cursor_index = " << cursor_index;
+        // ss << "byte read = \'" << byte << "\'" << ", cursor_index = " << cursor_index;
         // DEBUG_LOG(ss.str());
         return byte;
     }
@@ -252,7 +252,7 @@ private:
             std::runtime_error("\nNot a number, but string is stored.");
         }
         // std::stringstream ss;  
-        // ss << "from read_size_encoded_number(), length = " << length;
+        // ss << "length = " << length;
         // DEBUG_LOG(ss.str());
         return length;
     }
@@ -265,7 +265,7 @@ private:
             number = number | temp;
         }
         // std::stringstream ss;  
-        // ss << "from read_little_endian_number(), num_bytes = " << num_bytes << ", number = " << number;
+        // ss << "num_bytes = " << num_bytes << ", number = " << number;
         // DEBUG_LOG(ss.str());
         return number;
     }

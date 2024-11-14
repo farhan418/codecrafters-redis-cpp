@@ -153,6 +153,10 @@ public:
         // }
         redis_data_store.get_keys_with_pattern(reply, command[1]);
         data_type = "array";
+        std::stringstream ss;  
+        for(auto& e : reply) 
+          ss << e << ",| ";
+        DEBUG_LOG(ss.str());
         response = RespParser::serialize(reply, data_type);
     }
     else {

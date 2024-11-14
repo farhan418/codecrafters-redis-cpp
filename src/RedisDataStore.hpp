@@ -11,7 +11,7 @@
 #include <queue>
 #include <vector>
 #include <cstdint>
-
+#include "logging_utility.hpp"
 
 // typedef std::pair<std::string, std::string> KVPair;
 typedef std::pair<std::string, uint64_t> KEPair;
@@ -87,6 +87,7 @@ public:
             pattern_text.replace(pos, 1, ".*");
             pos += 2;
         }
+        DEBUG_LOG("pattern_text = " + pattern_text);
         std::regex pattern(pattern_text);
         std::lock_guard<std::mutex> guard(rds_mutex);
         for (auto& pair : key_value_map) {
