@@ -31,12 +31,16 @@ int main(int argc, char **argv) {
   }
   DEBUG_LOG(debug_message);
 
+  std::string ss1;
   uint16_t port_number = 6379;
   if (argc == 2 && ("--port" == argv[1])) {
-    DEBUG_LOG("port_Number" + argv[2]);
+    ss1 << "port_Number = " << argv[2];
+    DEBUG_LOG(ss1.str());
     port_number = std::stoi(argv[2]);
   }
-  DEBUG_LOG("port_Number" + std::to_string(port_number));
+  ss1.str("");
+  ss1 << "port_Number = " << port_number;
+  DEBUG_LOG(ss1.str());
 
   if (argc == 5 && ("--dir" == argv[1]) && ("--dbfilename" == argv[3])) { 
     RedisCommandCenter::set_config_kv("dir", argv[2]);
