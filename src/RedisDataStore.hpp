@@ -128,8 +128,8 @@ private:
     static void monitor_keys_for_expiry() {
         while(is_continue_monitoring) {
             std::this_thread::sleep_for(std::chrono::milliseconds(monitor_thread_sleep_duration));
-            DEBUG_LOG("monitor_thread_sleep_duration = " + std::to_string(monitor_thread_sleep_duration));
-            display_all_key_value_pairs();
+            // DEBUG_LOG("monitor_thread_sleep_duration = " + std::to_string(monitor_thread_sleep_duration));
+            // display_all_key_value_pairs();
             while (!key_expiry_pq.empty()) {
                 auto kv_pair = key_expiry_pq.top();
                 std::string key = kv_pair.first;
