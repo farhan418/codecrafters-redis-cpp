@@ -33,8 +33,10 @@ int main(int argc, char **argv) {
 
   uint16_t port_number = 6379;
   if (argc == 2 && ("--port" == argv[1])) {
+    DEBUG_LOG("port_Number" + argv[2]);
     port_number = std::stoi(argv[2]);
   }
+  DEBUG_LOG("port_Number" + std::to_string(port_number));
 
   if (argc == 5 && ("--dir" == argv[1]) && ("--dbfilename" == argv[3])) { 
     RedisCommandCenter::set_config_kv("dir", argv[2]);
