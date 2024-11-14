@@ -152,7 +152,9 @@ public:
         //     // throw std::runtime_error("few arguments provided for KEY command.");
         // }
         DEBUG_LOG("command[0]=" + command[0] + ", command[1]=" + command[1]);
-        redis_data_store.get_keys_with_pattern(reply, command[1]);
+        if (0 != redis_data_store.get_keys_with_pattern(reply, command[1])) {
+          throw std::runtime_error("error occurred while fetching keys");
+        }
         data_type = "array";
         std::stringstream ss;  
         for(auto& e : reply) 
