@@ -193,8 +193,12 @@ private:
       for (auto& section : supported_sections)
           get_info(reply, section);
     }
-    else if (compareCaseInsensitive(section, "Replication"))
-      reply.push_back("role" + get_config_kv("role"));
+    else if (compareCaseInsensitive(section, "Replication")) {
+      if (auto role = get_config_kv("role"))
+        reply.push_back("role:" + *role);
+      else
+        reply.push_back("role:master");
+    }
     return 0;
   }
 
