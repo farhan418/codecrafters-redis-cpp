@@ -61,8 +61,10 @@ public:
             std::lock_guard<std::mutex> guard(rds_mutex);
             key_value_map[key] = value;
             if (expiry_time_ms != UINT64_MAX) {
-                key_expiry_pq.push({key, get_current_time_ms() + expiry_time_ms});
-
+                if (expiry_time_ms < 1e5)
+                    key_expiry_pq.push({key, get_current_time_ms() + expiry_time_ms});
+                else
+                    key_expiry_pq.push({key, expiry_time_ms});
                 // if max 1000 millisecond delay is ok. If real time system, make monitor_thread_sleep_duration = 0, and remove the below linees
                 // monitor_thread_sleep_duration = std::min(static_cast<uint64_t>(max_delay_ms), ((key_expiry_pq.top().second / 2)-min_delay_ms));  // max sleep duration of 1 second i.e. 1000 ms
                 // monitor_thread_sleep_duration = std::max(static_cast<uint64_t>(min_delay_ms), monitor_thread_sleep_duration);
