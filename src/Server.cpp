@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   argparse::ArgumentParser arg_parser("Redis Server");
   process_cmdline_args(argc, argv, arg_parser);
   DEBUG_LOG("in main after return");
-  uint16_t port_number = arg_parser.get<int>("--port");
+  uint16_t port_number = std::stoi(arg_parser.get("--port"));
   DEBUG_LOG("in main after getting port_number = " + std::to_string(port_number));
 
   if (auto dir = arg_parser.present("--dir")) {
@@ -42,24 +42,6 @@ int main(int argc, char **argv) {
       // continue without reading RDB file, graceful handling
     }
   }
-
-  // std::stringstream ss1;
-  // if (argc == 3 && ("--port" == std::string(argv[1]))) {
-  //   ss1 << "port_Number = " << argv[2];
-  //   DEBUG_LOG(ss1.str());
-  //   port_number = std::stoi(argv[2]);
-  // }
-  // ss1.str("");
-  // ss1 << "port_Number = " << port_number;
-  // DEBUG_LOG(ss1.str());
-
-  // if (argc == 5 && ("--dir" == std::string(argv[1])) && ("--dbfilename" == std::string(argv[3]))) { 
-  //   RedisCommandCenter::set_config_kv("dir", argv[2]);
-  //   RedisCommandCenter::set_config_kv("dbfilename", argv[4]);
-  //   if (0 != RedisCommandCenter::read_rdb_file()) {
-  //     DEBUG_LOG("Failed to read rdb file.");
-  //   } 
-  // }
 
   int server_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (server_fd < 0) {
@@ -187,8 +169,8 @@ int process_cmdline_args(int argc, char** argv, argparse::ArgumentParser& argume
 
   argument_parser.add_argument("-p", "--port")
     .help("port number to bind the server socket to")
-    .default_value(6379)
-    .scan<'d', int>();
+    .default_value(6379);
+    // .scan<'d', int>();
 
   try {
     DEBUG_LOG("in try block");
