@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   argparse::ArgumentParser arg_parser("Redis Server");
   process_cmdline_args(argc, argv, arg_parser);
   DEBUG_LOG("in main after return");
-  uint16_t port_number = arg_parser.get<uint16_t>("--port");
+  uint16_t port_number = arg_parser.get<int>("--port");
   DEBUG_LOG("in main after getting port_number");
 
   if (auto dir = arg_parser.present("--dir")) {
