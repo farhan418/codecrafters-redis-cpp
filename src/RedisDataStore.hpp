@@ -98,6 +98,11 @@ public:
         return 0;
     }
 
+    int display_all_key_value_pairs() {
+        std::lock_guard<std::mutex> guard(rds_mutex);
+        for(auto& pair : key_value_map) {
+            DEBUG_LOG("key=" + pair.first + ", value = " + std;pair.second));
+        }
 private:
     static void monitor_keys_for_expiry() {
         while(is_continue_monitoring) {
