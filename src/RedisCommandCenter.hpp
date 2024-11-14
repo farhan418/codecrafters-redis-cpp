@@ -200,14 +200,20 @@ private:
           get_info(reply, section);
     }
     else if (compareCaseInsensitive(section, "Replication")) {
-      if (auto role = get_config_kv("role"))
-        reply.push_back("role:" + *role);
+      std::string str;
+      for (auto& key : std::vector<std::string>{"role", "master_replid", "master_repl_offset"})
+        if (auto result = get_config_kv(key))
+          str += key + ":" + *result;
       
-      if (auto master_replid = get_config_kv("master_replid"))
-        reply.push_back("master_replid:" + *master_replid);
+      reply.push_back(str);
+      // if (auto role = get_config_kv("role"))
+      //   str += "role:" + *role;
+      
+      // if (auto master_replid = get_config_kv("master_replid"))
+      //   reply.push_back("master_replid:" + *master_replid);
 
-      if (auto master_repl_offset = get_config_kv("master_repl_offset"))
-        reply.push_back("master_repl_offset:" + *master_repl_offset);
+      // if (auto master_repl_offset = get_config_kv("master_repl_offset"))
+      //   reply.push_back("master_repl_offset:" + *master_repl_offset);
     }
     return 0;
   }
