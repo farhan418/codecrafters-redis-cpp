@@ -66,29 +66,15 @@ private:
     }
 
     int read_header_and_metadata() {
-        // char value[9];
-        // uint8_t byte;
-        // int i = 0;
-        // memset(value, 0, sizeof(value));
-        // do {
-        //     byte = read_byte();
-        //     if (byte != 0xFA) {
-        //         value[i++] = byte;
-        //         std::cerr << "\nbyte = " << byte << "value[" << i << "] = " << value[i];
-        //     }
-        // } while(byte != 0xFA);
-
         uint8_t byte;
         std::string version;
-        std::stringstream ss;
+        // std::stringstream ss;
         while(peek_next_byte() != 0xFA) {
-            // value[i++] = byte;
-            // char c = byte;
             byte = read_byte();
             version += byte;
-            ss.str("");
-            ss << "byte = " << byte << ", version = " << version << ", cursor_index = " << cursor_index; 
-            DEBUG_LOG(ss.str());
+            // ss.str("");
+            // ss << "byte = " << byte << ", version = " << version << ", cursor_index = " << cursor_index; 
+            // DEBUG_LOG(ss.str());
         }
 
         // std::string version(value);
@@ -135,7 +121,7 @@ private:
         uint32_t size_hash_table_with_expiry = read_size_encoded_number();
 
         std::stringstream ss;  
-        ss << "size_hash_table_total = " << size_hash_table_total << ", size_hash_table_with_expiry" << size_hash_table_with_expiry;
+        ss << "size_hash_table_total = " << size_hash_table_total << ", size_hash_table_with_expiry = " << size_hash_table_with_expiry;
         DEBUG_LOG(ss.str());
 
         for(uint32_t i = 0; i < size_hash_table_total; i++) {
@@ -144,12 +130,12 @@ private:
 
             count_ht_total++;
             if (byte == 0xFC) {
-                read_byte();
+                read_byte();  // read 0xFC
                 expiry_time_ms = read_little_endian_number(8);
                 count_ht_with_expiry++;
             }
             else if (byte == 0xFD) {
-                read_byte();
+                read_byte();  // read 0xFD
                 expiry_time_ms = read_little_endian_number(4);
                 count_ht_with_expiry++;
             }
@@ -157,9 +143,11 @@ private:
             else {
                 throw std::runtime_error("\nNot supported valueType for value in key, value pair\n");
             }
-
             read_key_value_pair(key, value);
-            redis_data_store_obj.set_kv(key, value);
+            std::stringstream ss;  
+            ss << "key : " << key << ", val : " << value << ", expiry : " << expiry_time_ms;
+            DEBUG_LOG(ss.str());
+            redis_data_store_obj.set_kv(key, value, expiry_time_ms);
         }
 
         return 0;
@@ -167,12 +155,13 @@ private:
 
     int read_key_value_pair(std::string& key, std::string& value) {
         uint8_t byte = read_byte();
-        std::stringstream ss;  
-        ss << "from read_key_value_pair(), byte = " << byte;
-        if (byte == 0) DEBUG_LOG("from from read_key_value_pair(), byte is 0"); 
-        DEBUG_LOG(ss.str());
+        // std::stringstream ss;  
+        // ss << "from read_key_value_pair(), byte = " << byte;
+        // if (byte == 0) DEBUG_LOG("from from read_key_value_pair(), byte is 0"); 
+        // DEBUG_LOG(ss.str());
         switch(byte) {
             case static_cast<uint8_t>(ValueType::StringEncoding) :  // value is String encoded
+            DEBUG_LOG("from read_key_value_pair(), reading string encoded kv pair");
             key = read_length_encoded_string();
             value = read_length_encoded_string();
             break;
