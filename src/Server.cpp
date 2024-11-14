@@ -169,7 +169,7 @@ int process_cmdline_args(int argc, char** argv, argparse::ArgumentParser& argume
 
   argument_parser.add_argument("-p", "--port")
     .help("port number to bind the server socket to")
-    .default_value(6379);
+    .default_value("6379");
     // .scan<'d', int>();
 
   try {
