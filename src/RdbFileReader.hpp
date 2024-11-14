@@ -226,9 +226,9 @@ private:
                 throw std::runtime_error("\nInvalid, compression is not expected in this project.");
             }
         }
-        std::stringstream ss;  
-        ss << "Parsed string, length = " << str.length() << ", str = " << str;
-        DEBUG_LOG(ss.str());
+        // std::stringstream ss;  
+        // ss << "Parsed string, length = " << str.length() << ", str = " << str;
+        // DEBUG_LOG(ss.str());
         return str;
     }
 
