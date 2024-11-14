@@ -60,7 +60,7 @@ public:
             std::lock_guard<std::mutex> guard(rds_mutex);
             key_value_map[key] = value;
             if (expiry_time_ms != UINT64_MAX)
-               key_expiry_pq.push({key, expiry_time_ms});
+               key_expiry_pq.push({key, get_current_time_ms() + expiry_time_ms});
         }
         catch(...) {
             status = -1;
@@ -109,7 +109,7 @@ public:
 private:
     static void monitor_keys_for_expiry() {
         while(is_continue_monitoring) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::milliseconds(90));
             while (!key_expiry_pq.empty()) {
                 auto kv_pair = key_expiry_pq.top();
                 std::string key = kv_pair.first;
