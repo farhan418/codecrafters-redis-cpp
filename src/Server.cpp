@@ -19,7 +19,7 @@
 
 
 int handle_client(int, const struct sockaddr_in&);
-argparse::ArgumentParser process_cmdline_args(int, char**, argparse::ArgumentParser&);
+int process_cmdline_args(int, char**, argparse::ArgumentParser&);
 
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
@@ -199,5 +199,5 @@ argparse::ArgumentParser process_cmdline_args(int argc, char** argv, argparse::A
     std::exit(1);
   }
 
-  return argument_parser;
+  return 0;
 }
