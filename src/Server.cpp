@@ -35,6 +35,9 @@ int main(int argc, char **argv) {
   if (auto replicaof = arg_parser.present("--replicaof")) {
     RedisCommandCenter::set_config_kv("role", "slave");
   }
+  else {  // master
+    RedisCommandCenter::set_master_info();
+  }
 
   if (auto dir = arg_parser.present("--dir")) {
     if (auto dbfilename = arg_parser.present("--dbfilename")) {

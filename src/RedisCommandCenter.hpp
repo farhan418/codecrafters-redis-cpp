@@ -51,7 +51,12 @@ public:
       db_file_path += "/" + *result;
     return rdb_file_reader.readFile(db_file_path);
   }
-  
+
+  int set_master_info() {
+    RedisCommandCenter::set_config_kv("role", "master");
+    RedisCommandCenter::set_config_kv("master_replid", "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb");
+    RedisCommandCenter::set_config_kv("master_repl_offset", "0");
+  }  
 
   std::string process(const std::vector<std::string>& command) {
     std::string response;
@@ -196,8 +201,12 @@ private:
     else if (compareCaseInsensitive(section, "Replication")) {
       if (auto role = get_config_kv("role"))
         reply.push_back("role:" + *role);
-      else
-        reply.push_back("role:master");
+      
+      if (auto master_replid = get_config_kv("master_replid"))
+        reply.push_back("master_replid:" + *master_replid);
+
+      if (auto master_repl_offset = get_config_kv("master_repl_offset"))
+        reply.push_back("master_repl_offset:" + *master_repl_offset);
     }
     return 0;
   }
