@@ -109,7 +109,7 @@ public:
 private:
     static void monitor_keys_for_expiry() {
         while(is_continue_monitoring) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(90));
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
             while (!key_expiry_pq.empty()) {
                 auto kv_pair = key_expiry_pq.top();
                 std::string key = kv_pair.first;
