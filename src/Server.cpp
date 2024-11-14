@@ -32,6 +32,10 @@ int main(int argc, char **argv) {
   uint16_t port_number = std::stoi(arg_parser.get<std::string>("--port"));
   DEBUG_LOG("in main after getting port_number = " + std::to_string(port_number));
 
+  if (auto replicaof = arg_parser.present("--replicaof")) {
+    RedisCommandCenter::set_config_kv("role", "slave");
+  }
+
   if (auto dir = arg_parser.present("--dir")) {
     if (auto dbfilename = arg_parser.present("--dbfilename")) {
       RedisCommandCenter::set_config_kv("dir", *dir);
@@ -171,6 +175,9 @@ int process_cmdline_args(int argc, char** argv, argparse::ArgumentParser& argume
     .help("port number to bind the server socket to")
     .default_value("6379");
     // .scan<'d', int>();
+
+  argument_parser.add_argument("--replicaof")
+    .help("this server is slave of which server, mention \"<ip> <port>\"");
 
   try {
     DEBUG_LOG("in try block");

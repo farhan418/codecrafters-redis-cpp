@@ -194,7 +194,7 @@ private:
           get_info(reply, section);
     }
     else if (compareCaseInsensitive(section, "Replication"))
-      reply.push_back("role:master");
+      reply.push_back("role" + get_config_kv("role"));
     return 0;
   }
 
