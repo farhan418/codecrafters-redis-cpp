@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 
   std::stringstream ss1;
   uint16_t port_number = 6379;
-  if (argc == 2 && ("--port" == argv[1])) {
+  if (argc == 3 && ("--port" == argv[1])) {
     ss1 << "port_Number = " << argv[2];
     DEBUG_LOG(ss1.str());
     port_number = std::stoi(argv[2]);
