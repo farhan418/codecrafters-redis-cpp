@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
 
-  argparse::ArgumentParser arg_parser = process_cmdline_args();
+  argparse::ArgumentParser arg_parser = process_cmdline_args(argc, argv);
   uint16_t port_number = arg_parser.get<uint16_t>("--port");
 
   if (auto dir = arg_parser.present("--dir")) {
