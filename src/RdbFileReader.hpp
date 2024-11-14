@@ -150,6 +150,12 @@ private:
             redis_data_store_obj.set_kv(key, value, expiry_time_ms);
         }
 
+        if (count_ht_total == size_hash_table_total)
+            DEBUG_LOG("read all keys from database file");
+
+        if (peek_next_byte() == 0xff)
+            DEBUG_LOG("reached end of rdb file.");
+
         return 0;
     }
 
@@ -161,7 +167,7 @@ private:
         // DEBUG_LOG(ss.str());
         switch(byte) {
             case static_cast<uint8_t>(ValueType::StringEncoding) :  // value is String encoded
-            DEBUG_LOG("from read_key_value_pair(), reading string encoded kv pair");
+            // DEBUG_LOG("from read_key_value_pair(), reading string encoded kv pair");
             key = read_length_encoded_string();
             value = read_length_encoded_string();
             break;
@@ -245,9 +251,9 @@ private:
         else if (msb == 0x11) {
             std::runtime_error("\nNot a number, but string is stored.");
         }
-        std::stringstream ss;  
-        ss << "from read_size_encoded_number(), length = " << length;
-        DEBUG_LOG(ss.str());
+        // std::stringstream ss;  
+        // ss << "from read_size_encoded_number(), length = " << length;
+        // DEBUG_LOG(ss.str());
         return length;
     }
 
@@ -258,9 +264,9 @@ private:
             temp = temp << (i * 8);
             number = number | temp;
         }
-        std::stringstream ss;  
-        ss << "from read_little_endian_number(), num_bytes = " << num_bytes << ", number = " << number;
-        DEBUG_LOG(ss.str());
+        // std::stringstream ss;  
+        // ss << "from read_little_endian_number(), num_bytes = " << num_bytes << ", number = " << number;
+        // DEBUG_LOG(ss.str());
         return number;
     }
 

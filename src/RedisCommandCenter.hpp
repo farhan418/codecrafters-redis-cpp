@@ -145,12 +145,12 @@ public:
     // command KEYS
     else if (command.size() == 2 && 
             compareCaseInsensitive("KEYS", command[0])) {
-        if (command.size() < 3) {
-          reply.push_back("-few arguments provided for KEY command.");
-          data_type = "error";
-          return RespParser::serialize(reply, data_type);
-            // throw std::runtime_error("few arguments provided for KEY command.");
-        }
+        // if (command.size() < 2) {
+        //   reply.push_back("-few arguments provided for KEY command.");
+        //   data_type = "error";
+        //   return RespParser::serialize(reply, data_type);
+        //     // throw std::runtime_error("few arguments provided for KEY command.");
+        // }
         redis_data_store.get_keys_with_pattern(reply, command[1]);
         data_type = "array";
         response = RespParser::serialize(reply, data_type);

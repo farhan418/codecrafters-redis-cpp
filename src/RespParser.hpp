@@ -47,7 +47,7 @@ private:
 public:
   std::vector<std::string> deserialize(const std::string& respToken) {
     std::vector<std::string> command;
-    DEBUG_LOG("\'" + respToken + "\' in deserialize, respToken[0] = " + respToken[0]);
+    // DEBUG_LOG("\'" + respToken + "\' in deserialize, respToken[0] = " + respToken[0]);
     switch(respToken[0]) {
       case '+':
       command.push_back(parse_simple_string(respToken));

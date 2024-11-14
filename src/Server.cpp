@@ -118,9 +118,9 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
     DEBUG_LOG(debug_message);
     resp_parser.resetParser(buffer);
     while(!resp_parser.isParsedAllTokens()) {
-      DEBUG_LOG(" in loop parsing command...");
+      // DEBUG_LOG(" in loop parsing command...");
       std::vector<std::string> command = resp_parser.deserialize(resp_parser.parseNextToken(""));
-      DEBUG_LOG("after in loop parsing command...");
+      // DEBUG_LOG("after in loop parsing command...");
       for(auto& e : command)
         std::cerr << e << " |, ";
       std::string response_str = rcc.process(command);
