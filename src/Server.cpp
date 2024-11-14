@@ -170,7 +170,7 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
   return 0;
 }
 
-argparse::ArgumentParser process_cmdline_args(int argc, char** argv, argparse::ArgumentParser& argument_parser) {
+int process_cmdline_args(int argc, char** argv, argparse::ArgumentParser& argument_parser) {
   std::string debug_message = "argc = " + std::to_string(argc) + "argv = [";
   for (int i = 0; i < argc; i++) {
     debug_message += std::string(argv[i]) + "|, ";
