@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
   ss1 << "port_Number = " << port_number;
   DEBUG_LOG(ss1.str());
 
-  if (argc == 5 && ("--dir" == argv[1]) && ("--dbfilename" == argv[3])) { 
+  if (argc == 5 && ("--dir" == std::string(argv[1])) && ("--dbfilename" == std::string(argv[3]))) { 
     RedisCommandCenter::set_config_kv("dir", argv[2]);
     RedisCommandCenter::set_config_kv("dbfilename", argv[4]);
     if (0 != RedisCommandCenter::read_rdb_file()) {
