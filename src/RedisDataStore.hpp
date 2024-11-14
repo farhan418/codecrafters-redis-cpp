@@ -64,8 +64,8 @@ public:
                 key_expiry_pq.push({key, get_current_time_ms() + expiry_time_ms});
 
                 // if max 1000 millisecond delay is ok. If real time system, make monitor_thread_sleep_duration = 0, and remove the below linees
-                monitor_thread_sleep_duration = std::min(max_delay_ms, ((key_expiry_pq.top().second / 2)-min_delay_ms));  // max sleep duration of 1 second i.e. 1000 ms
-                monitor_thread_sleep_duration = std::max(min_delay_ms, monitor_thread_sleep_duration);
+                monitor_thread_sleep_duration = std::min(static_cast<uint64_t>(max_delay_ms), ((key_expiry_pq.top().second / 2)-min_delay_ms));  // max sleep duration of 1 second i.e. 1000 ms
+                monitor_thread_sleep_duration = std::max(static_cast<uint64_t>(min_delay_ms), monitor_thread_sleep_duration);
             }
         }
         catch(...) {
