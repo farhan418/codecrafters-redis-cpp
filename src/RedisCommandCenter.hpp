@@ -58,7 +58,7 @@ public:
     std::string data_type;
     std::vector<std::string> reply;
 
-    std::string debug_message = "\nin process(...), command : ";
+    std::string debug_message;
     for (auto& c : command)
         debug_message += c + "|, ";
 
@@ -151,6 +151,7 @@ public:
         //   return RespParser::serialize(reply, data_type);
         //     // throw std::runtime_error("few arguments provided for KEY command.");
         // }
+        DEBUG_LOG("command[0]=" + command[0] + ", command[1]=" + command[1]);
         redis_data_store.get_keys_with_pattern(reply, command[1]);
         data_type = "array";
         std::stringstream ss;  

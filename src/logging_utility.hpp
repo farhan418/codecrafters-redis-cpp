@@ -14,7 +14,7 @@
 
 #ifndef DEBUG_LOG
 #define DEBUG_LOG(msg) \
-std::cerr << "\n[" << std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()) << "] [" << __FILE__ << ":" << __LINE__ << "] [" << __func__ << "] " << (msg) << std::endl;
+std::cerr << "\n[" << std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()) << "] [" << __FILE__ << ":" << __LINE__ << "] " << __func__ << "() : " << (msg) << std::endl;
 #endif
 
 // static void DEBUG_LOG(std::string msg) {
