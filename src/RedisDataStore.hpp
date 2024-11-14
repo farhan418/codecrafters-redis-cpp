@@ -108,8 +108,8 @@ public:
             DEBUG_LOG("key_expiry_pq is empty");
         }
         else {
-            // std::priority_queue<decltype(key_expiry_pq)::value_type> temp_pq = key_expiry_pq;
-            auto temp_pq = key_expiry_pq;
+            std::priority_queue<decltype(key_expiry_pq)::value_type, std::vector<decltype(key_expiry_pq)::value_type>, ExpiryComparator> temp_pq = key_expiry_pq;
+            // auto temp_pq = key_expiry_pq;
             while(!temp_pq.empty()) {
                 auto& pair = temp_pq.top();
                 DEBUG_LOG("key = " + pair.first + ", expiry = " + std::to_string(pair.second));
@@ -122,6 +122,7 @@ private:
     static void monitor_keys_for_expiry() {
         while(is_continue_monitoring) {
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            DEBUG_LOG("display all keys then check...");
             display_all_key_value_pairs();
             while (!key_expiry_pq.empty()) {
                 auto kv_pair = key_expiry_pq.top();
