@@ -171,14 +171,12 @@ int handle_client(int client_fd, const struct sockaddr_in& client_addr) {
 }
 
 int process_cmdline_args(int argc, char** argv, argparse::ArgumentParser& argument_parser) {
-  std::string debug_message = "argc = " + std::to_string(argc) + "argv = [";
+  std::string debug_message = "argc = " + std::to_string(argc) + ", argv = [";
   for (int i = 0; i < argc; i++) {
     debug_message += std::string(argv[i]) + "|, ";
   }
   DEBUG_LOG(debug_message);
 
-  // argparse::ArgumentParser argument_parser();
-  
   argument_parser.add_argument("--dir")
     .help("path to the directory containing Redis RDB file");
 
@@ -190,6 +188,7 @@ int process_cmdline_args(int argc, char** argv, argparse::ArgumentParser& argume
     .default_value(6379);
 
   try {
+    DEBUG_LOG("in try block");
     argument_parser.parse_args(argc, argv);
   }
   catch(const std::exception& err) {
@@ -198,6 +197,6 @@ int process_cmdline_args(int argc, char** argv, argparse::ArgumentParser& argume
     DEBUG_LOG(ss.str()); 
     std::exit(1);
   }
-
+  DEBUG_LOG("returning...");
   return 0;
 }
