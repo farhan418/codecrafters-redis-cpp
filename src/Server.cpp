@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
   }
   DEBUG_LOG(debug_message);
 
-  std::string ss1;
+  std::stringstream ss1;
   uint16_t port_number = 6379;
   if (argc == 2 && ("--port" == argv[1])) {
     ss1 << "port_Number = " << argv[2];
