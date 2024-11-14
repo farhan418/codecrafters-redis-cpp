@@ -52,7 +52,7 @@ public:
     return rdb_file_reader.readFile(db_file_path);
   }
 
-  int set_master_info() {
+  static int set_master_info() {
     RedisCommandCenter::set_config_kv("role", "master");
     RedisCommandCenter::set_config_kv("master_replid", "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb");
     RedisCommandCenter::set_config_kv("master_repl_offset", "0");
