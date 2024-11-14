@@ -163,6 +163,20 @@ public:
         DEBUG_LOG(ss.str());
         response = RespParser::serialize(reply, data_type);
     }
+    // command INFO, INFO <section>
+    else if (compareCaseInsensitive("INFO", command[0])) {
+      std::string required_section("all");
+      if (command.size() >= 2)
+        required_section = command[1];
+      get_info(reply, required_section);
+      data_type = "array";
+      std::stringstream ss;  
+      for(auto& e : reply) 
+        ss << e << ",| ";
+      DEBUG_LOG(ss.str());
+      response = RespParser::serialize(reply, data_type);
+    }
+    // Invalid command
     else {
       reply.push_back("-err invalid command : " + command[0]);
       data_type = "error";
@@ -172,6 +186,18 @@ public:
   }
 
 private:
+
+  int get_info(std::vector<std::string>& reply, const std::string& section) {
+    const std::vector<std::string> supported_sections = {"Replication"};
+    if (compareCaseInsensitive(section, "all")) {
+      for (auto& section : supported_sections)
+          get_info(reply, section);
+    }
+    else if (compareCaseInsensitive(section, "Replication"))
+      reply.push_back("role:master");
+    return 0;
+  }
+
   bool compareCaseInsensitive(const std::string& str1, const std::string& str2) {
     std::string str1_lower = str1;
     std::string str2_lower = str2;
