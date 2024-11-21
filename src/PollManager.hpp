@@ -101,6 +101,15 @@ namespace pm {
             std::stringstream ss;  
             ss << "\npoll call done, listenerSocketFD = " << listenerSocketFD << ", pollfdArrSize = " << pollfdArrSize;
             DEBUG_LOG(ss.str());
+
+            ss.clear();
+            for(int i = 0; i < pollfdArrSize; i++) {
+                ss << "\npollfdArr[" << i << "].fd = " << pollfdArr[i].fd;
+                ss << ", pollfdArr[" << i << "].events = " << pollfdArr[i].events;
+                ss << ", pollfdArr[" << i << "].revents = " << pollfdArr[i].revents;
+            }
+            DEBUG_LOG(ss.str());
+
             if (pollfdArr[0].fd == listenerSocketFD && (pollfdArr[0].revents & POLLIN)) {
                 // if listener is ready to read, it means a new client connection
                 
