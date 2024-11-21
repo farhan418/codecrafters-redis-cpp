@@ -57,7 +57,13 @@ public:
     RedisCommandCenter::set_config_kv("master_replid", "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb");
     RedisCommandCenter::set_config_kv("master_repl_offset", "0");
     return 0;
-  }  
+  }
+
+  static int set_slave_info(const std::string replicaof) {
+    RedisCommandCenter::set_config_kv("role", "slave");
+    RedisCommandCenter::set_config_kv("replicaof", replicaof);
+    return 0;
+  }
 
   std::string process(const std::vector<std::string>& command) {
     std::string response;

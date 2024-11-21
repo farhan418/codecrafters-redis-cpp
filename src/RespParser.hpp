@@ -9,7 +9,7 @@
 
 class RespParser {
 private:
-  bool isParsed;
+  bool isSplit;
   long long lastTokenIndex;
   std::vector<std::string> tokens;
 
@@ -33,9 +33,9 @@ private:
     return parseNextToken("");
   }
 
-  std::vector<std::string> parse_array(const std::string& array_string) {
+  std::vector<std::string> parse_array(std::vector<std::string>& command, const std::string& array_string) {
     long long length = std::stol(array_string.substr(1, array_string.length()-1));
-    std::vector<std::string> command;
+    // std::vector<std::string> command;
     for (long long i = 0; i < length; i++) {
       std::string next_token = parseNextToken("");
       auto temp = deserialize(next_token);
@@ -62,7 +62,7 @@ public:
       break;
 
       case '*':
-      command = parse_array(respToken);
+      parse_array(command, respToken);
       break;
 
       default:
@@ -72,12 +72,12 @@ public:
     return command;
   }
 
-  RespParser() : isParsed(false), lastTokenIndex(0) {
+  RespParser() : isSplit(false), lastTokenIndex(0) {
     tokens.clear();
   }
 
   void resetParser() {
-    isParsed = false;
+    isSplit = false;
     lastTokenIndex = 0;
     tokens.clear();
   }
@@ -85,14 +85,14 @@ public:
   void resetParser(const std::string& respStr) {
     resetParser();
     tokens = split(respStr);
-    isParsed = true;
+    isSplit = true;
     // for(auto& element : tokens) {
     //   std::cerr << element << "|, ";
     // }
   }
 
   std::string parseNextToken(const std::string& respStr) {
-    if (!isParsed) {
+    if (!isSplit) {
       resetParser(respStr);
     }
     if (lastTokenIndex == tokens.size()) {
