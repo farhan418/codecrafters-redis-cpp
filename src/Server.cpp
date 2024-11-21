@@ -105,7 +105,7 @@ int handle_client(int clientFD, RespParser& respParser, RedisCommandCenter& rcc)
     DEBUG_LOG("response_str : " + response_str);
 
     memset(buffer, 0, sizeof(buffer));
-    memcpy(buffer, response_str.str(), response_str.length());
+    memcpy(buffer, response_str.c_str(), response_str.length());
     numBytes = write(clientFD, buffer, response_str.length());
     
     strstream << "\nSent " << numBytes << " bytes : " << buffer;
