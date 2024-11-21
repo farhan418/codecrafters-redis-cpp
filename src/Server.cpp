@@ -60,18 +60,21 @@ int main(int argc, char **argv) {
 
   RespParser respParser;
   RedisCommandCenter rcc;
-  const int timeout_ms = 0;  // non blocking; if > 0 then poll() in pollSockets() will block for timeout_ms seconds
+  const int timeout_ms = 500;  // non blocking; if > 0 then poll() in pollSockets() will block for timeout_ms seconds
   std::vector<struct pollfd> readySocketPollfdVec;
-      
   std::stringstream strstream;
+  uint64_t counter = 0;
 
   for(;;) {
     readySocketPollfdVec.clear();
     if (0 != pollManager.pollSockets(timeout_ms, readySocketPollfdVec)) {
       DEBUG_LOG("encountered error while polling");
     }
-
-    DEBUG_LOG("polled sockets, now looping...");
+    counter++;
+    if (counter % 1000 == 0)
+    {
+      DEBUG_LOG("polled sockets, now looping...");
+    }  
 
     for(const struct pollfd pfd : readySocketPollfdVec) {
       strstream.clear();

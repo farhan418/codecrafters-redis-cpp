@@ -255,6 +255,9 @@ namespace pm {
             if (pollfdArrSize <= 0) {
                 return -1;
             }
+            if (_isSocketOpen(pollfdArr[index].fd)) {
+                close(pollfdArr[index].fd);
+            }
             pollfdArr[index] = pollfdArr[pollfdArrSize-1];
             pollfdArrSize--;
 
