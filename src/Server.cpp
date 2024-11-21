@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cstdlib>
-#include <string>respParser
+#include <string>
 #include <cstring>
 #include <unistd.h>
 #include <sys/types.h>
@@ -19,7 +19,7 @@
 #include "PollManager.hpp"
 
 
-int handle_client(int, const struct sockaddr_in&);
+int handle_client(int, RespParser&, RedisCommandCenter&);
 int process_cmdline_args(int, char**, argparse::ArgumentParser&);
 
 int main(int argc, char **argv) {
