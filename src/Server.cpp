@@ -95,7 +95,7 @@ int handle_client(int clientFD, RespParser& respParser, RedisCommandCenter& rcc)
 
   {
     strstream << "read " << numBytes << " bytes : " << buffer;
-    DEBUG_LOG(stringstream.str());
+    DEBUG_LOG(strstream.str());
   }
 
   respParser.resetParser(buffer);

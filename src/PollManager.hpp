@@ -29,6 +29,7 @@ namespace pm {
             socketProtocol = 0;
             isSocketNonBlocking = true; // default - non blocking mode
             isReuseSocket = true;
+            return 0;
         }
 
     // private:
@@ -103,7 +104,7 @@ namespace pm {
                     strstream << "pollserver: new connection from ";
                     strstream << remoteIP;
                     strstream << " on socket " << newSocketFD;
-                    DEBUG_LOG(strstream.c_str());
+                    DEBUG_LOG(strstream.str());
 
                     // polling again to include newSocketFD
                     if (poll(pollfdArr, pollfdArrSize, timeout_ms) == -1) {
@@ -128,14 +129,14 @@ namespace pm {
             struct addrinfo hints, *ai, *p;
 
             memset(&hints, 0, sizeof hints);
-            hints.ai_family = socketDomain;  // IPv4 / IPv6
-            hints.ai_socktype = socketType;  // TCP
+            hints.ai_family = socketSettings.socketDomain;  // IPv4 / IPv6
+            hints.ai_socktype = socketSettings.socketType;  // TCP
             hints.ai_flags = AI_PASSIVE;  // set IP address
 
             if ((rv = getaddrinfo(NULL, listeningPortOrService.c_str(), &hints, &ai)) != 0) {
-                const charBufSize = 256;
-                char charBuf[charBufSize];
-                snprintf(charBuf, charBufSize, "pollserver: %s\n", gai_strerror(rv));
+                const char bufSize = 256;
+                char charBuf[bufSize];
+                snprintf(charBuf, bufSize, "pollserver: %s\n", gai_strerror(rv));
                 DEBUG_LOG(charBuf);
                 // fprintf(stderr, "pollserver: %s\n", gai_strerror(rv));
                 exit(1);
@@ -148,10 +149,10 @@ namespace pm {
                     continue;
                 }
 
-                if (isSocketNonBlocking) {
+                if (socketSettings.isSocketNonBlocking) {
                     int flags = fcntl(listenerSocketFD, F_GETFL, 0);
                     if (flags < 0) {
-                        fprinf(stderr, "fcntl(listenerSocketFD, F_GETFL, 0) failed");
+                        DEBUG_LOG("fcntl(listenerSocketFD, F_GETFL, 0) failed");
                     }
                     if (fcntl(listenerSocketFD, F_SETFL, flags | O_NONBLOCK) < 0) {
                         DEBUG_LOG("fcntl(listenerSocketFD, F_SETFL, flags | O_NONBLOCK) failed");
@@ -159,7 +160,7 @@ namespace pm {
                     }
                 }
 
-                if (isReuseSocket) {
+                if (socketSettings.isReuseSocket) {
                     int reuse = static_cast<int>(isReuseSocket);
                     if (setsockopt(listenerSocketFD, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int)) < 0) {
                         DEBUG_LOG("setsockopt failed\n");
@@ -203,7 +204,7 @@ namespace pm {
 
             char buffer;
             size_t result = recv(socketFD, &buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT);
-            if (result == -1 && errno = EBADF) {
+            if ( (result == -1) && (errno == EBADF)) {
                 return false;  // socket is closed
             }
             return true;  // socket is open
