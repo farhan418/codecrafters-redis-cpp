@@ -36,13 +36,13 @@ namespace pm {
         std::string getSocketSettingsString() {
             std::stringstream out;
             out << "\nSocket settings :";
-            out << "\nlisteningPortOrService : " << ss.listeningPortOrService;
-            out << "\nsocketDomain : " << ss.socketDomain;
-            out << "\nsocketType : " << ss.socketType;
-            out << "\nsocketProtocol : " << ss.socketProtocol;
-            out << "\nsocketBacklogCount : " << ss.socketBacklogCount;
-            out << "\nisSocketNonBlocking : " << ss.isSocketNonBlocking;
-            out << "\nisReuseSocket : " << ss.isReuseSocket;
+            out << "\nlisteningPortOrService : " << listeningPortOrService;
+            out << "\nsocketDomain : " << socketDomain;
+            out << "\nsocketType : " << socketType;
+            out << "\nsocketProtocol : " << socketProtocol;
+            out << "\nsocketBacklogCount : " << socketBacklogCount;
+            out << "\nisSocketNonBlocking : " << isSocketNonBlocking;
+            out << "\nisReuseSocket : " << isReuseSocket;
             return out.str();
         }
 
