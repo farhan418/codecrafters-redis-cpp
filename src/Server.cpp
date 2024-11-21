@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
     for(const struct pollfd pfd : readySocketPollfdVec) {
       strstream.clear();
       strstream << "\npfd.fd = " << pfd.fd; 
-      strstream << ", pfd.events = " << pfd.envents;
+      strstream << ", pfd.events = " << pfd.events;
       strstream << ", pfd.revents = " << pfd.revents << std::endl;
       DEBUG_LOG(strstream.str());
 
