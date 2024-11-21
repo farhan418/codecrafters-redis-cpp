@@ -62,6 +62,8 @@ int main(int argc, char **argv) {
   RedisCommandCenter rcc;
   const int timeout_ms = 0;  // non blocking; if > 0 then poll() in pollSockets() will block for timeout_ms seconds
   std::vector<struct pollfd> readySocketPollfdVec;
+      
+  std::stringstream strstream;
 
   for(;;) {
     readySocketPollfdVec.clear();
@@ -69,16 +71,22 @@ int main(int argc, char **argv) {
       DEBUG_LOG("encountered error while polling");
     }
 
-    DEBUG_LOG("polled sockets, now looping...")
+    DEBUG_LOG("polled sockets, now looping...");
 
     for(const struct pollfd pfd : readySocketPollfdVec) {
+      strstream.clear();
+      strstream << "\npfd.fd = " << pfd.fd; 
+      strstream << ", pfd.events = " << pfd.envents;
+      strstream << ", pfd.revents = " << pfd.revents << std::endl;
+      DEBUG_LOG(strstream.str());
+
       int senderSocketFD = pfd.fd;
       // int bytesReceived = recv();
       if (handle_client(senderSocketFD, respParser, rcc) != 0) {
         // delete and close this pollfd.fd
       }
-      
-      std::stringstream strstream;
+
+      strstream.clear();
       strstream << "handled senderSocketFD : " << senderSocketFD;
       DEBUG_LOG(strstream.str());
     }

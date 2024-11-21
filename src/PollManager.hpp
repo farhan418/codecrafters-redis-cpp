@@ -77,6 +77,9 @@ namespace pm {
                 DEBUG_LOG("failed to create listener socket");
                 exit(1);
             }
+            std::stringstream ss;  
+            ss << "\nlistenerSocketFD = " << listenerSocketFD;
+            DEBUG_LOG(ss.str());
         }
 
         ~PollManager() {
@@ -95,9 +98,12 @@ namespace pm {
                 // exit(1);
                 return -1;
             }
-
+            std::stringstream ss;  
+            ss << "\npoll call done, listenerSocketFD = " << listenerSocketFD << ", pollfdArrSize = " << pollfdArrSize;
+            DEBUG_LOG(ss.str());
             if (pollfdArr[0].fd == listenerSocketFD && (pollfdArr[0].revents & POLLIN)) {
                 // if listener is ready to read, it means a new client connection
+                
                 struct sockaddr_storage remoteAddr; // Client address
                 socklen_t addrLen = sizeof(remoteAddr);
                 int newSocketFD = accept(listenerSocketFD, (struct sockaddr*)&remoteAddr, &addrLen);
