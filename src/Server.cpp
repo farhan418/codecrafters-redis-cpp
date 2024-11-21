@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cstdlib>
-#include <string>
+#include <string>respParser
 #include <cstring>
 #include <unistd.h>
 #include <sys/types.h>
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
   // creating SocketManager socket which creates a socket using socketSettings
   pm::PollManager pollManager(socketSettings);
 
-  RespParser resp_parser;
+  RespParser respParser;
   RedisCommandCenter rcc;
   const int timeout_ms = 0;  // non blocking; if > 0 then poll() in pollSockets() will block for timeout_ms seconds
   std::vector<struct pollfd> readySocketPollfdVec;
@@ -70,49 +70,24 @@ int main(int argc, char **argv) {
 
     for(const struct pollfd pfd : readySocketPollfdVec) {
       int senderSocketFD = pfd.fd;
-      int bytesReceived = recv();
+      // int bytesReceived = recv();
+      if (handle_client(senderSocketFD, respParser, rcc) != 0) {
+        // delete and close this pollfd.fd
+      }
     }
 
   }
   
-  // struct sockaddr_in client_addr;
-  // int client_addr_len = sizeof(client_addr);
-  
-  // while(true) { 
-  //   memset(&client_addr, 0, sizeof(client_addr));
-  //   DEBUG_LOG("Waiting for a client to connect...\n");
-
-  //   int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t*) &client_addr_len);
-  //   if (client_fd == -1) {
-  //     DEBUG_LOG("Failed to accept client connection\n");
-  //     return 1;
-  //   }
-  //   DEBUG_LOG("Client connected\n");
-     
-  //   std::thread t([client_fd, client_addr](){
-  //     try {
-  //       handle_client(client_fd, client_addr);
-  //     }
-  //     catch(const std::exception& e) {
-  //       DEBUG_LOG("Exception occurred in thread: " + std::string(e.what()) + "\n");
-  //     }
-  //     catch(...) {
-  //       DEBUG_LOG("Unknown exception occurred in thread.\n");
-  //     }
-  //   });
-  //   t.detach();
-  // }
-  // close(server_fd);
   return 0;
 }
 
-int handle_client(int client_fd, RespParser& resp_parser, RedisCommandCenter& rcc) {
+int handle_client(int clientFD, RespParser& respParser, RedisCommandCenter& rcc) {
   int numBytes = 0;
   char buffer[1024];
   std::stringstring strstream;
 
   memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
-  numBytes = read(client_fd, buffer, sizeof(buffer));
+  numBytes = read(clientFD, buffer, sizeof(buffer));
   if (numBytes < 0) {
     DEBUG_LOG("Error reading from socket.\n");
     return -1;
@@ -123,15 +98,15 @@ int handle_client(int client_fd, RespParser& resp_parser, RedisCommandCenter& rc
     DEBUG_LOG(stringstream.str());
   }
 
-  resp_parser.resetParser(buffer);
-  while(!resp_parser.isParsedAllTokens()) {
-    std::vector<std::string> command = resp_parser.deserialize(resp_parser.parseNextToken(""));
+  respParser.resetParser(buffer);
+  while(!respParser.isParsedAllTokens()) {
+    std::vector<std::string> command = respParser.deserialize(respParser.parseNextToken(""));
     std::string response_str = rcc.process(command);
     DEBUG_LOG("response_str : " + response_str);
 
     memset(buffer, 0, sizeof(buffer));
     memcpy(buffer, response_str.str(), response_str.length());
-    numBytes = write(client_fd, buffer, response_str.length());
+    numBytes = write(clientFD, buffer, response_str.length());
     
     strstream << "\nSent " << numBytes << " bytes : " << buffer;
     DEBUG_LOG(strstream.str());
@@ -141,7 +116,7 @@ int handle_client(int client_fd, RespParser& resp_parser, RedisCommandCenter& rc
       return -1;
     }
   } // while loop to process all tokens (even multiple commands)
-  // close(client_fd);  // PollManager should close connection
+  // close(clientFD);  // PollManager should close connection
   return 0;
 }
 

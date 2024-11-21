@@ -2,6 +2,7 @@
 #define SOCKETMANAGER_HPP
 
 #include <iostream>
+#include <string>
 #include <cstdlib>
 #include <unistd.h>
 #include <sys/types.h>
@@ -95,7 +96,7 @@ namespace pm {
                     }
 
                     char remoteIP[INET6_ADDRSTRLEN];
-                    if (NULL == inet_ntop(remoteAddr.ss_family, get_in_addr((struct sockaddr*)&remoteAddr), remoteIP, INET6_ADDRSTRLEN)) {
+                    if (NULL == inet_ntop(remoteAddr.ss_family, _get_in_addr((struct sockaddr*)&remoteAddr), remoteIP, INET6_ADDRSTRLEN)) {
                         DEBUG_LOG("failed to convert address to human readable form");
                     }
                     std::stringstream strstream;
@@ -143,7 +144,7 @@ namespace pm {
             for(p = ai; p != NULL; p = p->ai_next) {
 
                 listenerSocketFD = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-                if (listenerSocketFD < 0) { 
+                if (listenerSocketFD < 0) {
                     continue;
                 }
 
@@ -163,6 +164,7 @@ namespace pm {
                     if (setsockopt(listenerSocketFD, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int)) < 0) {
                         DEBUG_LOG("setsockopt failed\n");
                         continue;
+                    }
                 }
 
                 if (bind(listenerSocketFD, p->ai_addr, p->ai_addrlen) < 0) {
@@ -233,6 +235,16 @@ namespace pm {
             pollfdArr[index] = pollfdArr[pollfdArrSize-1];
             pollfdArrSize--;
             return 0;
+        }
+
+        // Get sockaddr, IPv4 or IPv6:
+        void* _get_in_addr(struct sockaddr *sa)
+        {
+            if (sa->sa_family == AF_INET) {
+                return &(((struct sockaddr_in*)sa)->sin_addr);
+            }
+
+            return &(((struct sockaddr_in6*)sa)->sin6_addr);
         }
 
         // private member variables
