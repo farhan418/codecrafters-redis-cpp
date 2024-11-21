@@ -77,7 +77,8 @@ int main(int argc, char **argv) {
       if (handle_client(senderSocketFD, respParser, rcc) != 0) {
         // delete and close this pollfd.fd
       }
-      strstream.clear();
+      
+      std::stringstream strstream;
       strstream << "handled senderSocketFD : " << senderSocketFD;
       DEBUG_LOG(strstream.str());
     }
