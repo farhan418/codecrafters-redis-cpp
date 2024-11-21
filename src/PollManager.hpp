@@ -33,6 +33,19 @@ namespace pm {
             return 0;
         }
 
+        std::string getSocketSettingsString() {
+            std::stringstream out;
+            out << "\nSocket settings :";
+            out << "\nlisteningPortOrService : " << ss.listeningPortOrService;
+            out << "\nsocketDomain : " << ss.socketDomain;
+            out << "\nsocketType : " << ss.socketType;
+            out << "\nsocketProtocol : " << ss.socketProtocol;
+            out << "\nsocketBacklogCount : " << ss.socketBacklogCount;
+            out << "\nisSocketNonBlocking : " << ss.isSocketNonBlocking;
+            out << "\nisReuseSocket : " << ss.isReuseSocket;
+            return out.str();
+        }
+
     // private:
         // std::string serverName;
         std::string listeningPortOrService;
@@ -43,18 +56,6 @@ namespace pm {
         bool isSocketNonBlocking;
         bool isReuseSocket;
     };
-
-    std::ostream& operator<<(const std::ostream& out, const SocketSettings& ss) {
-            out << "\nSocket settings :";
-            out << "\nlisteningPortOrService : " << ss.listeningPortOrService;
-            out << "\nsocketDomain : " << ss.socketDomain;
-            out << "\nsocketType : " << ss.socketType;
-            out << "\nsocketProtocol : " << ss.socketProtocol;
-            out << "\nsocketBacklogCount : " << ss.socketBacklogCount;
-            out << "\nisSocketNonBlocking : " << ss.isSocketNonBlocking;
-            out << "\nisReuseSocket : " << ss.isReuseSocket;
-            return out;
-    }
 
     class PollManager {
     public:

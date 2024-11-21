@@ -54,9 +54,7 @@ int main(int argc, char **argv) {
 
   // configuring socket settings
   pm::SocketSettings socketSettings(portNumber);
-  std::stringstream strstream;
-  strstream << socketSettings;
-  DEBUG_LOG(strstream.str());
+  DEBUG_LOG(socketSettings.getSocketSettingsString());
   // creating SocketManager socket which creates a socket using socketSettings
   pm::PollManager pollManager(socketSettings);
 
