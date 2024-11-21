@@ -27,6 +27,7 @@ namespace pm {
             socketDomain = AF_INET;  // default - IPv4
             socketType = SOCK_STREAM;  // default - TCP
             socketProtocol = 0;
+            socketBacklogCount = 5;
             isSocketNonBlocking = true; // default - non blocking mode
             isReuseSocket = true;
             return 0;
@@ -38,6 +39,7 @@ namespace pm {
         int socketDomain;  // AF_INET - IPv4, AF_INET6 - IPv6 or AF_UNSPEC if unspecified i.e. any one
         int socketType;  // SOCK_STREAM, SOCK_DGRAM, etc
         int socketProtocol;  // protocol socket must follow
+        int socketBacklogCount;
         bool isSocketNonBlocking;
         bool isReuseSocket;
     };
@@ -133,8 +135,9 @@ namespace pm {
             hints.ai_socktype = socketSettings.socketType;  // TCP
             hints.ai_flags = AI_PASSIVE;  // set IP address
 
-            if (int rv = getaddrinfo(NULL, listeningPortOrService.c_str(), &hints, &ai) != 0) {
-                const char bufSize = 256;
+            int rv = getaddrinfo(NULL, socketSettings.listeningPortOrService.c_str(), &hints, &ai);
+            if (rv != 0) {
+                const int bufSize = 256;
                 char charBuf[bufSize];
                 snprintf(charBuf, bufSize, "pollserver: %s\n", gai_strerror(rv));
                 DEBUG_LOG(charBuf);
@@ -184,7 +187,7 @@ namespace pm {
             }
             ai = p = NULL;
 
-            if (listen(listenerSocketFD, socketBacklogCount) != 0) {
+            if (listen(listenerSocketFD, socketSettings.socketBacklogCount) != 0) {
                 DEBUG_LOG("listen failed\n");
                 return 1;
             }

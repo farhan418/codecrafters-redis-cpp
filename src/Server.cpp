@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
   DEBUG_LOG("in main after return");
   // uint16_t portNumber = std::stoi(arg_parser.get<std::string>("--port"));
   std::string portNumber = arg_parser.get<std::string>("--port");
-  DEBUG_LOG("in main after getting portNumber = " + std::to_string(portNumber));
+  DEBUG_LOG("in main after getting portNumber = " + portNumber);
 
   if (auto replicaof = arg_parser.present("--replicaof")) {
     RedisCommandCenter::set_slave_info(*replicaof);
