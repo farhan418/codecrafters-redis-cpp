@@ -133,7 +133,7 @@ namespace pm {
             hints.ai_socktype = socketSettings.socketType;  // TCP
             hints.ai_flags = AI_PASSIVE;  // set IP address
 
-            if ((int rv = getaddrinfo(NULL, listeningPortOrService.c_str(), &hints, &ai)) != 0) {
+            if (int rv = getaddrinfo(NULL, listeningPortOrService.c_str(), &hints, &ai) != 0) {
                 const char bufSize = 256;
                 char charBuf[bufSize];
                 snprintf(charBuf, bufSize, "pollserver: %s\n", gai_strerror(rv));
