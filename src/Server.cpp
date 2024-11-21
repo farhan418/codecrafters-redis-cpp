@@ -54,6 +54,9 @@ int main(int argc, char **argv) {
 
   // configuring socket settings
   pm::SocketSettings socketSettings(portNumber);
+  std::stringstream strstream;
+  strstream << socketSettings;
+  DEBUG_LOG(strstream.str());
   // creating SocketManager socket which creates a socket using socketSettings
   pm::PollManager pollManager(socketSettings);
 
@@ -68,12 +71,17 @@ int main(int argc, char **argv) {
       DEBUG_LOG("encountered error while polling");
     }
 
+    DEBUG_LOG("polled sockets, now looping...")
+
     for(const struct pollfd pfd : readySocketPollfdVec) {
       int senderSocketFD = pfd.fd;
       // int bytesReceived = recv();
       if (handle_client(senderSocketFD, respParser, rcc) != 0) {
         // delete and close this pollfd.fd
       }
+      strstream.clear();
+      strstream << "handled senderSocketFD : " << senderSocketFD;
+      DEBUG_LOG(strstream.str());
     }
 
   }

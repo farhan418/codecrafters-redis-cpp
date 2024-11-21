@@ -44,6 +44,18 @@ namespace pm {
         bool isReuseSocket;
     };
 
+    std::ostream& operator<<(const std::ostream& out, const SocketSettings& ss) {
+            out << "\nSocket settings :";
+            out << "\nlisteningPortOrService : " << ss.listeningPortOrService;
+            out << "\nsocketDomain : " << ss.socketDomain;
+            out << "\nsocketType : " << ss.socketType;
+            out << "\nsocketProtocol : " << ss.socketProtocol;
+            out << "\nsocketBacklogCount : " << ss.socketBacklogCount;
+            out << "\nisSocketNonBlocking : " << ss.isSocketNonBlocking;
+            out << "\nisReuseSocket : " << ss.isReuseSocket;
+            return out;
+    }
+
     class PollManager {
     public:
 
@@ -238,6 +250,14 @@ namespace pm {
             }
             pollfdArr[index] = pollfdArr[pollfdArrSize-1];
             pollfdArrSize--;
+
+            if ((pollfdArrCapacity-pollfdArrSize) > 200) {
+                int temp = -1 + (pollfdArrCapacity-pollfdArrSize)/100;
+                pollfdArrCapacity = pollfdArrCapacity - (100*temp);
+                pollfdArr = static_cast<struct pollfd*>(realloc(pollfdArr, (sizeof(struct pollfd) * pollfdArrCapacity)));
+                DEBUG_LOG("updted pollfdArr and pollfdArrCapacity = " + std::to_string(pollfdArrCapacity));
+            }
+
             return 0;
         }
 
