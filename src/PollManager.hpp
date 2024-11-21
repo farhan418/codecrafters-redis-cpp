@@ -46,7 +46,7 @@ namespace pm {
     public:
 
         PollManager(const struct SocketSettings& socketSettings) :
-            ss(socketSettings),
+            socketSettings(socketSettings),
             listenerSocketFD(-1),
             pollfdArrCapacity(100),
             pollfdArrSize(0),
@@ -73,7 +73,7 @@ namespace pm {
             free(pollfdArr);
         }
 
-        int pollSockets(int timeout_ms, const std::vector<struct pollfd>& readyFDsVec) {
+        int pollSockets(int timeout_ms, std::vector<struct pollfd>& readyFDsVec) {
 
             if (poll(pollfdArr, pollfdArrSize, timeout_ms) == -1) {
                 DEBUG_LOG("poll failed");
@@ -85,7 +85,7 @@ namespace pm {
                 // if listener is ready to read, it means a new client connection
                 struct sockaddr_storage remoteAddr; // Client address
                 socklen_t addrLen = sizeof(remoteAddr);
-                int newSocketFD = accept(listenerSocketFD, static_cast<struct sockaddr*>(&remoteAddr), &addrLen);
+                int newSocketFD = accept(listenerSocketFD, (struct sockaddr*)&remoteAddr, &addrLen);
                 if (newSocketFD == -1) {
                     DEBUG_LOG("Error accepting client request");
                 }
@@ -133,7 +133,7 @@ namespace pm {
             hints.ai_socktype = socketSettings.socketType;  // TCP
             hints.ai_flags = AI_PASSIVE;  // set IP address
 
-            if ((rv = getaddrinfo(NULL, listeningPortOrService.c_str(), &hints, &ai)) != 0) {
+            if ((int rv = getaddrinfo(NULL, listeningPortOrService.c_str(), &hints, &ai)) != 0) {
                 const char bufSize = 256;
                 char charBuf[bufSize];
                 snprintf(charBuf, bufSize, "pollserver: %s\n", gai_strerror(rv));
@@ -161,7 +161,7 @@ namespace pm {
                 }
 
                 if (socketSettings.isReuseSocket) {
-                    int reuse = static_cast<int>(isReuseSocket);
+                    int reuse = static_cast<int>(socketSettings.isReuseSocket);
                     if (setsockopt(listenerSocketFD, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int)) < 0) {
                         DEBUG_LOG("setsockopt failed\n");
                         continue;
@@ -249,7 +249,7 @@ namespace pm {
         }
 
         // private member variables
-        SocketSettings ss;  // settings for listener socket
+        SocketSettings socketSettings;  // settings for listener socket
         int listenerSocketFD;
         int pollfdArrCapacity;  // pollfdArr capacity (total space occupied in memory)
         int pollfdArrSize;  // current number of fds to track

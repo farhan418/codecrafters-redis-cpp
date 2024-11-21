@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
 int handle_client(int clientFD, RespParser& respParser, RedisCommandCenter& rcc) {
   int numBytes = 0;
   char buffer[1024];
-  std::stringstring strstream;
+  std::stringstream strstream;
 
   memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
   numBytes = read(clientFD, buffer, sizeof(buffer));
