@@ -223,19 +223,19 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
   }
   ss.clear();
   ss << "counter=" << counter << ", from socketFD = " << currentSocketFD << ", read " << numBytes << " bytes, command = \'";
-  int i = 0;
+  
   std::string temp;
-  for(auto& c : buffer) {
-    if (c == '\r')
+  for(int i = 0; i < numBytes; i++) {
+    if (buffer[i] == '\r')
       temp += "\\r";
-    else if (c == '\n') 
+    else if (buffer[i] == '\n') 
       temp += "\\n";
     else
-      temp += c;
+      temp += buffer[i];
     if (i == numBytes)
       break;
   }
-  ss << temp << "\'" << std::endl;
+  ss << temp << "\', numBytes=" << numBytes;
   DEBUG_LOG(ss.str());
 
   if (numBytes == 0) {  // connection closed
