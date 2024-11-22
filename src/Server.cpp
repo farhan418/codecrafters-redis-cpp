@@ -126,9 +126,9 @@ int main(int argc, char **argv) {
       // ss.clear();
       // ss << "\nhandling socketFD : " << pfd.fd;
       // DEBUG_LOG(ss.str());
-      // pm::printPollFD(pfd);
 
       if (pfd.fd != serverConnectorSocketFD) {
+        pm::printPollFD(pfd);
         if (clientHandler(pfd.fd, respParser, rcc) != 0) {
           ss.clear();
           ss << "error while handling socketFD = " << pfd.fd;
@@ -221,6 +221,7 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
   }
   ss.clear();
   ss << "from socketFD = " << currentSocketFD << ", read " << numBytes << " bytes, command = \"";
+  int i = 0;
   for(auto& c : buffer) {
     if (c == '\r')
       ss << "\\r";
@@ -228,8 +229,10 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
       ss << "\\n";
     else
       ss << c;
+    if (i == numBytes)
+      break;
   }
-  ss << "\"";
+  ss << "\"\n";
   DEBUG_LOG(ss.str());
 
   // parsing each command and processing it
@@ -241,7 +244,7 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
     ss << "processed command = ";
     for (auto& c : command)
       ss << c << " ";
-    ss << "response_str : " << response_str;
+    ss << ", response_str : " << response_str;
     DEBUG_LOG(ss.str());
 
     // writing the result of the command to the socket
