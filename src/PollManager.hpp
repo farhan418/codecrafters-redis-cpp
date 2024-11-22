@@ -19,7 +19,7 @@ namespace pm {
 
     inline void printPollFD(const struct pollfd& pfd) {
         std::stringstream ss;
-        ss << "\npfd.fd = " << pfd.fd; 
+        ss << "pfd.fd = " << pfd.fd; 
         ss << ", pfd.events = " << pfd.events;
         ss << ", pfd.revents = " << pfd.revents << std::endl;
         DEBUG_LOG(ss.str());

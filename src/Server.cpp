@@ -209,6 +209,8 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
 }
 
 int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCenter& rcc) {
+  static int counter = 0;
+  counter++;
   static int numBytes = 0;
   static char buffer[1024];  // 1KB buffer to use when reading from or writing to socket
   static std::stringstream ss;
@@ -220,7 +222,7 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
     return -1;
   }
   ss.clear();
-  ss << "from socketFD = " << currentSocketFD << ", read " << numBytes << " bytes, command = \"";
+  ss << "counter=" << counter << ", from socketFD = " << currentSocketFD << ", read " << numBytes << " bytes, command = \"";
   int i = 0;
   for(auto& c : buffer) {
     if (c == '\r')
