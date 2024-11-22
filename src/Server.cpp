@@ -211,9 +211,9 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
 int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCenter& rcc) {
   static int counter = 0;
   counter++;
-  static int numBytes = 0;
-  static char buffer[1024];  // 1KB buffer to use when reading from or writing to socket
-  static std::stringstream ss;
+  int numBytes = 0;
+  char buffer[1024];  // 1KB buffer to use when reading from or writing to socket
+  std::stringstream ss;
 
   memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
   numBytes = read(currentSocketFD, buffer, sizeof(buffer));
