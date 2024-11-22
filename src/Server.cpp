@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
   const int timeout_ms = 500;  // 0 means non blocking; if > 0 then poll() in pm::PollManager::pollSockets() will block for timeout_ms seconds
   std::vector<struct pollfd> readySocketPollfdVec;  // to get list of sockets which are ready to readFrom or writeTo
   bool isSlaveServer = false;  // to track if current server running is replica or master
-  bool isHandShakeDone = false;  // true if replica has done the handshake with the master else false
+  bool isHandShakeSuccessful = false;  // true if replica has done the handshake with the master else false
   bool isConnectedToMasterServer = false;  // true if replica and connected to master else false
   int serverListenerSocketFD = -1;  // to keep track of socket using which server is listening 
   int serverConnectorSocketFD = -1;  // if replica server => to keep track of socket using which replica is connected to master
@@ -79,11 +79,15 @@ int main(int argc, char **argv) {
     else {
       DEBUG_LOG("successfully connected to master : " + (*replicaof));
       // isConnectedToMasterServer = true;  // will make true after sending handshake
-      if (0 == doReplicaMasterHandshake()) {
+      if (0 == doReplicaMasterHandshake(serverConnectorSocketFD, respParser, rcc)) {
         DEBUG_LOG("successfully done handshake with master");
+        isHandShakeSuccessful = true;
+        isConnectedToMasterServer = true;
       }
       else {
         DEBUG_LOG("failed to do handshake with master");
+        isHandShakeSuccessful = false;
+        isConnectedToMasterServer = false;
       }
     }
   }
@@ -129,8 +133,18 @@ int main(int argc, char **argv) {
       }
       else {
         // handle replication
-        if ((!isHandShakeDone) || (!isConnectedToMasterServer)) {
-          doReplicaMasterHandshake(serverConnectorSocketFD, respParser, rcc);
+        if ((!isHandShakeSuccessful) || (!isConnectedToMasterServer)) {
+          // doReplicaMasterHandshake(serverConnectorSocketFD, respParser, rcc);
+          if (0 == doReplicaMasterHandshake(serverConnectorSocketFD, respParser, rcc)) {
+            DEBUG_LOG("successfully done handshake with master");
+            isHandShakeSuccessful = true;
+            isConnectedToMasterServer = true;
+          }
+          else {
+            DEBUG_LOG("failed to do handshake with master");
+            isHandShakeSuccessful = false;
+            isConnectedToMasterServer = false;
+          }
         }
       }
       ss.clear();
