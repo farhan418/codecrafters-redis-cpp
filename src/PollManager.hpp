@@ -352,6 +352,7 @@ namespace pm {
             pollfdArr[pollfdArrSize].fd = newSocketFD;
             pollfdArr[pollfdArrSize].events = events;
             pollfdArrSize++;
+            DEBUG_LOG("pollfdArrSize=" + std::to_string(pollfdArrSize));
             return 0;
         }
 
@@ -380,6 +381,7 @@ namespace pm {
                 pollfdArr = static_cast<struct pollfd*>(realloc(pollfdArr, (sizeof(struct pollfd) * pollfdArrCapacity)));
                 DEBUG_LOG("updted pollfdArr and pollfdArrCapacity = " + std::to_string(pollfdArrCapacity));
             }
+            DEBUG_LOG("pollfdArrSize=" + std::to_string(pollfdArrSize));
             return 0;
         }
 
