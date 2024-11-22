@@ -237,6 +237,10 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
   ss << "\"\n";
   DEBUG_LOG(ss.str());
 
+  if (numBytes == 0) {  // connection closed
+    return 0;
+  }
+
   // parsing each command and processing it
   respParser.resetParser(buffer);
   while(!respParser.isParsedAllTokens()) {
