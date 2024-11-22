@@ -44,10 +44,9 @@ int main(int argc, char **argv) {
 
   // parsing cmd line arguments
   process_cmdline_args(argc, argv, arg_parser);
-  DEBUG_LOG("in main after arguments parsed");
-  
+
+  // fetch listeningPortNumber from cmd line argument --port  
   std::string listeningPortNumber = arg_parser.get<std::string>("--port");
-  DEBUG_LOG("in main after getting listeningPortNumber = " + listeningPortNumber);
 
   // creating listener socket irrespective of the fact current server is replica or master
   socketSetting.socketPortOrService = listeningPortNumber;  // rest members default value, see definition of struct SocketSetting
@@ -63,8 +62,12 @@ int main(int argc, char **argv) {
       DEBUG_LOG("error resetting socketSetting");
     }
     std::vector<std::string> hostPortVec = utility::split(*replicaof);
+    DEBUG_LOG("hostPortVec[0]=" + hostPortVec[0] + ", hostPortVec[1]=" + hostPortVec[1]);
     socketSetting.socketHostOrIP = hostPortVec[0];
     socketSetting.socketPortOrService = hostPortVec[1];
+    socketSetting.socketDomain = AF_INET;
+    socketSetting.isReuseSocket = false;
+    socketSetting.isSocketNonBlocking = false;
     DEBUG_LOG("connector socket setting: " + socketSetting.getSocketSettingsString());
     int counter = 0;
     while ((counter < 3)) {
@@ -271,7 +274,7 @@ int process_cmdline_args(int argc, char** argv, argparse::ArgumentParser& argume
     .help("this server is a slave of which server, mention \"<master_host> <master_port>\"");
 
   try {
-    DEBUG_LOG("in try block");
+    // DEBUG_LOG("in try block");
     argument_parser.parse_args(argc, argv);
   }
   catch(const std::exception& err) {
@@ -280,6 +283,6 @@ int process_cmdline_args(int argc, char** argv, argparse::ArgumentParser& argume
     DEBUG_LOG(ss.str()); 
     std::exit(1);
   }
-  DEBUG_LOG("returning...");
+  // DEBUG_LOG("returning...");
   return 0;
 }
