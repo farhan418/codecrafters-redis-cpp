@@ -32,7 +32,7 @@ namespace pm {
         }
 
         int resetSocketSettings() {
-            socketHostOrIP = "";  // valid inputs - localhost, www.example.com, 16.2.4.74
+            socketHostOrIP = "localhost";  // valid inputs - localhost, www.example.com, 16.2.4.74
             socketPortOrService = "";  // valid inputs - any protocol (service) or portnumber eg : http, 443, etc
             socketDomain = AF_UNSPEC; // AF_INET - for any of IPv4 or IPv6  // default - IPv4
             socketType = SOCK_STREAM;  // default - TCP

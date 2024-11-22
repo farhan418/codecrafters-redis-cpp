@@ -46,7 +46,10 @@ int main(int argc, char **argv) {
   process_cmdline_args(argc, argv, arg_parser);
 
   // fetch listeningPortNumber from cmd line argument --port  
-  std::string listeningPortNumber = arg_parser.get<std::string>("--port");
+  std::string listeningPortNumber = "6379";  // official redis port
+  if (auto port = arg_parser.present("--port")) {
+    listeningPortNumber = *port;
+  }
 
   // creating listener socket irrespective of the fact current server is replica or master
   socketSetting.socketPortOrService = listeningPortNumber;  // rest members default value, see definition of struct SocketSetting
