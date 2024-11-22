@@ -98,8 +98,8 @@ namespace pm {
                 DEBUG_LOG("poll failed");
                 return -1;
             }
-            
-            ss << "poll call done, pollCount=" << pollCount << ", listenerSocketFD = " << listenerSocketFD << ", connectorSocketFD = " << connectorSocketFD << ", pollfdArrSize = " << pollfdArrSize;
+             
+            ss << "poll call done, pollCount=" << pollCount++ << ", listenerSocketFD = " << listenerSocketFD << ", connectorSocketFD = " << connectorSocketFD << ", pollfdArrSize = " << pollfdArrSize;
             DEBUG_LOG(ss.str());
             // for(int i = 0; i < pollfdArrSize; i++)
             //     printPollFD(pollfdArr[i]);
