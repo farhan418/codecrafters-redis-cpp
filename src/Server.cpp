@@ -220,7 +220,16 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
     return -1;
   }
   ss.clear();
-  ss << "read " << numBytes << " bytes : " << buffer;
+  ss << "from socketFD = " << currentSocketFD << ", read " << numBytes << " bytes, command = \"";
+  for(auto& c : buffer) {
+    if (c == '\r')
+      ss << "\\r";
+    else if (c == '\n') 
+      ss << "\\n";
+    else
+      ss << c;
+  }
+  ss << "\"";
   DEBUG_LOG(ss.str());
 
   // parsing each command and processing it
