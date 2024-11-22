@@ -251,10 +251,10 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
     std::vector<std::string> command = respParser.deserialize(respParser.parseNextToken(""));  // parse a command
     std::string response_str = rcc.process(command);  // process command
     ss.clear();
-    ss << "processed command = ";
+    ss << "processed command = \"";
     for (auto& c : command)
       ss << c << " ";
-    ss << ", response_str : " << response_str;
+    ss << "\", response_str : " << response_str;
     DEBUG_LOG(ss.str());
 
     // writing the result of the command to the socket
