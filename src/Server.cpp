@@ -253,7 +253,7 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
     numBytes = write(currentSocketFD, buffer, response_str.length());
     
     ss.clear();
-    ss << "\nSent " << numBytes << " bytes : " << buffer;
+    ss << "\n\nSent " << numBytes << " bytes : " << buffer;
     DEBUG_LOG(ss.str());
     
     if (numBytes < 0) {
