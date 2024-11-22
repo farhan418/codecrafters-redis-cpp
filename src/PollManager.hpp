@@ -139,6 +139,7 @@ namespace pm {
 
         int createConnectorSocket(const struct SocketSetting& socketSetting) {
             // returns connectorSocketFD (negative means failed, >0 means created successfully)
+            DEBUG_LOG("in public createConnectorSocket");
             if (0 != _createConnectorSocket(socketSetting)) {
                 DEBUG_LOG("failed to create listener socket");
                 return -1;
@@ -171,6 +172,8 @@ namespace pm {
             hints.ai_family = socketSetting.socketDomain;  // IPv4 / IPv6
             hints.ai_socktype = socketSetting.socketType;  // TCP
 
+            DEBUG_LOG("in private _createConnectorSocket");
+
             int rv = getaddrinfo(socketSetting.socketHostOrIP.c_str(), socketSetting.socketPortOrService.c_str(), &hints, &servinfo);
             if (rv != 0) {
                 const int bufSize = 256;
@@ -179,6 +182,12 @@ namespace pm {
                 DEBUG_LOG(charBuf);
                 return -1;
             }
+            DEBUG_LOG("done getaddrinfo, rv = " + std::to_string(rv));
+            for(p = servinfo; p != NULL; p = p->ai_next) {
+                std::stringstream ss1;
+                ss1 << "\np->ai_family=" << p->ai_family << ", p->ai_socktype=" << p->ai_socktype << ", p->ai_protocol=" << p->ai_protocol;
+                DEBUG_LOG(ss1.str());
+            }
             
             for(p = servinfo; p != NULL; p = p->ai_next) {
                 connectorSocketFD = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
@@ -186,6 +195,7 @@ namespace pm {
                     DEBUG_LOG("connectorSocketFD creation failed...");
                     continue;
                 }
+                DEBUG_LOG("connector socket creation in progress...");
 
                 if (socketSetting.isSocketNonBlocking) {
                     int flags = fcntl(connectorSocketFD, F_GETFL, 0);
@@ -196,6 +206,7 @@ namespace pm {
                     if (fcntl(connectorSocketFD, F_SETFL, flags | O_NONBLOCK) < 0) {
                         DEBUG_LOG("fcntl(connectorSocketFD, F_SETFL, flags | O_NONBLOCK) failed");
                     }
+                    DEBUG_LOG("made connector socket Non blocking...");
                 }
 
                 if (connect(connectorSocketFD, p->ai_addr, p->ai_addrlen) == -1) {
