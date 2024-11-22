@@ -123,9 +123,9 @@ int main(int argc, char **argv) {
     }  
 
     for(const struct pollfd& pfd : readySocketPollfdVec) {
-      ss.clear();
-      ss << "\nhandling socketFD : " << pfd.fd;
-      DEBUG_LOG(ss.str());
+      // ss.clear();
+      // ss << "\nhandling socketFD : " << pfd.fd;
+      // DEBUG_LOG(ss.str());
 
       pm::printPollFD(pfd);
       if (pfd.fd != serverConnectorSocketFD) {
