@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <iostream>
-#include <regex>
 #include <string>
 #include "logging_utility.hpp"
 
@@ -12,15 +11,6 @@ private:
   bool isSplit;
   long long lastTokenIndex;
   std::vector<std::string> tokens;
-
-  std::vector<std::string> split(const std::string& respStr) const {
-    std::vector<std::string> result;
-    std::regex re("\r\n");
-    std::sregex_token_iterator first(respStr.begin(), respStr.end(), re, -1);
-    std::sregex_token_iterator last;
-    result.assign(first, last);
-    return result;
-  }
 
   std::string parse_simple_string(const std::string& simple_string) {
     return simple_string.substr(1, simple_string.length()-1);
@@ -84,7 +74,7 @@ public:
 
   void resetParser(const std::string& respStr) {
     resetParser();
-    tokens = split(respStr);
+    tokens = utility::split(respStr);
     isSplit = true;
     // for(auto& element : tokens) {
     //   std::cerr << element << "|, ";

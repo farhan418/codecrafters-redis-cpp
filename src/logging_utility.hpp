@@ -4,6 +4,8 @@
 #include <iostream>
 #include <chrono>
 #include <ctime>
+#include <regex>
+
 
 // #ifndef DEBUG_LOG
 // #define DEBUG_LOG(msg)
@@ -16,6 +18,18 @@
 #define DEBUG_LOG(msg) \
 std::cerr << "\n[" << std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()) << "] [" << __FILE__ << ":" << __LINE__ << "] " << __func__ << "() : " << (msg) << std::endl;
 #endif
+
+namespace utility {
+
+    std::vector<std::string> split(const std::string& str) const {
+        std::vector<std::string> result;
+        std::regex re("\r\n");
+        std::sregex_token_iterator first(str.begin(), str.end(), re, -1);
+        std::sregex_token_iterator last;
+        result.assign(first, last);
+        return result;
+    }
+};
 
 // static void DEBUG_LOG(std::string msg) {
 //   auto now = std::chrono::system_clock::now();
