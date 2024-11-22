@@ -21,7 +21,7 @@ std::cerr << "\n[" << std::chrono::system_clock::to_time_t(std::chrono::system_c
 
 namespace utility {
 
-    std::vector<std::string> split(const std::string& str) const {
+    std::vector<std::string> split(const std::string& str) {
         std::vector<std::string> result;
         std::regex re("\r\n");
         std::sregex_token_iterator first(str.begin(), str.end(), re, -1);

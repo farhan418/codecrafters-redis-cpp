@@ -85,7 +85,7 @@ public:
     }
     // command GET key
     else if (compareCaseInsensitive("GET", command[0])) {
-      return _commandGET();
+      return _commandGET(command);
     }
     // command CONFIG GET
     else if (command.size() >= 2 && 
@@ -105,9 +105,9 @@ public:
     // Invalid command
     else {
       std::vector<std::string> reply;
-      std::string data_type("error");
+      std::string dataType("error");
       reply.push_back("err invalid command : " + command[0]);
-      return RespParser::serialize(reply, data_type);
+      return RespParser::serialize(reply, dataType);
     }
   }
 
@@ -117,7 +117,7 @@ private:
     std::vector<std::string> reply;
     std::string dataType = "simple_string";
     reply.push_back("PONG");
-    return RespParser::serialize(reply, data_type);
+    return RespParser::serialize(reply, dataType);
   }
 
   std::string _commandECHO(const std::vector<std::string>& command) {
@@ -125,12 +125,12 @@ private:
     std::string dataType = "bulk_string";
     if (command.size() <2) {
       reply.push_back("few arguments provided for ECHO command.");
-      data_type = "error";
+      dataType = "error";
     }
     else {
       reply.push_back(command[1]);
     }
-    return RespParser::serialize(reply, data_type);
+    return RespParser::serialize(reply, dataType);
   }
 
   std::string _commandSET(const std::vector<std::string>& command) {
@@ -139,7 +139,7 @@ private:
 
     if (command.size() < 3) {
         reply.push_back("few arguments provided for SET command.");
-        data_type = "error";
+        dataType = "error";
     }
     else {
       uint64_t expiry_time_ms = UINT64_MAX;
@@ -149,14 +149,14 @@ private:
       
       if (0 == redis_data_store_obj.set_kv(command[1], command[2], expiry_time_ms)) {
         reply.push_back("OK");
-        data_type = "simple_string";
+        dataType = "simple_string";
       }
       else {
         reply.push_back("Error while storing key value pair.");
-        data_type = "error";
+        dataType = "error";
       }
     }
-    return RespParser::serialize(reply, data_type);
+    return RespParser::serialize(reply, dataType);
   }
 
   std::string _commandGET(const std::vector<std::string>& command) {
@@ -165,14 +165,14 @@ private:
     std::string response;
     if (command.size() < 2) {
       reply.push_back("-few arguments provided for GET command.");
-      data_type = "error";
-      response = RespParser::serialize(reply, data_type);
+      dataType = "error";
+      response = RespParser::serialize(reply, dataType);
     }
     auto result = redis_data_store_obj.get_kv(command[1]);
     if (result.has_value()) {
       reply.push_back(*result);
-      data_type = "bulk_string";
-      response = RespParser::serialize(reply, data_type);
+      dataType = "bulk_string";
+      response = RespParser::serialize(reply, dataType);
     }
     else 
       response = "$-1\r\n";
@@ -186,16 +186,16 @@ private:
 
     if (command.size() < 3) {
       reply.push_back("few arguments provided for CONFIG GET command.");
-      data_type = "error";
-      return RespParser::serialize(reply, data_type);
+      dataType = "error";
+      return RespParser::serialize(reply, dataType);
     }
     DEBUG_LOG("in config get ");
     auto result = get_config_kv(command[2]);
     if (result.has_value()) {
-      data_type = "array";
+      dataType = "array";
       reply.push_back(command[2]);
       reply.push_back(*result);
-      response = RespParser::serialize(reply, data_type);
+      response = RespParser::serialize(reply, dataType);
     }
     else 
       response = "$-1\r\n";
@@ -207,8 +207,8 @@ private:
     std::string dataType;
     // if (command.size() < 2) {
     //   reply.push_back("-few arguments provided for KEY command.");
-    //   data_type = "error";
-    //   return RespParser::serialize(reply, data_type);
+    //   dataType = "error";
+    //   return RespParser::serialize(reply, dataType);
     //     // throw std::runtime_error("few arguments provided for KEY command.");
     // }
     DEBUG_LOG("command[0]=" + command[0] + ", command[1]=\"" + command[1] + "\"");
@@ -216,12 +216,12 @@ private:
     if (0 != redis_data_store_obj.get_keys_with_pattern(reply, command[1])) {
       throw std::runtime_error("error occurred while fetching keys");
     }
-    data_type = "array";
+    dataType = "array";
     std::stringstream ss;  
     for(auto& e : reply) 
       ss << e << ",| ";
     DEBUG_LOG(ss.str());
-    return RespParser::serialize(reply, data_type);
+    return RespParser::serialize(reply, dataType);
   }
 
   std::string _commandINFO(const std::vector<std::string>& command) {
@@ -239,8 +239,8 @@ private:
       for(auto& e : reply) 
         ss << e << ",| ";
       DEBUG_LOG(ss.str());
-      data_type = "bulk_string";
-      return RespParser::serialize(reply, data_type);
+      dataType = "bulk_string";
+      return RespParser::serialize(reply, dataType);
   }
 
   int _getInfo(std::vector<std::string>& reply, const std::string& section) {

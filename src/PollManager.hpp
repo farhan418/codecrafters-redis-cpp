@@ -104,7 +104,7 @@ namespace pm {
                 printPollFD(pollfdArr[i]);
             
             for(int i = 0; i < pollfdArrSize; i++) {
-                if (pollfdArr[i].revents & (POLLIN | POllOUT)) {
+                if (pollfdArr[i].revents & (POLLIN | POLLOUT)) {
                     if (pollfdArr[i].fd != listenerSocketFD) {
                         readyFDsVec.push_back(pollfdArr[i]);
                     }
@@ -222,7 +222,7 @@ namespace pm {
             servinfo = p = NULL;
             freeaddrinfo(servinfo); // All done with this
             
-            if (_addToPollfdArr(connectorSocketFD, POLLIN | POLLINOUT) != 0) {
+            if (_addToPollfdArr(connectorSocketFD, POLLIN | POLLOUT) != 0) {
                 DEBUG_LOG("failed to add connectorSocketFD to pollfdArr");
                 return -1;
             }

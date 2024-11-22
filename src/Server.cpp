@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 
   // creating listener socket irrespective of the fact current server is replica or master
   socketSetting.socketPortOrService = listeningPortNumber;  // rest members default value, see definition of struct SocketSettings
-  DEBUG_LOG(listeningSocketSettings.getSocketSettingsString());
+  DEBUG_LOG(socketSettings.getSocketSettingsString());
   serverListenerSocketFD = pollManager.createListenerSocket(socketSetting);
 
   // if current server is replica, then store info in config_kv and connect to master by creating a new socket
@@ -176,7 +176,7 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
   //   ss << "response_str : " << response_str;
   //   DEBUG_LOG(ss.str());
     
-  } // while loop to process all tokens (even multiple commands)
+  // } // while loop to process all tokens (even multiple commands)
   // close(currentSocketFD);  // PollManager should close connection
   return 0;
 }
