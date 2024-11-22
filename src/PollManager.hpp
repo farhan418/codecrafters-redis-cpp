@@ -110,7 +110,7 @@ namespace pm {
                         if (_isSocketOpen(pollfdArr[i].fd))
                             readyFDsVec.push_back(pollfdArr[i]);  // if the socket can be read from, push to the ready list
                         else
-                            _deleteFromPollfdArr(pollfdArr[i]);  // delete if the socket cannot be read from
+                            _deleteFromPollfdArr(pollfdArr[i].fd);  // delete if the socket cannot be read from
                     }
                     else if (/*(pollfdArr[i].fd == listenerSocketFD) &&*/ (pollfdArr[i].revents & POLLIN)) {
                         // if listener is ready to read, it means a new client connection
