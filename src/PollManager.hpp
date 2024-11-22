@@ -110,7 +110,7 @@ namespace pm {
                         if (_isSocketOpen(pollfdArr[i].fd))
                             readyFDsVec.push_back(pollfdArr[i]);  // if the socket can be read from, push to the ready list
                         else
-                            _deleteFromPollfdArr(pollfdArr[i].fd);  // delete if the socket cannot be read from
+                            _deleteSocketFDFromPollfdArr(pollfdArr[i].fd);  // delete if the socket cannot be read from
                     }
                     else if (/*(pollfdArr[i].fd == listenerSocketFD) &&*/ (pollfdArr[i].revents & POLLIN)) {
                         // if listener is ready to read, it means a new client connection
@@ -164,6 +164,10 @@ namespace pm {
             ss << "Successfully created listenerSocketFD = " << listenerSocketFD;
             DEBUG_LOG(ss.str());
             return listenerSocketFD;
+        }
+
+        int deleteSocketFDFromPollfdArr(int socketFD) {
+            return _deleteSocketFDFromPollfdArr(socketFD);
         }
 
     private:
@@ -351,19 +355,14 @@ namespace pm {
             return 0;
         }
 
-        int _deleteFromPollfdArr(int socketFD) {
-            if (pollfdArrSize <= 0) {
+        int _deleteSocketFDFromPollfdArr(int socketFD) {
+            if (pollfdArrSize <= 0)
                 return -1;
-            }
-
-            struct pollfd tempPollfd;
-            tempPollfd.fd = -1;
 
             int index = 0;
             while(index < pollfdArrSize) {
-                if (pollfdArr[index].fd == socketFD) {
+                if (pollfdArr[index].fd == socketFD)
                     break;
-                }
                 index++;
             }
 
@@ -383,26 +382,6 @@ namespace pm {
             }
             return 0;
         }
-
-        // int _deleteFromPollfdArr(int index) {
-        //     if (pollfdArrSize <= 0) {
-        //         return -1;
-        //     }
-        //     if (_isSocketOpen(pollfdArr[index].fd)) {
-        //         close(pollfdArr[index].fd);
-        //     }
-        //     pollfdArr[index] = pollfdArr[pollfdArrSize-1];
-        //     pollfdArrSize--;
-
-        //     int temp = (pollfdArrCapacity-pollfdArrSize)/100;
-        //     if (temp >= 2) {
-        //         temp--;
-        //         pollfdArrCapacity = pollfdArrCapacity - (100*temp);
-        //         pollfdArr = static_cast<struct pollfd*>(realloc(pollfdArr, (sizeof(struct pollfd) * pollfdArrCapacity)));
-        //         DEBUG_LOG("updted pollfdArr and pollfdArrCapacity = " + std::to_string(pollfdArrCapacity));
-        //     }
-        //     return 0;
-        // }
 
         // Get sockaddr, IPv4 or IPv6:
         void* _getInAddr(struct sockaddr *sa) {
@@ -495,3 +474,23 @@ namespace pm {
             //     ss << ", pollfdArr[" << i << "].revents = " << pollfdArr[i].revents;
             // }
             // DEBUG_LOG(ss.str());
+
+                    // int _deleteSocketFDFromPollfdArr(int index) {
+        //     if (pollfdArrSize <= 0) {
+        //         return -1;
+        //     }
+        //     if (_isSocketOpen(pollfdArr[index].fd)) {
+        //         close(pollfdArr[index].fd);
+        //     }
+        //     pollfdArr[index] = pollfdArr[pollfdArrSize-1];
+        //     pollfdArrSize--;
+
+        //     int temp = (pollfdArrCapacity-pollfdArrSize)/100;
+        //     if (temp >= 2) {
+        //         temp--;
+        //         pollfdArrCapacity = pollfdArrCapacity - (100*temp);
+        //         pollfdArr = static_cast<struct pollfd*>(realloc(pollfdArr, (sizeof(struct pollfd) * pollfdArrCapacity)));
+        //         DEBUG_LOG("updted pollfdArr and pollfdArrCapacity = " + std::to_string(pollfdArrCapacity));
+        //     }
+        //     return 0;
+        // }

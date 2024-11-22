@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   RespParser respParser;  // to parse RESP protocol
   RedisCommandCenter rcc;  // to execute Redis commands
   const int timeout_ms = 500;  // 0 means non blocking; if > 0 then poll() in pm::PollManager::pollSockets() will block for timeout_ms seconds
-  std::vector<struct pollfd> readySocketPollfdVec;  // to get list of sockets which are ready to readFrom or writeTo
+  // std::vector<struct pollfd> readySocketPollfdVec;  // to get list of sockets which are ready to readFrom or writeTo
   bool isSlaveServer = false;  // to track if current server running is replica or master
   bool isHandShakeSuccessful = false;  // true if replica has done the handshake with the master else false
   bool isConnectedToMasterServer = false;  // true if replica and connected to master else false
@@ -113,7 +113,8 @@ int main(int argc, char **argv) {
   uint64_t counter = 0;
   // infinite loop to poll sockets and listen form new connections and server connected sockets
   for(;;) {
-    readySocketPollfdVec.clear();
+    // readySocketPollfdVec.clear();
+    std::vector<struct pollfd> readySocketPollfdVec;  // to get list of sockets which are ready to readFrom or writeTo
     if (0 != pollManager.pollSockets(timeout_ms, readySocketPollfdVec)) {
       DEBUG_LOG("encountered error while polling");
     }
@@ -129,7 +130,7 @@ int main(int argc, char **argv) {
 
       if (pfd.fd != serverConnectorSocketFD) {
         // pm::printPollFD(pfd);
-        if (clientHandler(pfd.fd, respParser, rcc) != 0) {
+        if (clientHandler(pfd.fd, respParser, rcc, pollManager) != 0) {
           ss.clear();
           ss << "error while handling socketFD = " << pfd.fd;
           ss << ", serverListenerSocketFD = " << serverListenerSocketFD;
@@ -208,7 +209,7 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
   return 0;
 }
 
-int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCenter& rcc) {
+int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCenter& rcc, pm::PollManager& pollManager) {
   static int counter = 0;
   counter++;
   int numBytes = 0;
@@ -239,6 +240,7 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
   DEBUG_LOG(ss.str());
 
   if (numBytes == 0) {  // connection closed
+    pollManager.deleteSocketFDFromPollfdArr(currentSocketFD);
     return 0;
   }
 
