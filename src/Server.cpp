@@ -222,22 +222,23 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
     DEBUG_LOG("Error reading from socket.\n");
     return -1;
   }
-  ss.clear();
-  ss << "counter=" << counter << ", from socketFD = " << currentSocketFD << ", read " << numBytes << " bytes, command = \'";
+
+  // ss.clear();
+  // ss << "counter=" << counter << ", from socketFD = " << currentSocketFD << ", read " << numBytes << " bytes, command = \'";
   
-  std::string temp;
-  for(int i = 0; i < numBytes; i++) {
-    if (buffer[i] == '\r')
-      temp += "\\r";
-    else if (buffer[i] == '\n') 
-      temp += "\\n";
-    else
-      temp += buffer[i];
-    if (i == numBytes)
-      break;
-  }
-  ss << temp << "\', numBytes=" << numBytes;
-  DEBUG_LOG(ss.str());
+  // std::string temp;
+  // for(int i = 0; i < numBytes; i++) {
+  //   if (buffer[i] == '\r')
+  //     temp += "\\r";
+  //   else if (buffer[i] == '\n') 
+  //     temp += "\\n";
+  //   else
+  //     temp += buffer[i];
+  //   if (i == numBytes)
+  //     break;
+  // }
+  // ss << temp << "\', numBytes=" << numBytes;
+  // DEBUG_LOG(ss.str());
 
   if (numBytes == 0) {  // connection closed
     pollManager.deleteSocketFDFromPollfdArr(currentSocketFD);

@@ -122,7 +122,7 @@ namespace pm {
                             continue;  // continue to next socketFD in pollfdArr
                         }
                         // add the new socket to polling array 
-                        if (_addToPollfdArr(newSocketFD, POLLIN /*| POLLINOUT*/) != 0) {
+                        if (_addSocketFDToPollfdArr(newSocketFD, POLLIN /*| POLLINOUT*/) != 0) {
                             DEBUG_LOG("failed to add newSocketFD to pollfdArr");
                             continue;
                         }
@@ -244,7 +244,7 @@ namespace pm {
             servinfo = p = NULL;
             freeaddrinfo(servinfo); // All done with this
             
-            if (_addToPollfdArr(connectorSocketFD, POLLIN | POLLOUT) != 0) {
+            if (_addSocketFDToPollfdArr(connectorSocketFD, POLLIN | POLLOUT) != 0) {
                 DEBUG_LOG("failed to add connectorSocketFD to pollfdArr");
                 return -1;
             }
@@ -318,7 +318,7 @@ namespace pm {
                 return 1;
             }
             
-            if (_addToPollfdArr(listenerSocketFD, POLLIN /*| POLLINOUT*/) != 0) {
+            if (_addSocketFDToPollfdArr(listenerSocketFD, POLLIN /*| POLLINOUT*/) != 0) {
                 DEBUG_LOG("failed to add listenerSocketFD to pollfdArr");
                 return 1;
             }
@@ -338,7 +338,7 @@ namespace pm {
             return true;  // socket is open
         }
 
-        int _addToPollfdArr(int newSocketFD, int events) {
+        int _addSocketFDToPollfdArr(int newSocketFD, int events) {
             // If we don't have room, add more space in the pfds array
             if (pollfdArrCapacity == pollfdArrSize) {
                 pollfdArrCapacity += 100;
