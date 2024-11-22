@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 
   // creating listener socket irrespective of the fact current server is replica or master
   socketSetting.socketPortOrService = listeningPortNumber;  // rest members default value, see definition of struct SocketSetting
-  DEBUG_LOG(socketSetting.getSocketSettingsString());
+  DEBUG_LOG("listener socket setting : " + socketSetting.getSocketSettingsString());
   serverListenerSocketFD = pollManager.createListenerSocket(socketSetting);
 
   // if current server is replica, then store info in config_kv and connect to master by creating a new socket
@@ -65,10 +65,13 @@ int main(int argc, char **argv) {
     std::vector<std::string> hostPortVec = utility::split(*replicaof);
     socketSetting.socketHostOrIP = hostPortVec[0];
     socketSetting.socketPortOrService = hostPortVec[1];
+    DEBUG_LOG("connector socket setting: " + socketSetting.getSocketSettingsString());
     int counter = 0;
-    while ((serverConnectorSocketFD < 1) && (counter < 3)) {
+    while ((counter < 3)) {
       serverConnectorSocketFD = pollManager.createConnectorSocket(socketSetting);
       counter++;
+      if (serverConnectorSocketFD > 0)
+        break;
     }
     if (serverConnectorSocketFD < 1) {
       DEBUG_LOG("failed to connect to master : " + (*replicaof));
@@ -76,6 +79,12 @@ int main(int argc, char **argv) {
     else {
       DEBUG_LOG("successfully connected to master : " + (*replicaof));
       // isConnectedToMasterServer = true;  // will make true after sending handshake
+      if (0 == doReplicaMasterHandshake()) {
+        DEBUG_LOG("successfully done handshake with master");
+      }
+      else {
+        DEBUG_LOG("failed to do handshake with master");
+      }
     }
   }
   else {  // means master server & by default isSlaveServer = false; isConnectedToMasterServer = false;
