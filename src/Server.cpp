@@ -222,7 +222,7 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
     return -1;
   }
   ss.clear();
-  ss << "counter=" << counter << ", from socketFD = " << currentSocketFD << ", read " << numBytes << " bytes, command = \"";
+  ss << "counter=" << counter << ", from socketFD = " << currentSocketFD << ", read " << numBytes << " bytes, command = \'";
   int i = 0;
   std::string temp;
   for(auto& c : buffer) {
@@ -235,7 +235,7 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
     if (i == numBytes)
       break;
   }
-  ss << temp << "\"";
+  ss << temp << "\'" << std::endl;
   DEBUG_LOG(ss.str());
 
   if (numBytes == 0) {  // connection closed
