@@ -93,14 +93,13 @@ namespace pm {
 
         int pollSockets(int timeout_ms, std::vector<struct pollfd>& readyFDsVec) {
             static long long pollCount = 0;
-            std::stringstream ss;  
             if (poll(pollfdArr, pollfdArrSize, timeout_ms) == -1) {
                 DEBUG_LOG("poll failed");
                 return -1;
             }
              
-            ss << "poll call done, pollCount=" << pollCount++ << ", listenerSocketFD = " << listenerSocketFD << ", connectorSocketFD = " << connectorSocketFD << ", pollfdArrSize = " << pollfdArrSize;
-            DEBUG_LOG(ss.str());
+            // ss << "poll call done, pollCount=" << pollCount++ << ", listenerSocketFD = " << listenerSocketFD << ", connectorSocketFD = " << connectorSocketFD << ", pollfdArrSize = " << pollfdArrSize;
+            // DEBUG_LOG(ss.str());
             // for(int i = 0; i < pollfdArrSize; i++)
             //     printPollFD(pollfdArr[i]);
             
@@ -132,7 +131,7 @@ namespace pm {
                         if (NULL == inet_ntop(remoteAddr.ss_family, _getInAddr((struct sockaddr*)&remoteAddr), remoteIP, INET6_ADDRSTRLEN)) {
                             DEBUG_LOG("failed to convert address to human readable form");
                         }
-                        ss.clear();
+                        std::stringstream ss;  
                         ss << "pollserver: new connection from \""<< remoteIP;
                         ss << "\" on socketFD = " << newSocketFD;
                         DEBUG_LOG(ss.str());
