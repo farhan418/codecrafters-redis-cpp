@@ -126,8 +126,8 @@ int main(int argc, char **argv) {
       // ss.clear();
       // ss << "\nhandling socketFD : " << pfd.fd;
       // DEBUG_LOG(ss.str());
-
       pm::printPollFD(pfd);
+
       if (pfd.fd != serverConnectorSocketFD) {
         if (clientHandler(pfd.fd, respParser, rcc) != 0) {
           ss.clear();
