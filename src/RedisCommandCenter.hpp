@@ -102,6 +102,10 @@ public:
     else if (compareCaseInsensitive("INFO", command[0])) {
       return _commandINFO(command);
     }
+    // command REPLCONF listening-port <replicaListenerPort>, REPLCONF capa psync2
+    else if (compareCaseInsensitive("REPLCONF", command[0])) {
+      return _commandREPLCONF(command);
+    }
     // Invalid command
     else {
       std::vector<std::string> reply;
@@ -228,19 +232,42 @@ private:
     std::vector<std::string> reply;
     std::string dataType;
     std::string required_section("all");
-      if (command.size() >= 2)
-        required_section = command[1];
+    if (command.size() >= 2)
+      required_section = command[1];
 
-      if (0 != _getInfo(reply, required_section)) {
-        DEBUG_LOG("error while getting info");
-        return "error while getting info";
-      }
-      std::stringstream ss;  
-      for(auto& e : reply) 
-        ss << e << ",| ";
-      DEBUG_LOG(ss.str());
-      dataType = "bulk_string";
+    if (0 != _getInfo(reply, required_section)) {
+      DEBUG_LOG("error while getting info");
+      return "error while getting info";
+    }
+    std::stringstream ss;  
+    for(auto& e : reply) 
+      ss << e << ",| ";
+    DEBUG_LOG(ss.str());
+    dataType = "bulk_string";
+    return RespParser::serialize(reply, dataType);
+  }
+  
+  std::string _commandREPLCONF(const std::vector<std::string>& command) {
+    std::vector<std::string> reply;
+    std::string dataType;
+    
+    if (command.size() < 3) {
+      reply.push_back("few arguments provided for REPLCONF command.");
+      dataType = "error";
       return RespParser::serialize(reply, dataType);
+    }
+
+    if (compareCaseInsensitive("listening-port", command[1])) {
+      // save port
+      DEBUG_LOG("replica is listening at port - " + command[2]);
+    }
+    else if (compareCaseInsensitive("capa", command[1])) {
+      // save capabilities
+      DEBUG_LOG("Capabilities : " + command[2]);
+    }
+    reply.push_back("OK");
+    dataType = "simple_string";
+    return RespParser::serialize(reply, dataType);
   }
 
   int _getInfo(std::vector<std::string>& reply, const std::string& section) {
