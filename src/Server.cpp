@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
       // DEBUG_LOG(ss.str());
 
       if (pfd.fd != serverConnectorSocketFD) {
-        pm::printPollFD(pfd);
+        // pm::printPollFD(pfd);
         if (clientHandler(pfd.fd, respParser, rcc) != 0) {
           ss.clear();
           ss << "error while handling socketFD = " << pfd.fd;
