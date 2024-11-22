@@ -234,7 +234,7 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCente
     if (i == numBytes)
       break;
   }
-  ss << "\"\n";
+  ss << "\"";
   DEBUG_LOG(ss.str());
 
   if (numBytes == 0) {  // connection closed
