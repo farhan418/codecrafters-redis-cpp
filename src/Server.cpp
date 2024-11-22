@@ -172,7 +172,7 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
   std::vector<std::string> resultDataTypeVec{"simple_string", "simple_string", "simple_string"};
 
   auto listeningPortNumber = rcc.get_config_kv("listening-port");
-  if (result.has_value())
+  if (listeningPortNumber.has_value())
     handShakeCommands[1] += " " + (*listeningPortNumber);
 
   auto capa = rcc.get_config_kv("capa");
@@ -198,7 +198,7 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
     while(counter < 3) {
       counter++;
       memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
-      numBytes = read(currentSocketFD, buffer, sizeof(buffer));
+      numBytes = read(serverConnectorSocketFD, buffer, sizeof(buffer));
       if (numBytes < 0) {
         DEBUG_LOG("Error reading from socket.\n");
         return -1;
