@@ -19,7 +19,7 @@
 #include "PollManager.hpp"
 
 
-int clientHandler(int, RespParser&, RedisCommandCenter&);
+int clientHandler(int, RespParser&, RedisCommandCenter&, pm::PollManager&);
 int doReplicaMasterHandshake(int, RespParser&, RedisCommandCenter&);
 int process_cmdline_args(int, char**, argparse::ArgumentParser&);
 
