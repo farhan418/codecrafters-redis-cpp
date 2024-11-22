@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     if (0 != socketSetting.resetSocketSettings()) {
       DEBUG_LOG("error resetting socketSetting");
     }
-    std::vector<std::string> hostPortVec = utility::split(*replicaof);
+    std::vector<std::string> hostPortVec = utility::split(*replicaof, " ");
     DEBUG_LOG("hostPortVec[0]=" + hostPortVec[0] + ", hostPortVec[1]=" + hostPortVec[1]);
     socketSetting.socketHostOrIP = hostPortVec[0];
     socketSetting.socketPortOrService = hostPortVec[1];

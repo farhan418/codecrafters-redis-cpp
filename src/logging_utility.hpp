@@ -21,9 +21,9 @@ std::cerr << "\n[" << std::chrono::system_clock::to_time_t(std::chrono::system_c
 
 namespace utility {
 
-    std::vector<std::string> split(const std::string& str) {
+    std::vector<std::string> split(const std::string& str, const std::string& delimeter = "\r\n") {
         std::vector<std::string> result;
-        std::regex re("\r\n");
+        std::regex re(delimeter);
         std::sregex_token_iterator first(str.begin(), str.end(), re, -1);
         std::sregex_token_iterator last;
         result.assign(first, last);
