@@ -123,6 +123,10 @@ int main(int argc, char **argv) {
     }  
 
     for(const struct pollfd& pfd : readySocketPollfdVec) {
+      ss.clear();
+      ss << "\nhandling socketFD : " << pfd.fd;
+      DEBUG_LOG(ss.str());
+
       pm::printPollFD(pfd);
       if (pfd.fd != serverConnectorSocketFD) {
         if (clientHandler(pfd.fd, respParser, rcc) != 0) {
@@ -150,9 +154,6 @@ int main(int argc, char **argv) {
           }
         }
       }
-      ss.clear();
-      ss << "handled socketFD : " << pfd.fd;
-      DEBUG_LOG(ss.str());
     }  // looping through all FDs which are ready to be read from or write to
   } // infinite for loop
 
@@ -164,7 +165,7 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
   static char buffer[1024];  // 1KB buffer to use when reading from or writing to socket
   static std::stringstream ss;
 
-  std::string str = RespParser::serialize(std::vector<std::string>{"PING"}, "bulk_string");
+  std::string str = RespParser::serialize(std::vector<std::string>{"PING"}, "array");
   memset(buffer, 0, sizeof(buffer));
   memcpy(buffer, str.c_str(), str.length());
   numBytes = write(serverConnectorSocketFD, buffer, str.length());
