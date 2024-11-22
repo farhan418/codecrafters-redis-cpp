@@ -108,9 +108,9 @@ namespace pm {
                     if (pollfdArr[i].fd != listenerSocketFD) {
                         // DEBUG_LOG("a socketFD is ready : " + std::to_string(pollfdArr[i].fd));
                         if (_isSocketOpen(pollfdArr[i].fd))
-                            readyFDsVec.push_back(pollfdArr[i]);
+                            readyFDsVec.push_back(pollfdArr[i]);  // if the socket can be read from, push to the ready list
                         else
-                            _deleteFromPollfdArr();
+                            _deleteFromPollfdArr(pollfdArr[i]);  // delete if the socket cannot be read from
                     }
                     else if (/*(pollfdArr[i].fd == listenerSocketFD) &&*/ (pollfdArr[i].revents & POLLIN)) {
                         // if listener is ready to read, it means a new client connection
@@ -367,7 +367,7 @@ namespace pm {
                 index++;
             }
 
-            if (_isSocketOpen(pollfdArr[index].fd)) {
+            if ((index != pollfdArrSize) && _isSocketOpen(pollfdArr[index].fd)) {
                 close(pollfdArr[index].fd);
             }
 
