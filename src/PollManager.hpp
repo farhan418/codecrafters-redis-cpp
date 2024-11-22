@@ -141,11 +141,11 @@ namespace pm {
             // returns connectorSocketFD (negative means failed, >0 means created successfully)
             DEBUG_LOG("in public createConnectorSocket");
             if (0 != _createConnectorSocket(socketSetting)) {
-                DEBUG_LOG("failed to create listener socket");
+                DEBUG_LOG("failed to create connector socket");
                 return -1;
             }
             std::stringstream ss;  
-            ss << "\nSuccessfully created connectorSocketFD = " << connectorSocketFD;
+            ss << "Successfully created connectorSocketFD = " << connectorSocketFD;
             DEBUG_LOG(ss.str());
             return connectorSocketFD;
         }
@@ -157,7 +157,7 @@ namespace pm {
                 return -1;
             }
             std::stringstream ss;  
-            ss << "\nSuccessfully created listenerSocketFD = " << listenerSocketFD;
+            ss << "Successfully created listenerSocketFD = " << listenerSocketFD;
             DEBUG_LOG(ss.str());
             return listenerSocketFD;
         }
@@ -208,6 +208,9 @@ namespace pm {
                     }
                     DEBUG_LOG("made connector socket Non blocking...");
                 }
+                else {
+                    DEBUG_LOG("creating connector socket in blocking mode");
+                }
 
                 if (connect(connectorSocketFD, p->ai_addr, p->ai_addrlen) == -1) {
                     DEBUG_LOG("client: connect failed");
@@ -237,7 +240,7 @@ namespace pm {
                 DEBUG_LOG("failed to add connectorSocketFD to pollfdArr");
                 return -1;
             }
-            return connectorSocketFD;
+            return 0;
         }
 
         int _createListenerSocket(const struct SocketSetting& socketSetting) {
@@ -311,7 +314,6 @@ namespace pm {
                 DEBUG_LOG("failed to add listenerSocketFD to pollfdArr");
                 return 1;
             }
-
             return 0;
         }
 
