@@ -161,9 +161,9 @@ int main(int argc, char **argv) {
 }
 
 int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser, RedisCommandCenter& rcc) {
-  static int numBytes = 0;
-  static char buffer[1024];  // 1KB buffer to use when reading from or writing to socket
-  static std::stringstream ss;
+  int numBytes = 0;
+  char buffer[1024];  // 1KB buffer to use when reading from or writing to socket
+  std::stringstream ss;
 
   std::string str = RespParser::serialize(std::vector<std::string>{"PING"}, "array");
   memset(buffer, 0, sizeof(buffer));
