@@ -107,7 +107,10 @@ namespace pm {
                 if (pollfdArr[i].revents & (POLLIN | POLLOUT)) {
                     if (pollfdArr[i].fd != listenerSocketFD) {
                         // DEBUG_LOG("a socketFD is ready : " + std::to_string(pollfdArr[i].fd));
-                        readyFDsVec.push_back(pollfdArr[i]);
+                        if (_isSocketOpen(pollfdArr[i].fd))
+                            readyFDsVec.push_back(pollfdArr[i]);
+                        else
+                            _deleteFromPollfdArr();
                     }
                     else if (/*(pollfdArr[i].fd == listenerSocketFD) &&*/ (pollfdArr[i].revents & POLLIN)) {
                         // if listener is ready to read, it means a new client connection
@@ -348,13 +351,26 @@ namespace pm {
             return 0;
         }
 
-        int _deleteFromPollfdArr(int index) {
+        int _deleteFromPollfdArr(int socketFD) {
             if (pollfdArrSize <= 0) {
                 return -1;
             }
+
+            struct pollfd tempPollfd;
+            tempPollfd.fd = -1;
+
+            int index = 0;
+            while(index < pollfdArrSize) {
+                if (pollfdArr[index].fd == socketFD) {
+                    break;
+                }
+                index++;
+            }
+
             if (_isSocketOpen(pollfdArr[index].fd)) {
                 close(pollfdArr[index].fd);
             }
+
             pollfdArr[index] = pollfdArr[pollfdArrSize-1];
             pollfdArrSize--;
 
@@ -367,6 +383,26 @@ namespace pm {
             }
             return 0;
         }
+
+        // int _deleteFromPollfdArr(int index) {
+        //     if (pollfdArrSize <= 0) {
+        //         return -1;
+        //     }
+        //     if (_isSocketOpen(pollfdArr[index].fd)) {
+        //         close(pollfdArr[index].fd);
+        //     }
+        //     pollfdArr[index] = pollfdArr[pollfdArrSize-1];
+        //     pollfdArrSize--;
+
+        //     int temp = (pollfdArrCapacity-pollfdArrSize)/100;
+        //     if (temp >= 2) {
+        //         temp--;
+        //         pollfdArrCapacity = pollfdArrCapacity - (100*temp);
+        //         pollfdArr = static_cast<struct pollfd*>(realloc(pollfdArr, (sizeof(struct pollfd) * pollfdArrCapacity)));
+        //         DEBUG_LOG("updted pollfdArr and pollfdArrCapacity = " + std::to_string(pollfdArrCapacity));
+        //     }
+        //     return 0;
+        // }
 
         // Get sockaddr, IPv4 or IPv6:
         void* _getInAddr(struct sockaddr *sa) {
