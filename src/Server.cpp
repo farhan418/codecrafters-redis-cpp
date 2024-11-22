@@ -167,7 +167,7 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
   std::stringstream ss;
 
   std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa"};
-  std::vector<std::string> dataTypeVec{"simple_string", "array", "array"};
+  std::vector<std::string> dataTypeVec{"array", "array", "array"};
   std::vector<std::string> expectedResultVec{"PONG", "OK", "OK"};
   std::vector<std::string> resultDataTypeVec{"simple_string", "simple_string", "simple_string"};
 
