@@ -92,16 +92,17 @@ namespace pm {
         }
 
         int pollSockets(int timeout_ms, std::vector<struct pollfd>& readyFDsVec) {
+            static long long pollCount = 0;
             std::stringstream ss;  
             if (poll(pollfdArr, pollfdArrSize, timeout_ms) == -1) {
                 DEBUG_LOG("poll failed");
                 return -1;
             }
             
-            ss << "\npoll call done, listenerSocketFD = " << listenerSocketFD << ", connectorSocketFD = " << connectorSocketFD << ", pollfdArrSize = " << pollfdArrSize;
+            ss << "poll call done, pollCount=" << pollCount << ", listenerSocketFD = " << listenerSocketFD << ", connectorSocketFD = " << connectorSocketFD << ", pollfdArrSize = " << pollfdArrSize;
             DEBUG_LOG(ss.str());
-            for(int i = 0; i < pollfdArrSize; i++)
-                printPollFD(pollfdArr[i]);
+            // for(int i = 0; i < pollfdArrSize; i++)
+            //     printPollFD(pollfdArr[i]);
             
             for(int i = 0; i < pollfdArrSize; i++) {
                 if (pollfdArr[i].revents & (POLLIN | POLLOUT)) {
