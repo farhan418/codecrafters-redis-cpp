@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 
   // if current server is replica, then store info in config_kv and connect to master by creating a new socket
   if (auto replicaof = arg_parser.present("--replicaof")) {
-    RedisCommandCenter::set_slave_info(*replicaof);
+    RedisCommandCenter::set_slave_info(*replicaof, listeningPortNumber, "psync2");
     DEBUG_LOG("this server is a replica of " + (*replicaof));
     isSlaveServer = true;
     if (0 != socketSetting.resetSocketSettings()) {
@@ -166,26 +166,57 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
   char buffer[1024];  // 1KB buffer to use when reading from or writing to socket
   std::stringstream ss;
 
-  std::string str = RespParser::serialize(std::vector<std::string>{"PING"}, "array");
-  memset(buffer, 0, sizeof(buffer));
-  memcpy(buffer, str.c_str(), str.length());
-  numBytes = write(serverConnectorSocketFD, buffer, str.length());
-  
-  ss.clear();
-  ss << "\nSent " << numBytes << " bytes : " << buffer;
-  DEBUG_LOG(ss.str());
-  
-  if (numBytes < 0) {
-    DEBUG_LOG("Failed to write message to socket.\n");
-    return -1;
+  std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa"};
+  std::vector<std::string> dataTypeVec{"simple_string", "array", "array"};
+  std::vector<std::string> expectedResultVec{"PONG", "OK", "OK"};
+  std::vector<std::string> resultDataTypeVec{"simple_string", "simple_string", "simple_string"};
+
+  auto listeningPortNumber = rcc.get_config_kv("listening-port");
+  if (result.has_value())
+    handShakeCommands[1] += " " + (*listeningPortNumber);
+
+  auto capa = rcc.get_config_kv("capa");
+  if (capa.has_value())
+    handShakeCommands[2] += " " + (*capa);
+
+  for (int i = 0; i < handShakeCommands.size(); i++) {
+    std::string str = RespParser::serialize(utility::split(handShakeCommands[i], " "), dataTypeVec[i]);
+    memset(buffer, 0, sizeof(buffer));
+    memcpy(buffer, str.c_str(), str.length());
+    numBytes = write(serverConnectorSocketFD, buffer, str.length());
+    
+    ss.clear();
+    ss << "\nSent " << numBytes << " bytes : " << buffer;
+    DEBUG_LOG(ss.str());
+    
+    if (numBytes < 0) {
+      DEBUG_LOG("Failed to write message to socket.\n");
+      return -1;
+    }
+
+    int counter = 0;
+    while(counter < 3) {
+      counter++;
+      memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
+      numBytes = read(currentSocketFD, buffer, sizeof(buffer));
+      if (numBytes < 0) {
+        DEBUG_LOG("Error reading from socket.\n");
+        return -1;
+      }
+      else {
+        break;
+      }
+    }
+
+    std::string response(buffer);
+    if (!utility::compareCaseInsensitive(RespParser::serialize(utility::split(expectedResultVec[i]), resultDataTypeVec[i]), response)) {
+      DEBUG_LOG("error occurred while replica master handshake - did not receive reply for ");
+    }
+    else {
+      DEBUG_LOG("got reply to " + handShakeCommands[i] + " as expected");
+    }
   }
 
-  // memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
-  // numBytes = read(currentSocketFD, buffer, sizeof(buffer));
-  // if (numBytes < 0) {
-  //   DEBUG_LOG("Error reading from socket.\n");
-  //   return -1;
-  // }
   // ss.clear();
   // ss << "read " << numBytes << " bytes : " << buffer;
   // DEBUG_LOG(ss.str());

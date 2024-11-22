@@ -29,6 +29,16 @@ namespace utility {
         result.assign(first, last);
         return result;
     }
+
+    bool compareCaseInsensitive(const std::string& str1, const std::string& str2) {
+        std::string str1_lower = str1;
+        std::string str2_lower = str2;
+
+        std::transform(str1_lower.begin(), str1_lower.end(), str1_lower.begin(), ::tolower);
+        std::transform(str2_lower.begin(), str2_lower.end(), str2_lower.begin(), ::tolower);
+
+        return str1_lower.compare(str2_lower) == 0;
+    }
 };
 
 // static void DEBUG_LOG(std::string msg) {

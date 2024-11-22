@@ -59,9 +59,11 @@ public:
     return 0;
   }
 
-  static int set_slave_info(const std::string replicaof) {
+  static int set_slave_info(const std::string replicaof, const std::string listeningPortNumber, const std::string capa) {
     RedisCommandCenter::set_config_kv("role", "slave");
     RedisCommandCenter::set_config_kv("replicaof", replicaof);
+    RedisCommandCenter::set_config_kv("listening-port", listeningPortNumber);
+    RedisCommandCenter::set_config_kv("capa", capa);
     return 0;
   }
 
@@ -72,38 +74,38 @@ public:
     DEBUG_LOG(ss.str());
 
     // command PING
-    if (compareCaseInsensitive("PING", command[0])) {
+    if (utility::compareCaseInsensitive("PING", command[0])) {
       return _commandPING();
     }
     // command ECHO  
-    else if (compareCaseInsensitive("ECHO", command[0])) {
+    else if (utility::compareCaseInsensitive("ECHO", command[0])) {
       return _commandECHO(command);
     }
     // command SET, SET key value PX ms
-    else if (compareCaseInsensitive("SET", command[0])) {
+    else if (utility::compareCaseInsensitive("SET", command[0])) {
       return _commandSET(command);   
     }
     // command GET key
-    else if (compareCaseInsensitive("GET", command[0])) {
+    else if (utility::compareCaseInsensitive("GET", command[0])) {
       return _commandGET(command);
     }
     // command CONFIG GET
     else if (command.size() >= 2 && 
-            compareCaseInsensitive("CONFIG", command[0]) &&
-            compareCaseInsensitive("GET", command[1])) {
+            utility::compareCaseInsensitive("CONFIG", command[0]) &&
+            utility::compareCaseInsensitive("GET", command[1])) {
         return _commandCONFIG_GET(command);
     }
     // command KEYS
     else if (command.size() == 2 && 
-            compareCaseInsensitive("KEYS", command[0])) {
+            utility::compareCaseInsensitive("KEYS", command[0])) {
       return _commandKEYS(command);
     }
     // command INFO, INFO <section>
-    else if (compareCaseInsensitive("INFO", command[0])) {
+    else if (utility::compareCaseInsensitive("INFO", command[0])) {
       return _commandINFO(command);
     }
     // command REPLCONF listening-port <replicaListenerPort>, REPLCONF capa psync2
-    else if (compareCaseInsensitive("REPLCONF", command[0])) {
+    else if (utility::compareCaseInsensitive("REPLCONF", command[0])) {
       return _commandREPLCONF(command);
     }
     // Invalid command
@@ -147,7 +149,7 @@ private:
     }
     else {
       uint64_t expiry_time_ms = UINT64_MAX;
-      if (5 == command.size() && compareCaseInsensitive("PX", command[3])) {
+      if (5 == command.size() && utility::compareCaseInsensitive("PX", command[3])) {
         expiry_time_ms = std::stol(command[4]);
       }
       
@@ -257,11 +259,11 @@ private:
       return RespParser::serialize(reply, dataType);
     }
 
-    if (compareCaseInsensitive("listening-port", command[1])) {
+    if (utility::compareCaseInsensitive("listening-port", command[1])) {
       // save port
       DEBUG_LOG("replica is listening at port - " + command[2]);
     }
-    else if (compareCaseInsensitive("capa", command[1])) {
+    else if (utility::compareCaseInsensitive("capa", command[1])) {
       // save capabilities
       DEBUG_LOG("Capabilities : " + command[2]);
     }
@@ -272,11 +274,11 @@ private:
 
   int _getInfo(std::vector<std::string>& reply, const std::string& section) {
     static const std::vector<std::string> supported_sections = {"Replication"};
-    if (compareCaseInsensitive(section, "all")) {
+    if (utility::compareCaseInsensitive(section, "all")) {
       for (auto& section : supported_sections)
           _getInfo(reply, section);
     }
-    else if (compareCaseInsensitive(section, "Replication")) {
+    else if (utility::compareCaseInsensitive(section, "Replication")) {
       std::string str;
       for (auto& key : std::vector<std::string>{"role", "master_replid", "master_repl_offset"})
         if (auto result = get_config_kv(key)) {
@@ -285,16 +287,6 @@ private:
       reply.push_back(str.substr(2, str.length()-2));
     }
     return 0;
-  }
-
-  bool compareCaseInsensitive(const std::string& str1, const std::string& str2) {
-    std::string str1_lower = str1;
-    std::string str2_lower = str2;
-
-    std::transform(str1_lower.begin(), str1_lower.end(), str1_lower.begin(), ::tolower);
-    std::transform(str2_lower.begin(), str2_lower.end(), str2_lower.begin(), ::tolower);
-
-    return str1_lower.compare(str2_lower) == 0;
   }
 
   static std::map<std::string, std::string> configStore;
