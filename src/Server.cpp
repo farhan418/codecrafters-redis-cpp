@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   std::cerr << std::unitbuf;
 
   argparse::ArgumentParser arg_parser("Redis Server");  // to parse command line arguments
-  pm::SocketSettings socketSetting;  // struct object to pass socket settings to PollManager obj 
+  pm::SocketSetting socketSetting;  // struct object to pass socket settings to PollManager obj 
   pm::PollManager pollManager;  // object to manage sockets using poll()
   RespParser respParser;  // to parse RESP protocol
   RedisCommandCenter rcc;  // to execute Redis commands
@@ -50,8 +50,8 @@ int main(int argc, char **argv) {
   DEBUG_LOG("in main after getting listeningPortNumber = " + listeningPortNumber);
 
   // creating listener socket irrespective of the fact current server is replica or master
-  socketSetting.socketPortOrService = listeningPortNumber;  // rest members default value, see definition of struct SocketSettings
-  DEBUG_LOG(socketSettings.getSocketSettingsString());
+  socketSetting.socketPortOrService = listeningPortNumber;  // rest members default value, see definition of struct SocketSetting
+  DEBUG_LOG(socketSetting.getSocketSettingsString());
   serverListenerSocketFD = pollManager.createListenerSocket(socketSetting);
 
   // if current server is replica, then store info in config_kv and connect to master by creating a new socket

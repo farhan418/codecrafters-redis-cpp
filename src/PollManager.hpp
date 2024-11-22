@@ -1,5 +1,5 @@
-#ifndef SOCKETMANAGER_HPP
-#define SOCKETMANAGER_HPP
+#ifndef POLLMANAGER_HPP
+#define POLLMANAGER_HPP
 
 #include <iostream>
 #include <string>
@@ -25,9 +25,9 @@ namespace pm {
         DEBUG_LOG(ss.str());
     }
 
-    struct SocketSettings {
+    struct SocketSetting {
     public:
-        SocketSettings() {
+        SocketSetting() {
             resetSocketSettings();
         }
 
@@ -137,7 +137,7 @@ namespace pm {
             return 0;
         }
 
-        int createConnectorSocket(const struct SocketSettings& socketSetting) {
+        int createConnectorSocket(const struct SocketSetting& socketSetting) {
             // returns connectorSocketFD (negative means failed, >0 means created successfully)
             if (0 != _createConnectorSocket(socketSetting)) {
                 DEBUG_LOG("failed to create listener socket");
@@ -149,7 +149,7 @@ namespace pm {
             return connectorSocketFD;
         }
 
-        int createListenerSocket(const struct SocketSettings& socketSetting) {
+        int createListenerSocket(const struct SocketSetting& socketSetting) {
             // returns listenerSocketFD (negative means failed, >0 means created successfully)
             if (0 != _createListenerSocket(socketSetting)) {
                 DEBUG_LOG("failed to create listener socket");
@@ -163,7 +163,7 @@ namespace pm {
 
     private:
         // private member functions
-        int _createConnectorSocket(const struct SocketSettings& socketSetting) {
+        int _createConnectorSocket(const struct SocketSetting& socketSetting) {
             // returns connectorSocketFD (negative means failed, >0 means successfully created socket)
             struct addrinfo hints, *servinfo, *p;
 
@@ -229,7 +229,7 @@ namespace pm {
             return connectorSocketFD;
         }
 
-        int _createListenerSocket(const struct SocketSettings& socketSetting) {
+        int _createListenerSocket(const struct SocketSetting& socketSetting) {
             // returns 0 on success and else on failure
             struct addrinfo hints, *ai, *p;
 
@@ -370,12 +370,11 @@ namespace pm {
         struct pollfd *pollfdArr;  // array of FDs to monitor using poll
     };
 }
+#endif  // POLLMANAGER_HPP
 
-#endif  // SOCKETMANAGER_HPP
-
-// struct SocketSettings {
+// struct SocketSetting {
 //     public:
-//         SocketSettings(const std::string& socketPortOrService) {
+//         SocketSetting(const std::string& socketPortOrService) {
 //             resetSocketSettings(socketPortOrService);
 //         }
 
