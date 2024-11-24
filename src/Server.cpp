@@ -166,10 +166,10 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
   char buffer[1024];  // 1KB buffer to use when reading from or writing to socket
   std::stringstream ss;
 
-  std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa"};
-  std::vector<std::string> dataTypeVec{"array", "array", "array"};
-  std::vector<std::string> expectedResultVec{"PONG", "OK", "OK"};
-  std::vector<std::string> resultDataTypeVec{"simple_string", "simple_string", "simple_string"};
+  std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa", "PSYNC ? -1"};
+  std::vector<std::string> dataTypeVec{"array", "array", "array", "array"};
+  std::vector<std::string> expectedResultVec{"PONG", "OK", "OK", "FULLRESYNC abcdefghijklmnopqrstuvwxyz1234567890ABCD 0"};
+  std::vector<std::string> resultDataTypeVec{"simple_string", "simple_string", "simple_string", "simple_string"};
 
   auto listeningPortNumber = rcc.get_config_kv("listening-port");
   if (listeningPortNumber.has_value())
@@ -181,9 +181,19 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
 
   for (int i = 0; i < handShakeCommands.size(); i++) {
     std::string str = RespParser::serialize(utility::split(handShakeCommands[i], " "), dataTypeVec[i]);
-    memset(buffer, 0, sizeof(buffer));
-    memcpy(buffer, str.c_str(), str.length());
-    numBytes = write(serverConnectorSocketFD, buffer, str.length());
+    
+    int counter = 0;
+    while (counter < 3) {
+      counter++;
+      memset(buffer, 0, sizeof(buffer));
+      memcpy(buffer, str.c_str(), str.length());
+      numBytes = write(serverConnectorSocketFD, buffer, str.length());
+      if (numBytes > 0)
+        break;
+      else {
+        DEBUG_LOG("writing to socket during handshake failed, trying again...");
+      }
+    }
     
     ss.clear();
     ss << "\nSent " << numBytes << " bytes : " << buffer;
@@ -194,7 +204,7 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
       return -1;
     }
 
-    int counter = 0;
+    counter = 0;
     while(counter < 3) {
       counter++;
       memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
@@ -209,13 +219,23 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
     }
 
     std::string response(buffer);
-    if (!utility::compareCaseInsensitive(RespParser::serialize(utility::split(expectedResultVec[i]), resultDataTypeVec[i]), response)) {
+    bool isCase3Matching = false;
+    if ((i==3/*PSYNC command*/)) {
+      std::vector<std::string> responseVec = utility::split(buffer);
+      isCase3Matching = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
+      isCase3Matching &&= (responseVec[1].length() == 40);
+      isCase3Matching &&= (responseVec.size() == 3);
+    }
+    if (!isCase3Matching || !utility::compareCaseInsensitive(RespParser::serialize(utility::split(expectedResultVec[i]), resultDataTypeVec[i]), response)) {
       DEBUG_LOG("error occurred while replica master handshake - did not receive reply for ");
     }
     else {
       DEBUG_LOG("got reply to " + handShakeCommands[i] + " as expected");
     }
   }
+
+    //   std::string expectedRespString = RespParser::serialize(utility::split(expectedResultVec[i]), resultDataTypeVec[i]);
+    // bool isExpectedResponse = utility::compareCaseInsensitive(expectedRespString, response) || (handShakeCommands.startswith("PSYNC")
 
   // ss.clear();
   // ss << "read " << numBytes << " bytes : " << buffer;
