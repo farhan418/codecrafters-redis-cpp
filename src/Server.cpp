@@ -223,8 +223,8 @@ int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser
     if ((i==3/*PSYNC command*/)) {
       std::vector<std::string> responseVec = utility::split(buffer);
       isCase3Matching = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
-      isCase3Matching &&= (responseVec[1].length() == 40);
-      isCase3Matching &&= (responseVec.size() == 3);
+      isCase3Matching = isCase3Matching && (responseVec[1].length() == 40);
+      isCase3Matching = isCase3Matching && (responseVec.size() == 3);
     }
     if (!isCase3Matching || !utility::compareCaseInsensitive(RespParser::serialize(utility::split(expectedResultVec[i]), resultDataTypeVec[i]), response)) {
       DEBUG_LOG("error occurred while replica master handshake - did not receive reply for ");
