@@ -286,7 +286,7 @@ private:
       str += (*masterReplid);
     }
     else {
-      str += "8371b4fb1155b71f4a04d3e1b<random-replid>"
+      str += "8371b4fb1155b71f4a04d3e1b<random-replid>";
     }
     auto master_repl_offset = get_config_kv("master_replid");
     if (master_repl_offset.has_value()) {
