@@ -296,7 +296,7 @@ private:
     if (master_repl_offset.has_value()) {
       str += " " + (*master_repl_offset);
     }
-    reply.append(str);
+    reply.push_back(str);
     return RespParser::serialize(reply, dataType);
   }
 
