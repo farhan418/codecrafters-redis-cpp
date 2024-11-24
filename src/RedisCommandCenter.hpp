@@ -108,6 +108,10 @@ public:
     else if (utility::compareCaseInsensitive("REPLCONF", command[0])) {
       return _commandREPLCONF(command);
     }
+    // command PSYNC ? -1
+    else if (utility::compareCaseInsensitive("PSYNC", command[0])) {
+      return _commandPSYNC(command);
+    }
     // Invalid command
     else {
       std::vector<std::string> reply;
