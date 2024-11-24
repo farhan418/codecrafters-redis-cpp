@@ -284,17 +284,17 @@ private:
       dataType = "error";
       return RespParser::serialize(reply, dataType);
     }
-    std::string str = "FULLRESYNC ";
+    std::string str = "FULLRESYNC";
     auto masterReplid = get_config_kv("master_replid");
     if (masterReplid.has_value()) {
-      str += (*masterReplid);
+      str += " " + (*masterReplid);
     }
     else {
       str += "8371b4fb1155b71f4a04d3e1b<random-replid>";
     }
     auto master_repl_offset = get_config_kv("master_repl_offset");
     if (master_repl_offset.has_value()) {
-      str += (*master_repl_offset);
+      str += " " + (*master_repl_offset);
     }
     return RespParser::serialize(reply, dataType);
   }
