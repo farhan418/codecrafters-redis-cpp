@@ -576,13 +576,13 @@ namespace RCC {
     static std::map<std::string, std::string> configStore;
     static std::mutex configStoreMutex;
     static RedisDataStore redis_data_store_obj;
-    static std::string RDB_FILE_DIR;
+    static const std::string RDB_FILE_DIR;
   };
 
   std::map<std::string, std::string> RedisCommandCenter::configStore;
   std::mutex RedisCommandCenter::configStoreMutex;
   RedisDataStore RedisCommandCenter::redis_data_store_obj;
-  const std::string RDB_FILE_DIR("../rdbfiles/");
+  const std::string RedisCommandCenter::RDB_FILE_DIR("../rdbfiles/");
 };
 
 #endif  // REDISCOMMANDCENTER_HPP
