@@ -195,8 +195,8 @@ namespace RCC {
 
     int _doReplicaMasterHandshake(int& serverConnectorSocketFD, RespParser& respParser) {
       std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa", "PSYNC ? -1"};
-      const std::string sendDataType = {"array"};
-      const std::string receiveDataType = {"simple_string"};
+      const std::string sendDataType = "array";
+      const std::string receiveDataType = "simple_string";
       std::vector<std::string> expectedResultVec{"PONG", "OK", "OK", "FULLRESYNC abcdefghijklmnopqrstuvwxyz1234567890ABCD 0"};
       // std::vector<std::string> dataTypeVec{"array", "array", "array", "array"};
       // std::vector<std::string> resultDataTypeVec{"simple_string", "simple_string", "simple_string", "simple_string"};

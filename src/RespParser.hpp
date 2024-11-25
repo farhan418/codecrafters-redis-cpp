@@ -20,14 +20,23 @@ private:
     if (isParsedAllTokens()) {
       throw std::runtime_error("error extracting bulk string: " + bulk_string);
     }
-    return parseNextToken("");
+    return parseNextToken();
   }
 
   std::vector<std::string> parse_array(std::vector<std::string>& command, const std::string& array_string) {
+    /* 
+      format : *<number-of-elements>\r\n<element-1>...<element-n>
+        An asterisk (*) as the first byte.
+        One or more decimal digits (0..9) as the number of elements in the array as an unsigned, base-10 value.
+        The CRLF terminator.
+        An additional RESP type for every element of the array.
+      eg: *2\r\n$5\r\nhello\r\n$5\r\nworld\r\n
+    */
+
     long long length = std::stol(array_string.substr(1, array_string.length()-1));
     // std::vector<std::string> command;
     for (long long i = 0; i < length; i++) {
-      std::string next_token = parseNextToken("");
+      std::string next_token = parseNextToken();
       auto temp = deserialize(next_token);
       command.push_back(temp[0]);
     }
@@ -77,16 +86,17 @@ public:
 
   void resetParser(const std::string& respStr) {
     resetParser();
-    tokens = utility::split(respStr);
+    tokens = utility::split(respStr, "\r\n");
     isSplit = true;
     // for(auto& element : tokens) {
     //   std::cerr << element << "|, ";
     // }
   }
 
-  std::string parseNextToken(const std::string& respStr) {
+  std::string parseNextToken(/*const std::string& respStr=""*/) {
     if (!isSplit) {
-      resetParser(respStr);
+      // resetParser(respStr);
+      return ""; // error
     }
     if (lastTokenIndex == tokens.size()) {
       return "";  // empty string is false

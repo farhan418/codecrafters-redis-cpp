@@ -178,7 +178,7 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RCC::RedisCommand
   // parsing each command and processing it
   respParser.resetParser(buffer);
   while(!respParser.isParsedAllTokens()) {
-    std::vector<std::string> command = respParser.deserialize(respParser.parseNextToken(""));  // parse a command
+    std::vector<std::string> command = respParser.deserialize(respParser.parseNextToken());  // parse a command
     std::vector<std::string> responseStrVec = rcc.process(command);  // process command
     for (auto& responseStr : responseStrVec) {
       numBytes = utility::writeToSocketFD(currentSocketFD, buffer, bufferSize, responseStr);
