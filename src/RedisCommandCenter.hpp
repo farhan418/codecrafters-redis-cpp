@@ -508,12 +508,12 @@ namespace RCC {
       // generate rdb file if PSYNC ? -1 
       if ("?" == command[1]) {
         std::string rdbFileName = "rdbFile_" + masterReplid;
-        _generateRDBFile(RCC::RDB_FILE_DIR + rdbFileName);
+        _generateRDBFile(RDB_FILE_DIR + rdbFileName);
 
-        std::ifstream fin(RCC::RDB_FILE_DIR + rdbFileName, std::ios::binary);
+        std::ifstream fin(RDB_FILE_DIR + rdbFileName, std::ios::binary);
         if (!fin) {
-          DEBUG_LOG("failed to open file : " + RCC::RDB_FILE_DIR + rdbFileName);
-          response = "failed to open file : " + RCC::RDB_FILE_DIR + rdbFileName;
+          DEBUG_LOG("failed to open file : " + RDB_FILE_DIR + rdbFileName);
+          response = "failed to open file : " + RDB_FILE_DIR + rdbFileName;
           dataType = "error";
           reply.push_back(RespParser::serialize({response}, dataType));
         }
@@ -576,6 +576,7 @@ namespace RCC {
     static std::map<std::string, std::string> configStore;
     static std::mutex configStoreMutex;
     static RedisDataStore redis_data_store_obj;
+    static std::string RDB_FILE_DIR;
   };
 
   std::map<std::string, std::string> RedisCommandCenter::configStore;
