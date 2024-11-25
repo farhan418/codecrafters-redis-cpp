@@ -462,13 +462,13 @@ namespace RCC {
     }
     
     std::vector<std::string> _commandREPLCONF(const std::vector<std::string>& command) {
-      std::vector<std::string> reply;
+      std::string response;
       std::string dataType;
       
       if (command.size() < 3) {
-        reply.push_back("few arguments provided for REPLCONF command.");
+        response = "few arguments provided for REPLCONF command.");
         dataType = "error";
-        return {RespParser::serialize(reply, dataType)};
+        return {RespParser::serialize({response}, dataType)};
       }
 
       if (utility::compareCaseInsensitive("listening-port", command[1])) {
@@ -479,9 +479,9 @@ namespace RCC {
         // save capabilities
         DEBUG_LOG("Capabilities : " + command[2]);
       }
-      reply.push_back("OK");
+      response = "OK";
       dataType = "simple_string";
-      return {RespParser::serialize(reply, dataType)};
+      return {RespParser::serialize({response}, dataType)};
     }
 
     std::vector<std::string> _commandPSYNC(const std::vector<std::string>& command) {
