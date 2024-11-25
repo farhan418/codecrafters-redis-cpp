@@ -49,12 +49,12 @@ public:
     int numBytesRead = respToken.length();
     ss << "deserialize : read " << numBytesRead << " bytes : ";
     for(int i = 0; i < numBytesRead; i++) {
-    if (buffer[i] == '\r')
+    if (respToken[i] == '\r')
         ss << "\\r";
-    else if (buffer[i] == '\n') 
+    else if (respToken[i] == '\n') 
         ss << "\\n";
     else
-        ss << buffer[i];
+        ss << respToken[i];
     if (i == numBytesRead)
         break;
     }
