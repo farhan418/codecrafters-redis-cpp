@@ -56,7 +56,8 @@ public:
       break;
 
       default:
-      std::string errStr = "invalid respToken : \'" + respToken + "\' (" + std::to_string(static_cast<int>(respToken)) + ")";
+      size_t byte = respToken;
+      std::string errStr = "invalid respToken : \'" + respToken + "\' (" + std::to_string(byte) + ")";
       DEBUG_LOG(errStr);
       throw std::runtime_error("runtimeError -> " + errStr);
       break;
