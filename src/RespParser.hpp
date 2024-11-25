@@ -56,8 +56,8 @@ public:
       break;
 
       default:
-      size_t byte = respToken;
-      std::string errStr = "invalid respToken : \'" + respToken + "\' (" + std::to_string(byte) + ")";
+      // size_t byte = respToken.at(0);
+      std::string errStr = "invalid respToken : \'" + respToken + "\' (" + std::to_string(respToken.at(0)) + ")";
       DEBUG_LOG(errStr);
       throw std::runtime_error("runtimeError -> " + errStr);
       break;
