@@ -56,8 +56,9 @@ public:
       break;
 
       default:
-      DEBUG_LOG("invalid respToken");
-      throw std::runtime_error("invalid respToken \'" + respToken + "\'");
+      std::string errStr = "invalid respToken : \'" + respToken + "\' (" + std::to_string(static_cast<int>(respToken)) + ")";
+      DEBUG_LOG(errStr);
+      throw std::runtime_error("runtimeError -> " + errStr);
       break;
     }
     return command;
