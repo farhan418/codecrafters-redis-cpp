@@ -175,6 +175,11 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RCC::RedisCommand
     return -1;
   } 
 
+  // std::stringstream ss;  
+  // for (int i = 0; i < numBytes; i++) {
+
+  // }
+
   // parsing each command and processing it
   respParser.resetParser(buffer);
   while(!respParser.isParsedAllTokens()) {

@@ -45,6 +45,21 @@ private:
 
 public:
   std::vector<std::string> deserialize(const std::string& respToken) {
+    std::stringstream ss(respToken);
+    int numBytesRead = respToken.length();
+    ss << "deserialize : read " << numBytesRead << " bytes : ";
+    for(int i = 0; i < numBytesRead; i++) {
+    if (buffer[i] == '\r')
+        ss << "\\r";
+    else if (buffer[i] == '\n') 
+        ss << "\\n";
+    else
+        ss << buffer[i];
+    if (i == numBytesRead)
+        break;
+    }
+    DEBUG_LOG(ss.str());
+
     std::vector<std::string> command;
     // DEBUG_LOG("\'" + respToken + "\' in deserialize, respToken[0] = " + respToken[0]);
     switch(respToken[0]) {
