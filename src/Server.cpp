@@ -19,8 +19,8 @@
 #include "PollManager.hpp"
 
 
-int clientHandler(int, RespParser&, RedisCommandCenter&, pm::PollManager&);
-int doReplicaMasterHandshake(int, RespParser&, RedisCommandCenter&);
+int clientHandler(int, RespParser&, RCC::RedisCommandCenter&, pm::PollManager&);
+// int doReplicaMasterHandshake(int, RespParser&, RCC::RedisCommandCenter&);
 int process_cmdline_args(int, char**, argparse::ArgumentParser&);
 
 int main(int argc, char **argv) {
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
   pm::SocketSetting socketSetting;  // struct object to pass socket settings to PollManager obj 
   pm::PollManager pollManager;  // object to manage sockets using poll()
   RespParser respParser;  // to parse RESP protocol
-  RedisCommandCenter rcc;  // to execute Redis commands
+  RCC::RedisCommandCenter rcc;  // to execute Redis commands
   const int timeout_ms = 500;  // 0 means non blocking; if > 0 then poll() in pm::PollManager::pollSockets() will block for timeout_ms seconds
   // std::vector<struct pollfd> readySocketPollfdVec;  // to get list of sockets which are ready to readFrom or writeTo
   bool isSlaveServer = false;  // to track if current server running is replica or master
@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 
   // if current server is replica, then store info in config_kv and connect to master by creating a new socket
   if (auto replicaof = arg_parser.present("--replicaof")) {
-    RedisCommandCenter::set_slave_info(*replicaof, listeningPortNumber, "psync2");
+    RCC::RedisCommandCenter::set_slave_info(*replicaof, listeningPortNumber, "psync2");
     DEBUG_LOG("this server is a replica of " + (*replicaof));
     isSlaveServer = true;
     if (0 != socketSetting.resetSocketSettings()) {
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     else {
       DEBUG_LOG("successfully connected to master : " + (*replicaof));
       // isConnectedToMasterServer = true;  // will make true after sending handshake
-      if (0 == doReplicaMasterHandshake(serverConnectorSocketFD, respParser, rcc)) {
+      if (0 == rcc.doReplicaMasterHandshake(serverConnectorSocketFD, respParser)) {
         DEBUG_LOG("successfully done handshake with master");
         isHandShakeSuccessful = true;
         isConnectedToMasterServer = true;
@@ -95,14 +95,14 @@ int main(int argc, char **argv) {
     }
   }
   else {  // means master server & by default isSlaveServer = false; isConnectedToMasterServer = false;
-    RedisCommandCenter::set_master_info();
+    RCC::RedisCommandCenter::set_master_info();
   }
 
   if (auto dir = arg_parser.present("--dir")) {
     if (auto dbfilename = arg_parser.present("--dbfilename")) {
-      RedisCommandCenter::set_config_kv("dir", *dir);
-      RedisCommandCenter::set_config_kv("dbfilename", *dbfilename);
-      RedisCommandCenter::read_rdb_file();
+      RCC::RedisCommandCenter::set_config_kv("dir", *dir);
+      RCC::RedisCommandCenter::set_config_kv("dbfilename", *dbfilename);
+      RCC::RedisCommandCenter::read_rdb_file();
     }
     else {
       // continue without reading RDB file, graceful handling
@@ -142,8 +142,7 @@ int main(int argc, char **argv) {
       else {
         // handle replication
         if ((!isHandShakeSuccessful) || (!isConnectedToMasterServer)) {
-          // doReplicaMasterHandshake(serverConnectorSocketFD, respParser, rcc);
-          if (0 == doReplicaMasterHandshake(serverConnectorSocketFD, respParser, rcc)) {
+          if (0 == rcc.doReplicaMasterHandshake(serverConnectorSocketFD, respParser)) {
             DEBUG_LOG("successfully done handshake with master");
             isHandShakeSuccessful = true;
             isConnectedToMasterServer = true;
@@ -161,165 +160,37 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser, RedisCommandCenter& rcc) {
-  int numBytes = 0;
-  char buffer[1024];  // 1KB buffer to use when reading from or writing to socket
-  std::stringstream ss;
+int clientHandler(int currentSocketFD, RespParser& respParser, RCC::RedisCommandCenter& rcc, pm::PollManager& pollManager) {
+  const uint16_t bufferSize = 1024;  // 1KB buffer to use when reading from or writing to socket
+  char buffer[bufferSize];
 
-  std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa", "PSYNC ? -1"};
-  std::vector<std::string> dataTypeVec{"array", "array", "array", "array"};
-  std::vector<std::string> expectedResultVec{"PONG", "OK", "OK", "FULLRESYNC abcdefghijklmnopqrstuvwxyz1234567890ABCD 0"};
-  std::vector<std::string> resultDataTypeVec{"simple_string", "simple_string", "simple_string", "simple_string"};
-
-  auto listeningPortNumber = rcc.get_config_kv("listening-port");
-  if (listeningPortNumber.has_value())
-    handShakeCommands[1] += " " + (*listeningPortNumber);
-
-  auto capa = rcc.get_config_kv("capa");
-  if (capa.has_value())
-    handShakeCommands[2] += " " + (*capa);
-
-  for (int i = 0; i < handShakeCommands.size(); i++) {
-    std::string str = RespParser::serialize(utility::split(handShakeCommands[i], " "), dataTypeVec[i]);
-    
-    int counter = 0;
-    while (counter < 3) {
-      counter++;
-      memset(buffer, 0, sizeof(buffer));
-      memcpy(buffer, str.c_str(), str.length());
-      numBytes = write(serverConnectorSocketFD, buffer, str.length());
-      if (numBytes > 0)
-        break;
-      else {
-        DEBUG_LOG("writing to socket during handshake failed, trying again...");
-      }
-    }
-    
-    ss.clear();
-    ss << "\nSent " << numBytes << " bytes : " << buffer;
-    DEBUG_LOG(ss.str());
-    
-    if (numBytes < 0) {
-      DEBUG_LOG("Failed to write message to socket.\n");
-      return -1;
-    }
-
-    counter = 0;
-    while(counter < 3) {
-      counter++;
-      memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
-      numBytes = read(serverConnectorSocketFD, buffer, sizeof(buffer));
-      if (numBytes < 0) {
-        DEBUG_LOG("Error reading from socket.\n");
-        return -1;
-      }
-      else {
-        break;
-      }
-    }
-
-    std::string response(buffer);
-    bool isCase3Matching = false;
-    if ((i==3/*PSYNC command*/)) {
-      std::vector<std::string> responseVec = utility::split(buffer);
-      isCase3Matching = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
-      isCase3Matching = isCase3Matching && (responseVec[1].length() == 40);
-      isCase3Matching = isCase3Matching && (responseVec.size() == 3);
-    }
-    if (!isCase3Matching || !utility::compareCaseInsensitive(RespParser::serialize(utility::split(expectedResultVec[i]), resultDataTypeVec[i]), response)) {
-      DEBUG_LOG("error occurred while replica master handshake - did not receive reply for ");
-    }
-    else {
-      DEBUG_LOG("got reply to " + handShakeCommands[i] + " as expected");
-    }
-  }
-
-    //   std::string expectedRespString = RespParser::serialize(utility::split(expectedResultVec[i]), resultDataTypeVec[i]);
-    // bool isExpectedResponse = utility::compareCaseInsensitive(expectedRespString, response) || (handShakeCommands.startswith("PSYNC")
-
-  // ss.clear();
-  // ss << "read " << numBytes << " bytes : " << buffer;
-  // DEBUG_LOG(ss.str());
-
-  // // parsing each command and processing it
-  // respParser.resetParser(buffer);
-  // while(!respParser.isParsedAllTokens()) {
-  //   std::vector<std::string> command = respParser.deserialize(respParser.parseNextToken(""));  // parse a command
-
-
-  //   std::string response_str = rcc.process(command);  // process command
-  //   ss.clear();
-  //   ss << "processed command = ";
-  //   for (auto& c : command)
-  //     ss << c << " ";
-  //   ss << "response_str : " << response_str;
-  //   DEBUG_LOG(ss.str());
-    
-  // } // while loop to process all tokens (even multiple commands)
-  // close(currentSocketFD);  // PollManager should close connection
-  return 0;
-}
-
-int clientHandler(int currentSocketFD, RespParser& respParser, RedisCommandCenter& rcc, pm::PollManager& pollManager) {
-  static int counter = 0;
-  counter++;
-  int numBytes = 0;
-  char buffer[1024];  // 1KB buffer to use when reading from or writing to socket
-  std::stringstream ss;
-
-  memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
-  numBytes = read(currentSocketFD, buffer, sizeof(buffer));
-  if (numBytes < 0) {
-    DEBUG_LOG("Error reading from socket.\n");
-    return -1;
-  }
-
-  // ss.clear();
-  // ss << "counter=" << counter << ", from socketFD = " << currentSocketFD << ", read " << numBytes << " bytes, command = \'";
-  
-  // std::string temp;
-  // for(int i = 0; i < numBytes; i++) {
-  //   if (buffer[i] == '\r')
-  //     temp += "\\r";
-  //   else if (buffer[i] == '\n') 
-  //     temp += "\\n";
-  //   else
-  //     temp += buffer[i];
-  //   if (i == numBytes)
-  //     break;
-  // }
-  // ss << temp << "\', numBytes=" << numBytes;
-  // DEBUG_LOG(ss.str());
-
-  if (numBytes == 0) {  // connection closed
+  int numBytes = utility::readFromSocketFD(currentSocketFD, buffer, bufferSize);
+  if (numBytes == 0) {  // if 0 bytes read, it means connection closed
+    DEBUG_LOG("Failed to read message from socket : connection closed\n");
     pollManager.deleteSocketFDFromPollfdArr(currentSocketFD);
     return 0;
   }
+  else if (numBytes < 0) {
+    DEBUG_LOG("Failed to read message from socket.\n");
+    return -1;
+  } 
 
   // parsing each command and processing it
   respParser.resetParser(buffer);
   while(!respParser.isParsedAllTokens()) {
     std::vector<std::string> command = respParser.deserialize(respParser.parseNextToken(""));  // parse a command
-    std::string response_str = rcc.process(command);  // process command
-    ss.clear();
-    ss << "processed command = \"";
-    for (auto& c : command)
-      ss << c << " ";
-    ss << "\", response_str : " << response_str;
-    DEBUG_LOG(ss.str());
-
-    // writing the result of the command to the socket
-    memset(buffer, 0, sizeof(buffer));
-    memcpy(buffer, response_str.c_str(), response_str.length());
-    numBytes = write(currentSocketFD, buffer, response_str.length());
-    
-    ss.clear();
-    ss << "\nSent " << numBytes << " bytes : " << buffer;
-    DEBUG_LOG(ss.str());
-    
-    if (numBytes < 0) {
-      DEBUG_LOG("Failed to write message to socket.\n");
-      return -1;
+    std::vector<std::string> responseStrVec = rcc.process(command);  // process command
+    for (auto& responseStr : responseStrVec) {
+      numBytes = utility::writeToSocketFD(currentSocketFD, buffer, bufferSize, responseStr);
+      if (numBytes < 0) {
+        DEBUG_LOG("Failed to write message to socket.\n");
+        return -1;
+      }
+      else if (numBytes == 0) {  // if 0 bytes, it means connection closed
+        DEBUG_LOG("Failed to write message to socket : connection closed\n");
+        pollManager.deleteSocketFDFromPollfdArr(currentSocketFD);
+        return 0;
+      }
     }
   } // while loop to process all tokens (even multiple commands)
   // close(currentSocketFD);  // PollManager should close connection

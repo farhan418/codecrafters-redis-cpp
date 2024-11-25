@@ -5,6 +5,7 @@
 #include <chrono>
 #include <ctime>
 #include <regex>
+#include <sys/socket.h>
 
 
 // #ifndef DEBUG_LOG
@@ -39,6 +40,69 @@ namespace utility {
 
         return str1_lower.compare(str2_lower) == 0;
     }
+
+    uint8_t convertHexCharToByte(char hexChar4bits) {
+        uint8_t byte = 0;
+        if (hexChar4bits >= '0' && hexChar4bits <= '9') {
+            return hexChar4bits - '0';
+        }
+        else if (hexChar4bits >= 'A' && hexChar4bits <= 'F') {
+            return (hexChar4bits - 'A') + 10;
+        }
+        else if (hexChar4bits >= 'a' && hexChar4bits <= 'f') {
+            return (hexChar4bits - 'a') + 10;
+        }
+    }
+
+    int readFromSocketFD(int& sockFD, char* buffer, const int& bufferSize) {
+        // reads from a socket fd and returns number of bytes read
+
+        memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
+        int numBytesRead = read(sockFD, buffer, bufferSize);
+
+        if (numBytesRead <= 0) {
+            DEBUG_LOG("connection closed (if 0 returned) or Error reading from socket: " + std::to_string(sockFD) + " (if -ve returned.)\n");
+            return numBytesRead;
+        }
+
+        std::stringstream ss;
+        ss << "read " << numBytesRead << " bytes : ";
+        for(int i = 0; i < numBytesRead; i++) {
+          if (buffer[i] == '\r')
+            ss << "\\r";
+          else if (buffer[i] == '\n') 
+            ss << "\\n";
+          else
+            ss << buffer[i];
+          if (i == numBytesRead)
+            break;
+        }
+        DEBUG_LOG(ss.str());
+        return numBytesRead;
+    }
+
+    int writeToSocketFD(int& sockFD, char* buffer, const int& bufferSize, const std::string& content) {
+        // writes to a socket fd and returns number of bytes sent
+        
+        if (content.length() > bufferSize) {
+            DEBUG_LOG("content.length() > bufferSize : use sendall()");
+            return -1;
+        }
+
+        memset(buffer, 0, sizeof(buffer));
+        memcpy(buffer, content.c_str(), content.length());
+        int numBytesWritten = write(sockFD, buffer, content.length());
+        if (numBytesWritten <= 0) {
+            DEBUG_LOG("connection closed (if 0 returned) or Error writing to socket: " + std::to_string(sockFD) + " (if -ve returned)\n");
+            return numBytesWritten;
+        }
+
+        std::stringstream ss;
+        ss << "sent " << numBytesWritten << " bytes : " << buffer;
+        DEBUG_LOG(ss.str());
+        return numBytesWritten;
+    }
+
 };
 
 // static void DEBUG_LOG(std::string msg) {
