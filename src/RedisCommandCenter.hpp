@@ -166,14 +166,14 @@ namespace RCC {
       return 0;
     }
 
-    std::string process(const std::vector<std::string>& command) {
+    std::vector<std::string> process(const std::vector<std::string>& command) {
       std::vector<std::string> responseStrVec = _process(command);
       std::stringstream ss;
       ss << "processed command = \"";
       for (auto& c : command)
         ss << c << " ";
       ss << "\", responseStr : ";
-      for (auto& responseStr : responseVec)
+      for (auto& responseStr : responseStrVec)
         ss << "\n" << responseStr;
       DEBUG_LOG(ss.str());
       return responseStrVec;
@@ -217,7 +217,7 @@ namespace RCC {
         
         int counter = 0;
         while (counter < 3) {
-          numBytes = utility::writeToSocketFD(serverConnectorSocketFD, buffer, bufferSize, str);
+          int numBytes = utility::writeToSocketFD(serverConnectorSocketFD, buffer, bufferSize, str);
           if (numBytes > 0) {
             break;
           }
@@ -488,7 +488,7 @@ namespace RCC {
       std::string dataType;
 
       if (command.size() < 3) {
-        response = "few arguments provided for PSYNC command.");
+        response = "few arguments provided for PSYNC command.";
         dataType = "error";
         return {RespParser::serialize({response}, dataType)};
       }
@@ -500,19 +500,19 @@ namespace RCC {
       auto masterReplOffset = get_config_kv("master_repl_offset").value_or("0");
 
       std::vector<std::string> reply;
-      response = "FULLRESYNC " + *masterReplid + " " + *masterReplOffset;
+      response = "FULLRESYNC " + masterReplid + " " + masterReplOffset;
       dataType = "simple_string";
       reply.push_back(RespParser::serialize({response}, dataType));
 
       // generate rdb file if PSYNC ? -1 
       if ("?" == command[1]) {
-        std::string rdbFileName = "rdbFile_" + *masterReplid;
-        _generateRDBFile(RDB_FILE_DIR + rdbFileName);
+        std::string rdbFileName = "rdbFile_" + masterReplid;
+        _generateRDBFile(RedisCommandCenter::RDB_FILE_DIR + rdbFileName);
 
-        std::ifstream fin(RDB_FILE_DIR + rdbFileName, std::ios::binary);
+        std::ifstream fin(RedisCommandCenter::RDB_FILE_DIR + rdbFileName, std::ios::binary);
         if (!fin) {
-          DEBUG_LOG("failed to open file : " + RDB_FILE_DIR + rdbFileName);
-          response = "failed to open file : " + RDB_FILE_DIR + rdbFileName;
+          DEBUG_LOG("failed to open file : " + RedisCommandCenter::RDB_FILE_DIR + rdbFileName);
+          response = "failed to open file : " + RedisCommandCenter::RDB_FILE_DIR + rdbFileName;
           dataType = "error";
           reply.push_back(RespParser::serialize({response}, dataType));
         }
@@ -526,7 +526,7 @@ namespace RCC {
         const std::size_t bufferSize = 4096;
         char buffer[bufferSize];
         while (fin.read(buffer, bufferSize)) {
-            rdbFileContent.write(buffer, fin.gcount())
+            rdbFileContent.write(buffer, fin.gcount());
         }
         fin.close();
         reply.push_back(rdbFileContent.str());
@@ -556,7 +556,7 @@ namespace RCC {
       std::stringstream ss(emptyRdbFile);
       // std::stringstream ss(hexContent);
       std::ofstream fout(rdbFileName, std::ios::binary);
-      if (!fout.open()) {
+      if (!fout) {
         DEBUG_LOG("error opening file in binary mode : " + rdbFileName);
         fout.close();
         return 0;

@@ -44,14 +44,15 @@ namespace utility {
     uint8_t convertHexCharToByte(char hexChar4bits) {
         uint8_t byte = 0;
         if (hexChar4bits >= '0' && hexChar4bits <= '9') {
-            return hexChar4bits - '0';
+            byte = hexChar4bits - '0';
         }
         else if (hexChar4bits >= 'A' && hexChar4bits <= 'F') {
-            return (hexChar4bits - 'A') + 10;
+            byte = (hexChar4bits - 'A') + 10;
         }
         else if (hexChar4bits >= 'a' && hexChar4bits <= 'f') {
-            return (hexChar4bits - 'a') + 10;
+            byte = (hexChar4bits - 'a') + 10;
         }
+        return byte;
     }
 
     int readFromSocketFD(int& sockFD, char* buffer, const int& bufferSize) {
