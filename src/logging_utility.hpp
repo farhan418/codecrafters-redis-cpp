@@ -55,6 +55,53 @@ namespace utility {
         return byte;
     }
 
+int readFromSocketFD(int& sockFD, char* buffer, const int& bufferSize, const int& retryCount) {
+        // reads from a socket fd and returns number of bytes read
+
+        bool isSuccessfullyRead = false;
+        int counter = 0;
+        int numBytesRead;
+
+        while (counter < retryCount) {
+            memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
+            numBytesRead = read(sockFD, buffer, bufferSize);
+
+            // if (numBytesRead <= 0) {
+            //     DEBUG_LOG("connection closed (if 0 returned) or Error reading from socket: " + std::to_string(sockFD) + " (if -ve returned.)\n");
+            //     return numBytesRead;
+            // }
+            if (numBytesRead == 0) {
+                DEBUG_LOG("error while reading from socket " + std::to_string(sockFD) + " : connection closed (0 returned)");
+                break;
+            }
+            else if (numBytesRead < 0) {
+                DEBUG_LOG("Error reading from socket: " + std::to_string(sockFD) + " (return value is -ve)\n");
+            }
+            else {
+                isSuccessfullyRead = true;
+                break;
+            }
+            counter++;
+        }
+        
+        if (isSuccessfullyRead) {
+            std::stringstream ss;
+            ss << "read " << numBytesRead << " bytes : ";
+            for(int i = 0; i < numBytesRead; i++) {
+            if (buffer[i] == '\r')
+                ss << "\\r";
+            else if (buffer[i] == '\n') 
+                ss << "\\n";
+            else
+                ss << buffer[i];
+            if (i == numBytesRead)
+                break;
+            }
+            DEBUG_LOG(ss.str());
+        }
+        return numBytesRead;
+    }
+
     int readFromSocketFD(int& sockFD, char* buffer, const int& bufferSize) {
         // reads from a socket fd and returns number of bytes read
 
@@ -80,6 +127,44 @@ namespace utility {
         }
         DEBUG_LOG(ss.str());
         return numBytesRead;
+    }
+
+    int writeToSocketFD(int& sockFD, char* buffer, const int& bufferSize, const std::string& content, const int& retryCount) {
+        // writes to a socket fd and returns number of bytes sent
+        
+        if (content.length() > bufferSize) {
+            DEBUG_LOG("content.length() > bufferSize : use sendall()");
+            return -1;
+        }
+
+        bool isSuccessfullyWritten = false;
+        int numBytesWritten;
+        int counter = 0;
+
+        while (counter < retryCount) {
+            memset(buffer, 0, sizeof(buffer));
+            memcpy(buffer, content.c_str(), content.length());
+            numBytesWritten = write(sockFD, buffer, content.length());
+            if (numBytesWritten == 0) {
+                DEBUG_LOG("error while writing to socket " + std::to_string(sockFD) + " : connection closed (0 returned)");
+                break;
+            }
+            else if (numBytesWritten < 0) {
+                DEBUG_LOG("Error writing to socket: " + std::to_string(sockFD) + " (return value is -ve)\n");
+            }
+            else {
+                isSuccessfullyWritten = true;
+                break;
+            }
+            counter++;
+        }
+
+        if (isSuccessfullyWritten) {
+            std::stringstream ss;
+            ss << "sent " << numBytesWritten << " bytes : " << buffer;
+            DEBUG_LOG(ss.str());
+        }
+        return numBytesWritten;
     }
 
     int writeToSocketFD(int& sockFD, char* buffer, const int& bufferSize, const std::string& content) {

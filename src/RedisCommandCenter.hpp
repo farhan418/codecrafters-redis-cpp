@@ -187,7 +187,7 @@ namespace RCC {
         return -1;
     }
 
-    int doReplicaMasterHandshake(int serverConnectorSocketFD, RespParser& respParser) {
+    int doReplicaMasterHandshake(int& serverConnectorSocketFD, RespParser& respParser) {
       return _doReplicaMasterHandshake(serverConnectorSocketFD, respParser);
     }
 
@@ -211,41 +211,34 @@ namespace RCC {
       
       const uint16_t bufferSize = 1024;  // 1KB buffer to use when reading from or writing to socket
       char buffer[bufferSize];
-      int counter, numBytes;
+      const int retryCount = 3;
+      int numBytes;
 
       for (int i = 0; i < handShakeCommands.size(); i++) {
         std::string str = RespParser::serialize(utility::split(handShakeCommands[i], " "), sendDataType);
-        
-        counter = 0;
-        while (counter < 3) {
-          numBytes = utility::writeToSocketFD(serverConnectorSocketFD, buffer, bufferSize, str);
-          if (numBytes > 0) {
-            break;
-          }
-          else if (numBytes == 0){
-            DEBUG_LOG("writing to socket during handshake failed : connection closed");
-            return -1;
-          }
-          else {  // numBytes is -ve
-            DEBUG_LOG("writing to socket during handshake failed");
-          }
-          counter++;
+        numBytes = utility::writeToSocketFD(serverConnectorSocketFD, buffer, bufferSize, str, retryCount);
+        if (numBytes > 0) {
+          DEBUG_LOG("successfully sent command : " + str);
+        }
+        else if (numBytes == 0){
+          DEBUG_LOG("writing to socket during handshake failed : connection closed");
+          return -1;
+        }
+        else {  // numBytes is -ve
+          DEBUG_LOG("writing to socket during handshake failed");
         }
 
-        counter = 0;
-        while(counter < 3) {
-          numBytes = utility::readFromSocketFD(serverConnectorSocketFD, buffer, bufferSize);
-          if (numBytes > 0) {
-            break;
-          }
-          else if (numBytes == 0) {
-            DEBUG_LOG("Error reading from socket : connection closed\n");
-            return -1;
-          }
-          else {  // numBytes is -ve
-            DEBUG_LOG("error while reading from socket");
-          }
-          counter++;
+        numBytes = utility::readFromSocketFD(serverConnectorSocketFD, buffer, bufferSize, retryCount);
+        if (numBytes > 0) {
+          DEBUG_LOG("successfully read command : " + buffer);
+          break;
+        }
+        else if (numBytes == 0) {
+          DEBUG_LOG("Error reading from socket : connection closed\n");
+          return -1;
+        }
+        else {  // numBytes is -ve
+          DEBUG_LOG("error while reading from socket");
         }
 
         std::string response(buffer);
