@@ -211,13 +211,14 @@ namespace RCC {
       
       const uint16_t bufferSize = 1024;  // 1KB buffer to use when reading from or writing to socket
       char buffer[bufferSize];
-      
+      int counter, numBytes;
+
       for (int i = 0; i < handShakeCommands.size(); i++) {
         std::string str = RespParser::serialize(utility::split(handShakeCommands[i], " "), sendDataType);
         
-        int counter = 0;
+        counter = 0;
         while (counter < 3) {
-          int numBytes = utility::writeToSocketFD(serverConnectorSocketFD, buffer, bufferSize, str);
+          numBytes = utility::writeToSocketFD(serverConnectorSocketFD, buffer, bufferSize, str);
           if (numBytes > 0) {
             break;
           }
@@ -507,12 +508,12 @@ namespace RCC {
       // generate rdb file if PSYNC ? -1 
       if ("?" == command[1]) {
         std::string rdbFileName = "rdbFile_" + masterReplid;
-        _generateRDBFile(RedisCommandCenter::RDB_FILE_DIR + rdbFileName);
+        _generateRDBFile(RCC::RDB_FILE_DIR + rdbFileName);
 
-        std::ifstream fin(RedisCommandCenter::RDB_FILE_DIR + rdbFileName, std::ios::binary);
+        std::ifstream fin(RCC::RDB_FILE_DIR + rdbFileName, std::ios::binary);
         if (!fin) {
-          DEBUG_LOG("failed to open file : " + RedisCommandCenter::RDB_FILE_DIR + rdbFileName);
-          response = "failed to open file : " + RedisCommandCenter::RDB_FILE_DIR + rdbFileName;
+          DEBUG_LOG("failed to open file : " + RCC::RDB_FILE_DIR + rdbFileName);
+          response = "failed to open file : " + RCC::RDB_FILE_DIR + rdbFileName;
           dataType = "error";
           reply.push_back(RespParser::serialize({response}, dataType));
         }
