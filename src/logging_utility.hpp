@@ -17,6 +17,7 @@
 
 #ifndef DEBUG_LOG
 #define DEBUG_LOG(msg) \
+std::cerr << std::unitbuf;\
 std::cerr << "\n[" << std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()) << "] [" << __FILE__ << ":" << __LINE__ << "] " << __func__ << "() : " << (msg) << std::endl;
 #endif
 
@@ -83,7 +84,7 @@ int readFromSocketFD(int& sockFD, char* buffer, const int& bufferSize, const int
             }
             counter++;
         }
-        
+
         if (isSuccessfullyRead) {
             std::stringstream ss;
             ss << "read " << numBytesRead << " bytes : ";
