@@ -230,7 +230,7 @@ namespace RCC {
 
         numBytes = utility::readFromSocketFD(serverConnectorSocketFD, buffer, bufferSize, retryCount);
         if (numBytes > 0) {
-          DEBUG_LOG("successfully read command : " + buffer);
+          DEBUG_LOG("successfully read command : " + std::string(buffer));
           break;
         }
         else if (numBytes == 0) {
