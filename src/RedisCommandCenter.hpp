@@ -466,7 +466,7 @@ namespace RCC {
       std::string dataType;
       
       if (command.size() < 3) {
-        response = "few arguments provided for REPLCONF command.");
+        response = "few arguments provided for REPLCONF command.";
         dataType = "error";
         return {RespParser::serialize({response}, dataType)};
       }
