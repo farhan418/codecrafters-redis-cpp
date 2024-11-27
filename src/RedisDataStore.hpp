@@ -12,7 +12,7 @@
 #include <vector>
 #include <cstdint>
 #include <algorithm>
-#include "logging_utility.hpp"
+#include "utility.hpp"
 
 // typedef std::pair<std::string, std::string> KVPair;
 typedef std::pair<std::string, uint64_t> KEPair;

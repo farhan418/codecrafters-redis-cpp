@@ -13,7 +13,7 @@
 #include "RespParser.hpp"
 #include "RedisDataStore.hpp"
 #include "RdbFileReader.hpp"
-#include "logging_utility.hpp"
+#include "utility.hpp"
 
 namespace RCC {
 

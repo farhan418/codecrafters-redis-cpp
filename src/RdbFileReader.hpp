@@ -10,7 +10,7 @@
 
 #include "RedisDataStore.hpp"
 #include "RedisCommandCenter.hpp"
-#include "logging_utility.hpp"
+#include "utility.hpp"
 
 
 enum class ValueType : uint8_t {

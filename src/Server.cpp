@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
 
   argparse::ArgumentParser arg_parser("Redis Server");  // to parse command line arguments
   pm::SocketSetting socketSetting;  // struct object to pass socket settings to PollManager obj 
-  pm::PollManager pollManager;  // object to manage sockets using poll()
+  pm::PollManager pollManager;  // object to manage and poll() sockets
   RespParser respParser;  // to parse RESP protocol
   RCC::RedisCommandCenter rcc;  // to execute Redis commands
   const int timeout_ms = 500;  // 0 means non blocking; if > 0 then poll() in pm::PollManager::pollSockets() will block for timeout_ms seconds
@@ -174,11 +174,6 @@ int clientHandler(int currentSocketFD, RespParser& respParser, RCC::RedisCommand
     DEBUG_LOG("Failed to read message from socket.\n");
     return -1;
   } 
-
-  // std::stringstream ss;  
-  // for (int i = 0; i < numBytes; i++) {
-
-  // }
 
   // parsing each command and processing it
   respParser.resetParser(buffer);
