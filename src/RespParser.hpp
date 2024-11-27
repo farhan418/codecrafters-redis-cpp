@@ -483,7 +483,7 @@ namespace resp {
 
 //     return 0;
 // }
-#endif  // RESPPARSER_HPP
+// #endif  // RESPPARSER_HPP
 
 
 // namespace resp {

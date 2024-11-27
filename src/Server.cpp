@@ -14,7 +14,7 @@
 #include "RedisCommandCenter.hpp"
 #include "RespParser.hpp"
 // #include "RdbFileReader.hpp"
-#include "logging_utility.hpp"
+#include "utility.hpp"
 #include "argparse.hpp"
 #include "PollManager.hpp"
 
