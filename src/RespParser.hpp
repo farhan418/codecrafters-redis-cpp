@@ -145,11 +145,12 @@ namespace resp {
         return "$" + std::to_string(vec[0].length()) + RespConstants::CRLF + vec[0] + RespConstants::CRLF;
       }
       else if (respType == RespType::Array) {
-        std::string result = "*" + std::to_string(vec.size()) + RespConstants::CRLF;
+        std::ostringstream result;
+        result << "*" <<vec.size() << RespConstants::CRLF;
         for(auto& element : vec) {
-          result += "$" + std::to_string(element.length()) + RespConstants::CRLF + element + RespConstants::CRLF;
+          result << "$" << element.length() << RespConstants::CRLF << element << RespConstants::CRLF;
         }
-        return result;
+        return result.str();
       }
       else {
         std::string errMsg = "SERIALIZEERR error serializing data";
