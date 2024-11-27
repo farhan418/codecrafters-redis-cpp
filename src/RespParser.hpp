@@ -7,13 +7,6 @@
 #include <sstream>
 #include "utility.hpp"
 
-// #include "utility.hpp"
-#ifndef DEBUG_LOG
-#define DEBUG_LOG(msg) \
-std::cerr << std::unitbuf;\
-std::cerr << "\n[" << std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()) << "] [" << __FILE__ << ":" << __LINE__ << "] " << __func__ << "() : " << (msg) << std::endl;
-#endif
-
 namespace resp {
   enum class RespType : unsigned char {
     /* Refer https://redis.io/docs/latest/develop/reference/protocol-spec/#resp-protocol-description 
