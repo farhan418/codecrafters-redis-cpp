@@ -111,7 +111,8 @@ namespace utility {
                 std::ostringstream temp;
                 for (int i = numBytesRead; i < s.length(); i++) {
                     uint8_t byte = buffer[i];
-                    temp << "buffer[" << i << "] = " << buffer[i] << ", byte = " << byte;
+                    temp << "buffer[" << i << "] = " << buffer[i] << ", byte = " << static_cast<int>(byte) << "| ";
+                    // temp << "buffer[" << i << "] = " << buffer[i] << ", byte = " << byte;
                 }
                 DEBUG_LOG(temp.str());
             }
@@ -148,7 +149,7 @@ namespace utility {
             std::ostringstream temp;
             for (int i = numBytesRead; i < s.length(); i++) {
                 uint8_t byte = buffer[i];
-                temp << "buffer[" << i << "] = " << buffer[i] << ", byte = " << byte;
+                temp << "buffer[" << i << "] = " << buffer[i] << ", byte = " << static_cast<int>(byte) << "| ";
             }
             DEBUG_LOG(temp.str());
         }
