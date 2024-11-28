@@ -76,7 +76,7 @@ namespace RCC {
 
       std::vector<std::string> responseStrVec;
       for (auto& eachCommand : commands) {
-        responseStrVec.push_back(_process(eachCommand));
+        responseStrVec.push_back(_processSingleCommand(eachCommand));
       }
       ss.clear();
       ss << "responseStr : ";
@@ -250,7 +250,7 @@ namespace RCC {
     // }
 
 
-    std::vector<std::string> _process(const std::string& command) {
+    std::string _processSingleCommand(const std::string& command) {
       std::stringstream ss;
       // for (auto& c : commandVec)
           ss << "\"" << command << "\" | ";
