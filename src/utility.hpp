@@ -58,7 +58,7 @@ namespace utility {
 
     std::string printExact(const std::string& sampleRespStr) {
         std::ostringstream ss;
-        ss << "strLength=" << sampleRespStr.length() << "\"";
+        ss << "strLength=" << sampleRespStr.length() << ", \"";
         for(auto& c : sampleRespStr) {
             if (c == '\r') {
                 ss << "\\r";
@@ -72,6 +72,7 @@ namespace utility {
         ss << "\"";
         return ss.str();
     }
+    // *3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n6380\r\n
 
     int readFromSocketFD(int& sockFD, char* buffer, const int& bufferSize, const int& retryCount) {
         // reads from a socket fd and returns number of bytes read

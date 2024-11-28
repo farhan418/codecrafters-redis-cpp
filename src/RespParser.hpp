@@ -104,6 +104,7 @@ namespace resp {
     }
 
     void resetParser(const std::string& respStr) {
+      DEBUG_LOG(utility::printExact(respStr));
       respBuffer = respStr;
       respBufferIndex = 0;
       DEBUG_LOG(utility::printExact(respBuffer));
