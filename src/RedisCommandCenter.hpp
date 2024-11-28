@@ -13,6 +13,7 @@
 #include "RespParser.hpp"
 #include "RedisDataStore.hpp"
 #include "RdbFileReader.hpp"
+#include "PollManager.hpp"
 #include "utility.hpp"
 
 namespace RCC {

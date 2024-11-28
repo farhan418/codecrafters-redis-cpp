@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     }
     else {
       DEBUG_LOG("successfully connected to master : " + (*replicaof));
-      if (0 == rcc.doReplicaMasterHandshake(masterConnectorSocketFD, respParser)) {
+      if (0 == rcc.doReplicaMasterHandshake(masterConnectorSocketFD)) {
         DEBUG_LOG("successfully done handshake with master");
         isHandShakeSuccessful = true;
         isConnectedToMasterServer = true;
