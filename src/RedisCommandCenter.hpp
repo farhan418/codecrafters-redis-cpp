@@ -474,7 +474,8 @@ namespace RCC {
 
       std::vector<std::string> reply;
       response = "FULLRESYNC " + masterReplid + " " + masterReplOffset;
-      reply.push_back(resp::RespParser::serialize({response}, resp::RespType::SimpleString));
+      // reply.push_back(resp::RespParser::serialize({response}, resp::RespType::SimpleString));
+      response  = resp::RespParser::serialize({response}, resp::RespType::SimpleString);
 
       // generate rdb file if PSYNC ? -1 
       if ("?" == command[1]) {
@@ -500,9 +501,11 @@ namespace RCC {
             rdbFileContent.write(buffer, rdbFile.gcount());
         }
         rdbFile.close();
-        reply.push_back(rdbFileContent.str());
+        // reply.push_back(rdbFileContent.str());
+        response += rdbFileContent.str();
       }
-      return reply;
+      // return reply;
+      return response;
     }
 
     int _getInfo(std::vector<std::string>& reply, const std::string& section) {
