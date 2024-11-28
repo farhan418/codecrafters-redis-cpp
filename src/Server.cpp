@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
       DEBUG_LOG("encountered error while polling");
     }
     counter++;
-    if ((counter % 1000) == 0) {
+    if ((counter % 100000) == 0) {
       DEBUG_LOG("polled sockets, now looping...");
     }  
 
