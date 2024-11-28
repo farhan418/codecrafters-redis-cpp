@@ -185,10 +185,7 @@ namespace RCC {
 
     int _doReplicaMasterHandshake(int& serverConnectorSocketFD, resp::RespParser& respParser) {
       std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa", "PSYNC ? -1"};
-      const std::string receiveDataType = "simple_string";
       std::vector<std::string> expectedResultVec{"PONG", "OK", "OK", "FULLRESYNC abcdefghijklmnopqrstuvwxyz1234567890ABCD 0"};
-      // std::vector<std::string> dataTypeVec{"array", "array", "array", "array"};
-      // std::vector<std::string> resultDataTypeVec{"simple_string", "simple_string", "simple_string", "simple_string"};
       
       auto listeningPortNumber = getConfigKv("listening-port");
       if (listeningPortNumber.has_value())
@@ -197,17 +194,29 @@ namespace RCC {
       auto capa = getConfigKv("capa");
       if (capa.has_value())
         handShakeCommands[2] += " " + (*capa);
-      
+  
+      std::ostringstream respStrHandShakeCommandsToSend;
+      std::ostringstream respStrExpectedHandShakeResponse;
+      std::vector<std::string> commandVec;
+      // for (auto& hcommand : handShakeCommands) {
+      //   std::vector<std::string> commandVec = utility::split(hcommand, " ");
+      //   replicaHandshakeCommands << resp::RespParser::serialize(commandVec, resp::RespType::Array);
+      // }
+
       const uint16_t bufferSize = 1024;  // 1KB buffer to use when reading from or writing to socket
       char buffer[bufferSize];
       const int retryCount = 3;
       int numBytes;
+      std::string singleCommandToSend;
 
       for (int i = 0; i < handShakeCommands.size(); i++) {
-        std::string str = resp::RespParser::serialize(utility::split(handShakeCommands[i], " "), resp::RespType::Array);
-        numBytes = utility::writeToSocketFD(serverConnectorSocketFD, buffer, bufferSize, str, retryCount);
+        commandVec = utility::split(handShakeCommands[i], " ");
+        singleCommandToSend = resp::RespParser::serialize(commandVec, resp::RespType::Array);
+        
+        // send single command
+        numBytes = utility::writeToSocketFD(serverConnectorSocketFD, buffer, bufferSize, singleCommandToSend, retryCount);
         if (numBytes > 0) {
-          DEBUG_LOG("successfully sent command : " + str);
+          DEBUG_LOG("successfully sent command : " + utility::printExact(singleCommandToSend));
         }
         else if (numBytes == 0){
           DEBUG_LOG("writing to socket during handshake failed : connection closed");
@@ -217,10 +226,10 @@ namespace RCC {
           DEBUG_LOG("writing to socket during handshake failed");
         }
 
+        // reading response
         numBytes = utility::readFromSocketFD(serverConnectorSocketFD, buffer, bufferSize, retryCount);
         if (numBytes > 0) {
-          DEBUG_LOG("successfully read command : " + std::string(buffer));
-          break;
+          DEBUG_LOG("successfully read command : " + utility::printExact(buffer));
         }
         else if (numBytes == 0) {
           DEBUG_LOG("Error reading from socket : connection closed\n");
@@ -230,23 +239,108 @@ namespace RCC {
           DEBUG_LOG("error while reading from socket");
         }
 
+        // checking if response is expected 
         std::string response(buffer);
-        bool isCase3Matching = false;
-        if ((i==3/*PSYNC command*/)) {
+        commandVec = utility::split(expectedResultVec[i], " ");
+        std::string expectedResponse = resp::RespParser::serialize(commandVec, resp::RespType::SimpleString);
+        bool isExpectedResponse = false;
+        if (i != 3) {
+          if (response == expectedResponse) {
+            isExpectedResponse = true;
+          }
+          else {
+            isExpectedResponse = false;
+          }
+        }
+        else if ((i==3/*PSYNC command*/)) {
           std::vector<std::string> responseVec = utility::split(buffer);
           isCase3Matching = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
           isCase3Matching = isCase3Matching && (responseVec[1].length() == 40);
           isCase3Matching = isCase3Matching && (responseVec.size() == 3);
         }
-        if (!isCase3Matching || !utility::compareCaseInsensitive(resp::RespParser::serialize(utility::split(expectedResultVec[i]), resp::RespType::SimpleString), response)) {
-          DEBUG_LOG("error occurred while replica master handshake - did not receive reply for ");
+        // if (!isCase3Matching || !utility::compareCaseInsensitive(resp::RespParser::serialize(utility::split(expectedResultVec[i]), receiveDataType), response)) {
+        // }
+
+        if (isExpectedResponse) {
+          DEBUG_LOG("got reply to handShakeCommands as expected, handshake successful");
         }
         else {
-          DEBUG_LOG("got reply to " + handShakeCommands[i] + " as expected");
+          DEBUG_LOG("error occurred while replica master handshake - response not as expected, response : " + utility::printExact(response));
         }
+
       }
+      
+      // for (int i = 0; i < handShakeCommands.size(); i++) {
+      // std::string str = resp::RespParser::serialize(utility::split(handShakeCommands[i], " "), sendDataType);
+      
+      // }
       return 0;
     }
+
+    // int _doReplicaMasterHandshake(int& serverConnectorSocketFD, resp::RespParser& respParser) {
+    //   std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa", "PSYNC ? -1"};
+    //   const std::string receiveDataType = "simple_string";
+    //   std::vector<std::string> expectedResultVec{"PONG", "OK", "OK", "FULLRESYNC abcdefghijklmnopqrstuvwxyz1234567890ABCD 0"};
+    //   // std::vector<std::string> dataTypeVec{"array", "array", "array", "array"};
+    //   // std::vector<std::string> resultDataTypeVec{"simple_string", "simple_string", "simple_string", "simple_string"};
+      
+    //   auto listeningPortNumber = getConfigKv("listening-port");
+    //   if (listeningPortNumber.has_value())
+    //     handShakeCommands[1] += " " + (*listeningPortNumber);
+
+    //   auto capa = getConfigKv("capa");
+    //   if (capa.has_value())
+    //     handShakeCommands[2] += " " + (*capa);
+      
+    //   const uint16_t bufferSize = 1024;  // 1KB buffer to use when reading from or writing to socket
+    //   char buffer[bufferSize];
+    //   const int retryCount = 3;
+    //   int numBytes;
+
+    //   for (int i = 0; i < handShakeCommands.size(); i++) {
+    //     std::string str = resp::RespParser::serialize(utility::split(handShakeCommands[i], " "), resp::RespType::Array);
+    //     numBytes = utility::writeToSocketFD(serverConnectorSocketFD, buffer, bufferSize, str, retryCount);
+    //     if (numBytes > 0) {
+    //       DEBUG_LOG("successfully sent command : " + utility::printExact(str));
+    //     }
+    //     else if (numBytes == 0){
+    //       DEBUG_LOG("writing to socket during handshake failed : connection closed");
+    //       return -1;
+    //     }
+    //     else {  // numBytes is -ve
+    //       DEBUG_LOG("writing to socket during handshake failed");
+    //     }
+
+    //     numBytes = utility::readFromSocketFD(serverConnectorSocketFD, buffer, bufferSize, retryCount);
+    //     if (numBytes > 0) {
+    //       DEBUG_LOG("successfully read command : " + utility::printExact(buffer));
+    //       break;
+    //     }
+    //     else if (numBytes == 0) {
+    //       DEBUG_LOG("Error reading from socket : connection closed\n");
+    //       return -1;
+    //     }
+    //     else {  // numBytes is -ve
+    //       DEBUG_LOG("error while reading from socket");
+    //     }
+
+    //     std::string response(buffer);
+    //     bool isCase3Matching = false;
+    //     if ((i==3/*PSYNC command*/)) {
+    //       std::vector<std::string> responseVec = utility::split(buffer);
+    //       isCase3Matching = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
+    //       isCase3Matching = isCase3Matching && (responseVec[1].length() == 40);
+    //       isCase3Matching = isCase3Matching && (responseVec.size() == 3);
+    //     }
+    //     if (!isCase3Matching || !utility::compareCaseInsensitive(resp::RespParser::serialize(utility::split(expectedResultVec[i]), resp::RespType::SimpleString), response)) {
+    //       DEBUG_LOG("error occurred while replica master handshake - did not receive reply for ");
+    //     }
+    //     else {
+    //       DEBUG_LOG("got reply to " + handShakeCommands[i] + " as expected");
+    //     }
+    //   }
+    //   return 0;
+    // }
 
 
     std::string _processSingleCommand(const std::string& command) {
