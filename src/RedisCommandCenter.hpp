@@ -387,7 +387,7 @@ namespace RCC {
       std::vector<std::string> reply;
       if (command.size() < 2) {
         response = "-few arguments provided for KEY command.";
-        return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
+        return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
       //     // throw std::runtime_error("few arguments provided for KEY command.");
       }
       DEBUG_LOG("command[0]=" + command[0] + ", command[1]=\"" + command[1] + "\"");
