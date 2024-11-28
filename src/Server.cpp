@@ -10,6 +10,7 @@
 #include <thread>
 #include <chrono>
 #include <ctime>
+#include <unordered_set>
 
 #include "RedisCommandCenter.hpp"
 #include "RespParser.hpp"
@@ -110,7 +111,7 @@ int main(int argc, char **argv) {
   }
 
   uint64_t counter = 0;
-  std::unordered_set<int> replicaSocketsVec;  // to keep track of replica sockets
+  std::unordered_set<int> replicaSocketsSet;  // to keep track of replica sockets
   std::vector<struct pollfd> readySocketPollfdVec;  // to get list of sockets which are ready to readFrom or writeTo
 
   // infinite loop to poll sockets and listen form new connections and server connected sockets
@@ -133,7 +134,7 @@ int main(int argc, char **argv) {
         // if here => not master socket but client socket
         // this block handles clients
         // pm::printPollFD(pfd);
-        if (clientHandler(pfd.fd, respParser, rcc, pollManager, replicaSocketsVec) != 0) {
+        if (clientHandler(pfd.fd, respParser, rcc, pollManager, replicaSocketsSet) != 0) {
           ss.clear();
           ss << "error while handling socketFD = " << pfd.fd;
           ss << ", serverListenerSocketFD = " << serverListenerSocketFD;
@@ -174,7 +175,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-int clientHandler(int currentSocketFD, resp::RespParser& respParser, RCC::RedisCommandCenter& rcc, pm::PollManager& pollManager, std::unordered_set<int>& replicaSocketsVec) {
+int clientHandler(int currentSocketFD, resp::RespParser& respParser, RCC::RedisCommandCenter& rcc, pm::PollManager& pollManager, std::unordered_set<int>& replicaSocketsSet) {
   
   const uint16_t bufferSize = 1024;  // 1KB buffer to use when reading from or writing to socket
   char buffer[bufferSize];
@@ -198,7 +199,7 @@ int clientHandler(int currentSocketFD, resp::RespParser& respParser, RCC::RedisC
   std::vector<std::string> writeCommands;
   for (auto& eachCommand : command) {
     if (eachCommand.find("REPLCONF") != std::string::npos) {
-      replicaSocketsVec.insert(currentSocketFD);
+      replicaSocketsSet.insert(currentSocketFD);
     }
     if (eachCommand.find(writeCommand) != std::string::npos) {
 
