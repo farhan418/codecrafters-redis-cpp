@@ -106,6 +106,14 @@ namespace utility {
         if (isSuccessfullyRead) {
             std::stringstream ss;
             ss << "read " << numBytesRead << " bytes : " << utility::printExact(buffer);
+            std::string s(buffer);
+            if (numBytesRead != s.length()) {
+                std::ostringstream temp;
+                for (int i = numBytesRead; i < s.length(); i++) {
+                    uint8_t byte = buffer[i];
+                    temp << "buffer[" << i << "] = " << buffer[i] << ", byte = " << byte;
+                }
+            }
             // for(int i = 0; i < numBytesRead; i++) {
             // if (buffer[i] == '\r')
             //     ss << "\\r";
