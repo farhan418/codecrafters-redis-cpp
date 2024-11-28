@@ -201,8 +201,6 @@ int clientHandler(int currentSocketFD, resp::RespParser& respParser, RCC::RedisC
     if (eachCommand.find("REPLCONF") != std::string::npos) {
       replicaSocketsSet.insert(currentSocketFD);
     }
-    if (eachCommand.find(writeCommand) != std::string::npos) {
-
   }
 
   // find write commands and send to all replicas
