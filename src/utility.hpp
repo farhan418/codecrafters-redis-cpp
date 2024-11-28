@@ -68,7 +68,7 @@ namespace utility {
                     case '\r' : ss << "\\r"; break;
                     case '\n' : ss << "\\n"; break;
                     case '\t' : ss << "\\t"; break;
-                    default : ss << "\\x" << ;std::setw(2) << std::setfill('0') << std::hex << static_cast<int>(c);
+                    default : ss << "\\x" << std::setw(2) << std::setfill('0') << std::hex << static_cast<int>(c);
                 }
             }
         }
