@@ -209,7 +209,7 @@ int clientHandler(int currentSocketFD, resp::RespParser& respParser, RCC::RedisC
     for (auto& writeCommand : writeCommandsSet) {
       if (eachCommand.find(writeCommand) != std::string::npos) {
         for (auto& replicaFD : replicaSocketsSet) {
-          numBytes = utility::writeToSocketFD(currentSocketFD, buffer, bufferSize, resp::RespParser::serialize({utility::split(eachCommand, " ")}, resp::RespType::Array));
+          numBytes = utility::writeToSocketFD(currentSocketFD, buffer, bufferSize, resp::RespParser::serialize({utility::split(eachCommand, " ")}, resp::RespType::BulkString));
           if (numBytes < 0) {
             DEBUG_LOG("Failed to write message to replica socket : " + std::to_string(replicaFD));
           }
