@@ -531,7 +531,7 @@ namespace RCC {
       // std::stringstream ss(hexContent);
       std::ofstream fout(rdbFileName, std::ios::binary);
       if (!fout) {
-        DEBUG_LOG("error opening file in binary mode : " + rdbFileName);
+        DEBUG_LOG("error opening file in binary mode : " + utility::printExact(rdbFileName));
         fout.close();
         return 0;
       }
@@ -543,6 +543,7 @@ namespace RCC {
         fout.put(byte);
       }
       fout.close();
+      DEBUG_LOG("successfully generated rdb file : " + utility::printExact(rdbFileName));
       return 0;
     }
 
@@ -555,7 +556,8 @@ namespace RCC {
   std::map<std::string, std::string> RedisCommandCenter::configStore;
   std::mutex RedisCommandCenter::configStoreMutex;
   RedisDataStore RedisCommandCenter::redis_data_store_obj;
-  const std::string RedisCommandCenter::RDB_FILE_DIR("../rdbfiles/");
+  // const std::string RedisCommandCenter::RDB_FILE_DIR("../rdbfiles/");
+  const std::string RedisCommandCenter::RDB_FILE_DIR("./");
 };
 
 #endif  // REDISCOMMANDCENTER_HPP
