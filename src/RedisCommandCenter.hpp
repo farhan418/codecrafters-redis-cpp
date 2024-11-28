@@ -250,7 +250,7 @@ namespace RCC {
     // }
 
 
-    std::vector<std::string> _process(std::string& command) {
+    std::vector<std::string> _process(const std::string& command) {
       std::stringstream ss;
       // for (auto& c : commandVec)
           ss << "\"" << command << "\" | ";
