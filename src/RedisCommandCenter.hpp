@@ -78,7 +78,7 @@ namespace RCC {
 
       std::vector<std::string> responseStrVec;
       for (auto& eachCommand : commands) {
-        responseStrVec.push_back(_processSingleCommand(int& socketFD, eachCommand));
+        responseStrVec.push_back(_processSingleCommand(socketFD, eachCommand));
       }
       ss.clear();
       ss << "responseStr : ";
@@ -546,14 +546,14 @@ namespace RCC {
       return resp::RespParser::serialize({response}, dataType);
     }
 
-    std::string _commandSET(const std::vector<std::string>& command) {
+    std::string _commandSET(int& socketFD, const std::vector<std::string>& command) {
       std::string response;
       if (command.size() < 3) {
         response = "few arguments provided for SET command.";
         return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
       }
 
-      if (0 == sendCommandToAllReplicas(resp::RespParser::serialize(command, resp::RespType::Array))) {
+      if (0 == sendCommandToAllReplicas(socketFD, resp::RespParser::serialize(command, resp::RespType::Array))) {
         DEBUG_LOG("successfully sent command to all replicas");
       }
       else {
