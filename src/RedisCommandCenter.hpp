@@ -495,24 +495,17 @@ namespace RCC {
         DEBUG_LOG("opened file in binary mode : " + utility::printExact(rdbFileName) + ", fileSize = " + std::to_string(fileSize));
 
         std::ostringstream rdbFileContent;
-        rdbFileContent << "$" << fileSize << "\r\n";
-        const std::size_t bufferSize = 4096;
-        char buffer[bufferSize];
-        if (rdbFile.read(buffer, bufferSize)) {
-            rdbFileContent.write(buffer, rdbFile.gcount());
-            DEBUG_LOG(rdbFileContent.str());
-        }
-        else {
-          DEBUG_LOG("nothing read");
-        }
-        while (rdbFile.read(buffer, bufferSize)) {
-            // rdbFileContent.write(buffer, rdbFile.gcount());
-            DEBUG_LOG("rdbFile.gcount()=" + std::to_string(rdbFile.gcount()));
-            for (int i = 0; i < rdbFile.gcount(); i++)
-              rdbFileContent << buffer[i];
-        }
-        DEBUG_LOG("closing rdb file : " + utility::printExact(rdbFileName));
-        rdbFile.close();
+        rdbFileContent << "$" << fileSize << "\r\n" << generateEmptyRdbFileContent();
+        // const std::size_t bufferSize = 4096;
+        // char buffer[bufferSize];
+        // while (rdbFile.read(buffer, bufferSize)) {
+        //     rdbFileContent.write(buffer, rdbFile.gcount());
+        //     // DEBUG_LOG("rdbFile.gcount()=" + std::to_string(rdbFile.gcount()));
+        //     // for (int i = 0; i < rdbFile.gcount(); i++)
+        //     //   rdbFileContent << buffer[i];
+        // }
+        // DEBUG_LOG("closing rdb file : " + utility::printExact(rdbFileName));
+        // rdbFile.close();
         // reply.push_back(rdbFileContent.str());
         DEBUG_LOG("file content : " + rdbFileContent.str())
         response += rdbFileContent.str();
@@ -535,6 +528,21 @@ namespace RCC {
           }
         reply.push_back(str.substr(2, str.length()-2));
       }
+      return 0;
+    }
+
+    std::string generateEmptyRdbFileContent() {
+      std::stringstream ss("524544495330303131fa0972656469732d76657205372e322e30fa0a72656469732d62697473c040fa056374696d65c26d08bc65fa08757365642d6d656dc2b0c41000fa08616f662d62617365c000fff06e3bfec0ff5aa2");
+      std::string emptyRdbFileContent;
+      // std::stringstream ss(emptyRdbFile);
+      char high, low;
+      uint8_t byte = 0;
+      while(ss >> high >> low) {
+        byte = utility::convertHexCharToByte(high) << 4;
+        byte |= utility::convertHexCharToByte(low);
+        emptyRdbFileContent += static_cast<unsigned char>(byte);
+      }
+      DEBUG_LOG("successfully generated empty rdb content : " + utility::printExact(emptyRdbFileContent));
       return 0;
     }
 
