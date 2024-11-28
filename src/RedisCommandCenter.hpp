@@ -499,7 +499,9 @@ namespace RCC {
         const std::size_t bufferSize = 4096;
         char buffer[bufferSize];
         while (rdbFile.read(buffer, bufferSize)) {
-            rdbFileContent.write(buffer, rdbFile.gcount());
+            // rdbFileContent.write(buffer, rdbFile.gcount());
+            for (int i = 0; i < rdbFile.gcount(); i++)
+              rdbFileContent << buffer[i];
         }
         rdbFile.close();
         // reply.push_back(rdbFileContent.str());
