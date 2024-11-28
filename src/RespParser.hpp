@@ -154,10 +154,18 @@ namespace resp {
     
   private:
     bool isRespTypeCharOrEndOfRespBuffer() {
-        if (isParsedRespBuffer())
+      /*
+        this functions checks if the respBuffer is completely parsed
+        and if the character at respBufferIndex is any of the valid RespType
+        Returns true if so otherwise false;
+      */
+        if (isParsedRespBuffer()) {
+          DEBUG_LOG("respBuffer was parsed completely");
             return true;
+        }
 
-        char ch = respBuffer[respBufferIndex];
+        // reaching here means respBufferIndex < respBuffer.length()
+        unsigned char ch = respBuffer[respBufferIndex];
 
         if (   ch == static_cast<unsigned char>(RespType::SimpleString)
             || ch == static_cast<unsigned char>(RespType::SimpleError)
@@ -166,8 +174,10 @@ namespace resp {
             || ch == static_cast<unsigned char>(RespType::Array)
         )
         {
+            DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "] = " + respBuffer[respBufferIndex] + " is valid state");
             return true;
         }
+        DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "] = " + respBuffer[respBufferIndex] + " is invalid state");
         return false;
     }
     
@@ -211,7 +221,7 @@ namespace resp {
     std::string parseSimpleString() {
       size_t crlfIndex = respBuffer.find(RespConstants::CRLF, respBufferIndex);
       if (crlfIndex == std::string::npos) {
-        std::string errMsg = "PARSEERR data does not conform to RESP SimpleString encoding";
+        std::string errMsg = "PARSEERR data does not conform to RESP SimpleString encoding : no \\r\\n at the end";
         DEBUG_LOG(errMsg);
         respBufferIndex = respBuffer.length();
         return serialize({errMsg}, RespType::SimpleError);
@@ -221,7 +231,7 @@ namespace resp {
       size_t tempIndex = 1 + respBufferIndex;
       respBufferIndex = crlfIndex + 2;
       if (!isRespTypeCharOrEndOfRespBuffer()) {
-        std::string errMsg = "PARSEERR data does not conform to RESP SimpleString encoding";
+        std::string errMsg = "PARSEERR data does not conform to RESP SimpleString encoding: char at " + std::to_string(respBufferIndex) + " is not valid";
         DEBUG_LOG(errMsg);
         respBufferIndex = respBuffer.length();
         return serialize({errMsg}, RespType::SimpleError);
@@ -232,14 +242,14 @@ namespace resp {
     std::string parseSimpleError() {
       size_t crlfIndex = respBuffer.find(RespConstants::CRLF, respBufferIndex);
       if (crlfIndex == std::string::npos) {
-        DEBUG_LOG("PARSEERR data does not conform to RESP SimpleError encoding");
+        DEBUG_LOG("PARSEERR data does not conform to RESP SimpleError encoding : no \\r\\n at the end");
         respBufferIndex = respBuffer.length();
         return RespConstants::NULL_BULK_STRING;
       }
       size_t tempIndex = 1 + respBufferIndex;
       respBufferIndex = crlfIndex + 2;
       if (!isRespTypeCharOrEndOfRespBuffer()) {
-        DEBUG_LOG("PARSEERR data does not conform to RESP SimpleError encoding");
+        DEBUG_LOG("PARSEERR data does not conform to RESP SimpleError encoding: char at " + std::to_string(respBufferIndex) + " is not valid");
         respBufferIndex = respBuffer.length();
         return RespConstants::NULL_BULK_STRING;
       }
@@ -253,14 +263,14 @@ namespace resp {
       */
       size_t crlfIndex = respBuffer.find(RespConstants::CRLF, respBufferIndex);
       if (crlfIndex == std::string::npos) {
-        DEBUG_LOG("PARSEERR data does not conform to RESP Integer encoding");
+        DEBUG_LOG("PARSEERR data does not conform to RESP Integer encoding : no \\r\\n at the end");
         respBufferIndex = respBuffer.length();
         return RespConstants::NULL_BULK_STRING;
       }
       size_t tempIndex = 1 + respBufferIndex;
       respBufferIndex = crlfIndex + 2;
       if (!isRespTypeCharOrEndOfRespBuffer()) {
-        DEBUG_LOG("PARSEERR data does not conform to RESP Integer encoding");
+        DEBUG_LOG("PARSEERR data does not conform to RESP Integer encoding : char at " + std::to_string(respBufferIndex) + " is not valid");
         respBufferIndex = respBuffer.length();
         return RespConstants::NULL_BULK_STRING;
       }
@@ -271,14 +281,14 @@ namespace resp {
     std::string parseBulkString() {
       size_t crlfIndex = respBuffer.find(RespConstants::CRLF, respBufferIndex);
       if (crlfIndex == std::string::npos) {
-        DEBUG_LOG("PARSEERR data does not conform to RESP BulkString encoding");
+        DEBUG_LOG("PARSEERR data does not conform to RESP BulkString encoding : no \\r\\n at the end of bulkString length");
         respBufferIndex = respBuffer.length();
         return RespConstants::NULL_BULK_STRING;
       }
 
-      ++respBufferIndex;
+      ++respBufferIndex;  // moving to the first digit of bufferLength
       uint16_t length = std::stol(respBuffer.substr(respBufferIndex, crlfIndex - respBufferIndex));
-      respBufferIndex = crlfIndex + 2;
+      respBufferIndex = crlfIndex + 2;  // moving to the first char of bulkString
       DEBUG_LOG("bulkStringLength = " + std::to_string(length) + ", respBufferIndex=" + std::to_string(respBufferIndex));
       
       std::ostringstream ss;
@@ -294,7 +304,7 @@ namespace resp {
       // for (size_t i = 0; i < length && (!isParsedRespBuffer()); i++) {
         // ss << respBuffer[respBufferIndex++];//*2\r\n$5\r\nhello\r\n$5\r\nworld\r\n
       // }
-      DEBUG_LOG("parsed bulk string : " + ss.str() + ", respBufferIndex=" + std::to_string(respBufferIndex));
+      DEBUG_LOG("parsed bulk string : " + ss.str() + ", respBufferIndex=" + std::to_string(respBufferIndex) + ", isError=" + std::to_string(isError));
     //   respBufferIndex += 2;
     //   if ((!isParsedRespBuffer()) && respBufferIndex != respBuffer.find(RespConstants::CRLF, respBufferIndex)) {
     //     /*
@@ -323,7 +333,7 @@ namespace resp {
     std::string parseArray() {
       size_t crlfIndex = respBuffer.find(RespConstants::CRLF, respBufferIndex);
       if (crlfIndex == std::string::npos) {
-        DEBUG_LOG("PARSEERR data does not conform to RESP Array encoding");
+        DEBUG_LOG("PARSEERR data does not conform to RESP Array encoding: no \\r\\n at the end of arrayLength");
         respBufferIndex = respBuffer.length();
         return RespConstants::NULL_BULK_STRING;
       }
