@@ -107,7 +107,7 @@ namespace utility {
             std::stringstream ss;
             ss << "read " << numBytesRead << " bytes : " << utility::printExact(buffer);
             std::string s(buffer);
-            if (numBytesRead != s.length()) {
+            if (numBytesRead == 49) {
                 std::ostringstream temp;
                 for (int i = numBytesRead; i < s.length(); i++) {
                     uint8_t byte = buffer[i];
