@@ -116,16 +116,6 @@ namespace utility {
                 }
                 DEBUG_LOG(temp.str());
             }
-            // for(int i = 0; i < numBytesRead; i++) {
-            // if (buffer[i] == '\r')
-            //     ss << "\\r";
-            // else if (buffer[i] == '\n') 
-            //     ss << "\\n";
-            // else
-            //     ss << buffer[i];
-            // if (i == numBytesRead)
-            //     break;
-            // }
             DEBUG_LOG(ss.str());
         }
         return numBytesRead;
@@ -134,7 +124,7 @@ namespace utility {
     int readFromSocketFD(int& sockFD, char* buffer, const int& bufferSize) {
         // reads from a socket fd and returns number of bytes read
 
-        memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
+        memset(buffer, 0, bufferSize);  // bzero is also deprecated POSIX function
         int numBytesRead = read(sockFD, buffer, bufferSize);
 
         if (numBytesRead <= 0) {
