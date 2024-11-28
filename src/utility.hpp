@@ -113,6 +113,7 @@ namespace utility {
                     uint8_t byte = buffer[i];
                     temp << "buffer[" << i << "] = " << buffer[i] << ", byte = " << byte;
                 }
+                DEBUG_LOG(temp.str());
             }
             // for(int i = 0; i < numBytesRead; i++) {
             // if (buffer[i] == '\r')
