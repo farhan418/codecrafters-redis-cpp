@@ -259,7 +259,7 @@ namespace RCC {
       ss.clear();
       for (auto& c : commandVec)
         ss << "\"" << c << "\" | ";
-      DEBUG_LOG("after commandVec = " + ss.str());
+      DEBUG_LOG("after commandVec = " + ss.str() + "commandVec.size()=" + std::to_string(commandVec.size()));
       // commandVec = utility::split(commandVec, " 
 
       // commandVec PING

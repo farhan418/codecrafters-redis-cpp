@@ -104,10 +104,10 @@ namespace resp {
     }
 
     void resetParser(const std::string& respStr) {
-      DEBUG_LOG(utility::printExact(respStr));
+      // DEBUG_LOG(utility::printExact(respStr));
       respBuffer = respStr;
       respBufferIndex = 0;
-      DEBUG_LOG(utility::printExact(respBuffer));
+      // DEBUG_LOG(utility::printExact(respBuffer));
     }
 
     bool isParsedRespBuffer() const {
@@ -161,7 +161,7 @@ namespace resp {
         and if the character at respBufferIndex is any of the valid RespType
         Returns true if so otherwise false;
       */
-      DEBUG_LOG(utility::printExact(respBuffer));
+      // DEBUG_LOG(utility::printExact(respBuffer));
         if (isParsedRespBuffer()) {
           DEBUG_LOG("respBuffer was parsed completely");
             return true;
@@ -198,19 +198,19 @@ namespace resp {
         return parseSimpleString();
       }
       else if (respBuffer[respBufferIndex] == static_cast<unsigned char>(RespType::SimpleError)) {
-        DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ",parsing SimpleError");
+        DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing SimpleError");
         return parseSimpleError();
       }
       else if (respBuffer[respBufferIndex] == static_cast<unsigned char>(RespType::Integer)) {
-        DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ",parsing Integer");
+        DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing Integer");
         return parseInteger();
       }
       else if (respBuffer[respBufferIndex] == static_cast<unsigned char>(RespType::BulkString)) {
-        DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ",parsing BulkString");
+        DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing BulkString");
         return parseBulkString();
       }
       else if (respBuffer[respBufferIndex] == static_cast<unsigned char>(RespType::Array)) {
-        DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ",parsing Array");
+        DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing Array");
         return parseArray();
       }
       else {
