@@ -495,7 +495,7 @@ namespace RCC {
         // DEBUG_LOG("opened file in binary mode : " + utility::printExact(rdbFileName) + ", fileSize = " + std::to_string(fileSize));
 
         // std::ostringstream rdbFileContent;
-        std::string rdbFileContnet = generateEmptyRdbFileContent();
+        std::string rdbFileContent = generateEmptyRdbFileContent();
         rdbFileContent = "$" + std::to_string(fileSize) + "\r\n" + rdbFileContent;
         // const std::size_t bufferSize = 4096;
         // char buffer[bufferSize];
