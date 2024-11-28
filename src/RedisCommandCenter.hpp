@@ -67,7 +67,8 @@ namespace RCC {
       return 0;
     }
 
-    std::vector<std::string> processCommands(const std::vector<std::string>& commands) {
+    std::vector<std::string> processCommands(int& socketFD, const std::vector<std::string>& commands) {
+      // socketFD is the socket which sent commands (to be used if it is replica)
       std::stringstream ss;
       ss << "processing command = \"";
       for (auto& c : commands)
@@ -76,7 +77,7 @@ namespace RCC {
 
       std::vector<std::string> responseStrVec;
       for (auto& eachCommand : commands) {
-        responseStrVec.push_back(_processSingleCommand(eachCommand));
+        responseStrVec.push_back(_processSingleCommand(int& socketFD, eachCommand));
       }
       ss.clear();
       ss << "responseStr : ";
@@ -97,11 +98,129 @@ namespace RCC {
         return -1;
     }
 
-    int doReplicaMasterHandshake(int& serverConnectorSocketFD, resp::RespParser& respParser) {
-      return _doReplicaMasterHandshake(serverConnectorSocketFD, respParser);
+    int doReplicaMasterHandshake(int& serverConnectorSocketFD) {
+      return _doReplicaMasterHandshake(serverConnectorSocketFD);
+    }
+
+    int receiveCommandsFromMaster(int currentSocketFD, pm::PollManager& pollManager) {
+      const uint16_t bufferSize = 1024;  // 1KB buffer to use when reading from or writing to socket
+      char buffer[bufferSize];
+
+      int numBytes = utility::readFromSocketFD(currentSocketFD, buffer, bufferSize);
+      if (numBytes == 0) {  // if 0 bytes read, it means connection closed
+        DEBUG_LOG("Failed to read message from socket : connection closed\n");
+        pollManager.deleteSocketFDFromPollfdArr(currentSocketFD);
+        replicaSocketFDSet.erase(currentSocketFD);
+        return 0;
+      }
+      else if (numBytes < 0) {
+        DEBUG_LOG("Failed to read message from socket.\n");
+        return -1;
+      } 
+
+      // parsing the buffer for commands
+      respParser.resetParser(buffer);
+      std::vector<std::string> command;
+      respParser.parseCommands(command); 
+      // process the commands
+      std::vector<std::string> responseStrVec = processCommands(command);
+      for (auto& responseStr : responseStrVec) {
+        DEBUG_LOG("processed commands one by one, respective responseStr : " + utility::printExact(responseStr))
+      }
+      // } // while loop to process all tokens (even multiple commands)
+      // close(currentSocketFD);  // PollManager should close connection
+      return 0;
+    }
+
+    int clientHandler(int currentSocketFD, pm::PollManager& pollManager) {
+      const uint16_t bufferSize = 1024;  // 1KB buffer to use when reading from or writing to socket
+      char buffer[bufferSize];
+
+      int numBytes = utility::readFromSocketFD(currentSocketFD, buffer, bufferSize);
+      if (numBytes == 0) {  // if 0 bytes read, it means connection closed
+        DEBUG_LOG("Failed to read message from socket : connection closed\n");
+        pollManager.deleteSocketFDFromPollfdArr(currentSocketFD);
+        replicaSocketFDSet.erase(currentSocketFD);
+        return 0;
+      }
+      else if (numBytes < 0) {
+        DEBUG_LOG("Failed to read message from socket.\n");
+        return -1;
+      } 
+
+      // parsing the buffer for commands
+      respParser.resetParser(buffer);
+      std::vector<std::string> command;
+      respParser.parseCommands(command);
+
+      // for (auto& eachCommand : command) {
+      //   if (eachCommand.find("REPLCONF") != std::string::npos) {
+      //     replicaSocketsSet.insert(currentSocketFD);
+      //   }
+      // }
+
+      // find write commands and send to all replicas
+      // for (auto& eachCommand : command) {
+      //   std::unordered_set<std::string> writeCommandsSet{"SET", "DEL"};
+      //   for (auto& writeCommand : writeCommandsSet) {
+      //     if (eachCommand.find(writeCommand) != std::string::npos) {
+      //       for (auto& replicaFD : replicaSocketsSet) {
+      //         numBytes = utility::writeToSocketFD(currentSocketFD, buffer, bufferSize, resp::RespParser::serialize({utility::split(eachCommand, " ")}, resp::RespType::Array));
+      //         if (numBytes < 0) {
+      //           DEBUG_LOG("Failed to write message to replica socket : " + std::to_string(replicaFD));
+      //         }
+      //         else if (numBytes == 0) {  // if 0 bytes, it means connection closed
+      //           DEBUG_LOG("Failed to write message to replica socket : " + std::to_string(replicaFD) + " connection closed\n");
+      //           pollManager.deleteSocketFDFromPollfdArr(replicaFD);
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
+
+      // process the commands
+      std::vector<std::string> responseStrVec = processCommands(command);
+      for (auto& responseStr : responseStrVec) {
+        numBytes = utility::writeToSocketFD(currentSocketFD, buffer, bufferSize, responseStr);
+        if (numBytes < 0) {
+          DEBUG_LOG("Failed to write message to socket.\n");
+          return -1;
+        }
+        else if (numBytes == 0) {  // if 0 bytes, it means connection closed
+          DEBUG_LOG("Failed to write message to socket : connection closed\n");
+          pollManager.deleteSocketFDFromPollfdArr(currentSocketFD);
+          replicaSocketFDSet.erase(currentSocketFD);
+          return 0;
+        }
+      }
+      // } // while loop to process all tokens (even multiple commands)
+      // close(currentSocketFD);  // PollManager should close connection
+      return 0;
     }
 
   private:
+
+    int sendCommandToAllReplicas(int& socketFD, const std::string& singleCommandToSend) {
+      const int bufferSize = 1024;
+      char buffer[bufferSize];
+      int retryCount = 3;
+      int numBytes;
+      for (auto& replicaSocketFD : replicaSocketFDSet) {
+        // send single command to all replicas
+        numBytes = utility::writeToSocketFD(socketFD, buffer, bufferSize, singleCommandToSend, retryCount);
+        if (numBytes > 0) {
+          DEBUG_LOG("successfully sent command : " + utility::printExact(singleCommandToSend));
+        }
+        else if (numBytes == 0){
+          DEBUG_LOG("writing to replica socket(" + std::to_string(socketFD) + ") during handshake failed : connection closed");
+          return -1;
+        }
+        else {  // numBytes is -ve
+          DEBUG_LOG("writing to replica socket(" + std::to_string(socketFD) + ") during handshake failed");
+        }
+      }
+      return 0;
+    }
 
     // int _doReplicaMasterHandshake(int& serverConnectorSocketFD, resp::RespParser& respParser) {
     //   std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa", "PSYNC ? -1"};
@@ -183,7 +302,7 @@ namespace RCC {
     //   return 0;
     // }
 
-    int _doReplicaMasterHandshake(int& serverConnectorSocketFD, resp::RespParser& respParser) {
+    int _doReplicaMasterHandshake(int& serverConnectorSocketFD) {
       std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa", "PSYNC ? -1"};
       std::vector<std::string> expectedResultVec{"PONG", "OK", "OK", "FULLRESYNC abcdefghijklmnopqrstuvwxyz1234567890ABCD 0"};
       
@@ -343,7 +462,7 @@ namespace RCC {
     // }
 
 
-    std::string _processSingleCommand(const std::string& command) {
+    std::string _processSingleCommand(int& socketFD, const std::string& command) {
       std::stringstream ss;
       // for (auto& c : commandVec)
       // ss << "\"" << command << "\" | ";
@@ -392,7 +511,7 @@ namespace RCC {
       }
       // command PSYNC ? -1
       else if (utility::compareCaseInsensitive("PSYNC", commandVec[0])) {
-        return _commandPSYNC(commandVec);
+        return _commandPSYNC(socketFD, commandVec);
       }
       // Invalid command
       else {
@@ -431,6 +550,13 @@ namespace RCC {
       if (command.size() < 3) {
         response = "few arguments provided for SET command.";
         return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
+      }
+
+      if (0 == sendCommandToAllReplicas(resp::RespParser::serialize(command, resp::RespType::Array))) {
+        DEBUG_LOG("successfully sent command to all replicas");
+      }
+      else {
+        DEBUG_LOG("failed to send command to all replicas");
       }
 
       resp::RespType dataType;
@@ -551,7 +677,7 @@ namespace RCC {
       return resp::RespParser::serialize({response}, resp::RespType::SimpleString);
     }
 
-    std::string _commandPSYNC(const std::vector<std::string>& command) {
+    std::string _commandPSYNC(int& socketFD, const std::vector<std::string>& command) {
       std::string response;
 
       if (command.size() < 3) {
@@ -605,6 +731,10 @@ namespace RCC {
         response += rdbFileContent;
       }
       // return reply;
+
+      // if reached here, it means master is connected with the replica which sent : 1) PING 2) REPLCONF ... 3) REPLCONF ... 4) PSYNC ? -1
+      // so add it to replicaSocketFDSet
+      replicaSocketFDSet.insert(socketFD);
       return response;
     }
 
@@ -666,6 +796,8 @@ namespace RCC {
     static std::mutex configStoreMutex;
     static RedisDataStore redis_data_store_obj;
     static const std::string RDB_FILE_DIR;
+    static std::unordered_set<int> replicaSocketFDSet;
+    static resp::RespParser respParser;  // to parse RESP protocol
   };
 
   std::map<std::string, std::string> RedisCommandCenter::configStore;
@@ -673,6 +805,8 @@ namespace RCC {
   RedisDataStore RedisCommandCenter::redis_data_store_obj;
   // const std::string RedisCommandCenter::RDB_FILE_DIR("../rdbfiles/");
   const std::string RedisCommandCenter::RDB_FILE_DIR("./");
+  std::unordered_set<int> RedisCommandCenter::replicaSocketFDSet;
+  resp::RespParser RedisCommandCenter::respParser;
 };
 
 #endif  // REDISCOMMANDCENTER_HPP
