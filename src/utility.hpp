@@ -82,7 +82,7 @@ namespace utility {
         int numBytesRead;
 
         while (counter < retryCount) {
-            memset(buffer, 0, sizeof(buffer));  // bzero is also deprecated POSIX function
+            memset(buffer, 0, bufferSize);  // bzero is also deprecated POSIX function
             numBytesRead = read(sockFD, buffer, bufferSize);
 
             // if (numBytesRead <= 0) {
@@ -161,7 +161,7 @@ namespace utility {
         int counter = 0;
 
         while (counter < retryCount) {
-            memset(buffer, 0, sizeof(buffer));
+            memset(buffer, 0, bufferSize);
             memcpy(buffer, content.c_str(), content.length());
             numBytesWritten = write(sockFD, buffer, content.length());
             if (numBytesWritten == 0) {
