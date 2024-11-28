@@ -266,7 +266,8 @@ namespace resp {
       }
       return respBuffer.substr(tempIndex, crlfIndex - tempIndex);
     }
-    
+    "*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n6380\r\n"
+                 456789011213
     std::string parseBulkString() {
       size_t crlfIndex = respBuffer.find(RespConstants::CRLF, respBufferIndex);
       if (crlfIndex == std::string::npos) {
@@ -281,9 +282,19 @@ namespace resp {
       DEBUG_LOG("bulkStringLength = " + std::to_string(length) + ", respBufferIndex=" + std::to_string(respBufferIndex));
       
       std::ostringstream ss;
-      for (size_t i = 0; i < length && (!isParsedRespBuffer()); i++) {
-        ss << respBuffer[respBufferIndex++];//*2\r\n$5\r\nhello\r\n$5\r\nworld\r\n
+      bool isError = false;
+      if (respBufferIndex + length + 1 < respBuffer.length()) {  // +1 is done to include ending \r\n in bulkstring
+        ss << respBuffer.substr(respBufferIndex, length);
+        respBufferIndex += length + 2;
       }
+      else {
+        isError = true;
+        respBufferIndex = respBuffer.length();
+      }
+      // for (size_t i = 0; i < length && (!isParsedRespBuffer()); i++) {
+        // ss << respBuffer[respBufferIndex++];//*2\r\n$5\r\nhello\r\n$5\r\nworld\r\n
+      // }
+      DEBUG_LOG("parsed bulk string : " + respBuffer.str() + ", respBufferIndex=" + std::to_string(respBufferIndex));
     //   respBufferIndex += 2;
     //   if ((!isParsedRespBuffer()) && respBufferIndex != respBuffer.find(RespConstants::CRLF, respBufferIndex)) {
     //     /*
@@ -293,10 +304,8 @@ namespace resp {
     //     respBufferIndex = respBuffer.length();
     //     return RespConstants::NULL_BULK_STRING;
     //   }
-      respBufferIndex += 2;
-      if (!isRespTypeCharOrEndOfRespBuffer()) {
+      if (!isRespTypeCharOrEndOfRespBuffer() || isError) {
         DEBUG_LOG("PARSEERR data does not conform to RESP BulkString encoding");
-        respBufferIndex = respBuffer.length();
         return RespConstants::NULL_BULK_STRING;
       }
       return ss.str();
