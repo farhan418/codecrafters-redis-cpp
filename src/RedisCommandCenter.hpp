@@ -304,7 +304,7 @@ namespace RCC {
       // Invalid command
       else {
         std::string errStr("err invalid command : " + commandVec[0]);
-        return {resp::RespParser::serialize({errStr}, resp::RespType::SimpleError)};
+        return resp::RespParser::serialize({errStr}, resp::RespType::SimpleError);
       }
     }
 
@@ -314,12 +314,12 @@ namespace RCC {
     //   return reply;
     // }
 
-    std::vector<std::string> _commandPING() {
+    std::string _commandPING() {
       std::string response{"PONG"};
-      return {resp::RespParser::serialize({response}, resp::RespType::SimpleString)};
+      return resp::RespParser::serialize({response}, resp::RespType::SimpleString);
     }
 
-    std::vector<std::string> _commandECHO(const std::vector<std::string>& command) {
+    std::string _commandECHO(const std::vector<std::string>& command) {
       std::string response;
       resp::RespType dataType;
       if (command.size() <2) {
@@ -330,14 +330,14 @@ namespace RCC {
         response = command[1];
         dataType = resp::RespType::BulkString;
       }
-      return {resp::RespParser::serialize({response}, dataType)};
+      return resp::RespParser::serialize({response}, dataType);
     }
 
-    std::vector<std::string> _commandSET(const std::vector<std::string>& command) {
+    std::string _commandSET(const std::vector<std::string>& command) {
       std::string response;
       if (command.size() < 3) {
         response = "few arguments provided for SET command.";
-        return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
+        return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
       }
 
       resp::RespType dataType;
@@ -354,33 +354,32 @@ namespace RCC {
         response = "Error while storing key value pair.";
         dataType = resp::RespType::SimpleError;
       }
-      return {resp::RespParser::serialize({response}, dataType)};
+      return resp::RespParser::serialize({response}, dataType);
     }
 
-    std::vector<std::string> _commandGET(const std::vector<std::string>& command) {
+    std::string _commandGET(const std::vector<std::string>& command) {
       std::string response;
       if (command.size() < 2) {
         response = "-few arguments provided for GET command.";
-        return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
+        return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
       }
       
-      std::vector<std::string> reply;
       auto result = redis_data_store_obj.get_kv(command[1]);
       if (result.has_value()) {
         response = *result;
-        reply.push_back(resp::RespParser::serialize({response}, resp::RespType::BulkString));
+        response = resp::RespParser::serialize({response}, resp::RespType::BulkString);
       }
       else {
-        reply.push_back(resp::RespConstants::NULL_BULK_STRING);
+        response = resp::RespConstants::NULL_BULK_STRING;
       }
-      return reply;
+      return response;
     }
 
-    std::vector<std::string> _commandCONFIG_GET(const std::vector<std::string>& command) {
+    std::string _commandCONFIG_GET(const std::vector<std::string>& command) {
       std::string response;
       if (command.size() < 3) {
         response = "few arguments provided for CONFIG GET command.";
-        return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
+        return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
       }
 
       // DEBUG_LOG("in CONFIG GET ");
@@ -391,32 +390,32 @@ namespace RCC {
       else {
         response = "$-1\r\n";
       }
-      return {response};
+      return response;
     }
 
-    std::vector<std::string> _commandKEYS(const std::vector<std::string>& command) {
+    std::string _commandKEYS(const std::vector<std::string>& command) {
       std::string response;
       std::vector<std::string> reply;
       if (command.size() < 2) {
         response = "-few arguments provided for KEY command.";
-        return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
+        return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
       //     // throw std::runtime_error("few arguments provided for KEY command.");
       }
       DEBUG_LOG("command[0]=" + command[0] + ", command[1]=\"" + command[1] + "\"");
       // redis_data_store_obj.display_all_key_value_pairs();
       if (0 != redis_data_store_obj.get_keys_with_pattern(reply, command[1])) {
         response = "error occurred while fetching keys";
-        return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
+        return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
         // throw std::runtime_error("error occurred while fetching keys");
       }
       std::stringstream ss;
       for(auto& e : reply) 
         ss << e << ",| ";
       DEBUG_LOG(ss.str());
-      return {resp::RespParser::serialize(reply, resp::RespType::Array)};
+      return resp::RespParser::serialize(reply, resp::RespType::Array);
     }
 
-    std::vector<std::string> _commandINFO(const std::vector<std::string>& command) {
+    std::string _commandINFO(const std::vector<std::string>& command) {
       std::vector<std::string> reply;
       std::string response;
       std::string dataType;
@@ -428,21 +427,21 @@ namespace RCC {
       if (0 != _getInfo(reply, required_section)) {
         response = "error while getting info";
         DEBUG_LOG(response);
-        return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
+        return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
       }
       std::stringstream ss;  
       for(auto& e : reply) 
         ss << e << ",| ";
       DEBUG_LOG(ss.str());
-      return {resp::RespParser::serialize(reply, resp::RespType::BulkString)};
+      return resp::RespParser::serialize(reply, resp::RespType::BulkString);
     }
     
-    std::vector<std::string> _commandREPLCONF(const std::vector<std::string>& command) {
+    std::string _commandREPLCONF(const std::vector<std::string>& command) {
       std::string response;
       
       if (command.size() < 3) {
         response = "few arguments provided for REPLCONF command.";
-        return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
+        return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
       }
 
       if (utility::compareCaseInsensitive("listening-port", command[1])) {
@@ -456,15 +455,15 @@ namespace RCC {
         DEBUG_LOG("Capabilities : " + command[2]);
       }
       response = "OK";
-      return {resp::RespParser::serialize({response}, resp::RespType::SimpleString)};
+      return resp::RespParser::serialize({response}, resp::RespType::SimpleString);
     }
 
-    std::vector<std::string> _commandPSYNC(const std::vector<std::string>& command) {
+    std::string _commandPSYNC(const std::vector<std::string>& command) {
       std::string response;
 
       if (command.size() < 3) {
         response = "few arguments provided for PSYNC command.";
-        return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
+        return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
       }
 
       // get master replication id; generate replid if not present
