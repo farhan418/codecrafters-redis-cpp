@@ -206,18 +206,18 @@ namespace RCC {
       char buffer[bufferSize];
       int retryCount = 3;
       int numBytes;
-      for (auto& replicaSocketFD : replicaSocketFDSet) {
+      for (int& replicaSocketFD : replicaSocketFDSet) {
         // send single command to all replicas
         numBytes = utility::writeToSocketFD(replicaSocketFD, buffer, bufferSize, commandRespStr, retryCount);
         if (numBytes > 0) {
-          DEBUG_LOG("successfully sent " + std::to_string(numBytes) + "bytes to socket=" + std::to_string(socketFD) + ", command : " + utility::printExact(commandRespStr));
+          DEBUG_LOG("successfully sent " + std::to_string(numBytes) + "bytes to socket=" + std::to_string(replicaSocketFD) + ", command : " + utility::printExact(commandRespStr));
         }
         else if (numBytes == 0){
-          DEBUG_LOG("writing to replica socket(" + std::to_string(socketFD) + ") during handshake failed : connection closed");
+          DEBUG_LOG("writing to replica socket(" + std::to_string(replicaSocketFD) + ") during handshake failed : connection closed");
           return -1;
         }
         else {  // numBytes is -ve
-          DEBUG_LOG("writing to replica socket(" + std::to_string(socketFD) + ") during handshake failed");
+          DEBUG_LOG("writing to replica socket(" + std::to_string(replicaSocketFD) + ") during handshake failed");
         }
       }
       return 0;
