@@ -75,8 +75,8 @@ namespace RCC {
       DEBUG_LOG(ss.str());
 
       std::vector<std::string> responseStrVec;
-      for (auto& command : commands) {
-        responseStrVec.push_back(_process(commands));
+      for (auto& eachCommand : commands) {
+        responseStrVec.push_back(_process(eachCommand));
       }
       ss.clear();
       ss << "responseStr : ";
