@@ -254,7 +254,7 @@ namespace RCC {
         }
         else if ((i==3/*PSYNC command*/)) {
           std::vector<std::string> responseVec = utility::split(buffer);
-          isCase3Matching = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
+          bool isCase3Matching = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
           isCase3Matching = isCase3Matching && (responseVec[1].length() == 40);
           isCase3Matching = isCase3Matching && (responseVec.size() == 3);
         }
