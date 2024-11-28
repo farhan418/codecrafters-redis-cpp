@@ -294,7 +294,7 @@ namespace resp {
       // for (size_t i = 0; i < length && (!isParsedRespBuffer()); i++) {
         // ss << respBuffer[respBufferIndex++];//*2\r\n$5\r\nhello\r\n$5\r\nworld\r\n
       // }
-      DEBUG_LOG("parsed bulk string : " + respBuffer.str() + ", respBufferIndex=" + std::to_string(respBufferIndex));
+      DEBUG_LOG("parsed bulk string : " + ss.str() + ", respBufferIndex=" + std::to_string(respBufferIndex));
     //   respBufferIndex += 2;
     //   if ((!isParsedRespBuffer()) && respBufferIndex != respBuffer.find(RespConstants::CRLF, respBufferIndex)) {
     //     /*
