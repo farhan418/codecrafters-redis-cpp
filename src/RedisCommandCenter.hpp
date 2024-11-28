@@ -185,7 +185,6 @@ namespace RCC {
 
     int _doReplicaMasterHandshake(int& serverConnectorSocketFD, resp::RespParser& respParser) {
       std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa", "PSYNC ? -1"};
-      const std::string sendDataType = "array";
       const std::string receiveDataType = "simple_string";
       std::vector<std::string> expectedResultVec{"PONG", "OK", "OK", "FULLRESYNC abcdefghijklmnopqrstuvwxyz1234567890ABCD 0"};
       // std::vector<std::string> dataTypeVec{"array", "array", "array", "array"};
@@ -205,7 +204,7 @@ namespace RCC {
       int numBytes;
 
       for (int i = 0; i < handShakeCommands.size(); i++) {
-        std::string str = RespParser::serialize(utility::split(handShakeCommands[i], " "), sendDataType);
+        std::string str = resp::RespParser::serialize(utility::split(handShakeCommands[i], " "), resp::RespType::Array);
         numBytes = utility::writeToSocketFD(serverConnectorSocketFD, buffer, bufferSize, str, retryCount);
         if (numBytes > 0) {
           DEBUG_LOG("successfully sent command : " + str);
@@ -239,7 +238,7 @@ namespace RCC {
           isCase3Matching = isCase3Matching && (responseVec[1].length() == 40);
           isCase3Matching = isCase3Matching && (responseVec.size() == 3);
         }
-        if (!isCase3Matching || !utility::compareCaseInsensitive(resp::RespParser::serialize(utility::split(expectedResultVec[i]), receiveDataType), response)) {
+        if (!isCase3Matching || !utility::compareCaseInsensitive(resp::RespParser::serialize(utility::split(expectedResultVec[i]), resp::RespType::SimpleString), response)) {
           DEBUG_LOG("error occurred while replica master handshake - did not receive reply for ");
         }
         else {
