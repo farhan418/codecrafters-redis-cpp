@@ -106,6 +106,7 @@ namespace resp {
     void resetParser(const std::string& respStr) {
       respBuffer = respStr;
       respBufferIndex = 0;
+      DEBUG_LOG(utility::printExact(respBuffer));
     }
 
     bool isParsedRespBuffer() const {
@@ -159,6 +160,7 @@ namespace resp {
         and if the character at respBufferIndex is any of the valid RespType
         Returns true if so otherwise false;
       */
+      DEBUG_LOG(utility::printExact(respBuffer));
         if (isParsedRespBuffer()) {
           DEBUG_LOG("respBuffer was parsed completely");
             return true;
