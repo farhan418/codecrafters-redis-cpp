@@ -107,7 +107,7 @@ namespace utility {
             std::stringstream ss;
             ss << "read " << numBytesRead << " bytes : " << utility::printExact(buffer);
             std::string s(buffer);
-            if (numBytesRead == 49) {
+            if (numBytesRead != s.length()) {
                 std::ostringstream temp;
                 for (int i = numBytesRead; i < s.length(); i++) {
                     uint8_t byte = buffer[i];
@@ -143,6 +143,15 @@ namespace utility {
 
         std::stringstream ss;
         ss << "read " << numBytesRead << " bytes : " << utility::printExact(buffer);
+        std::string s(buffer);
+        if (numBytesRead != s.length()) {
+            std::ostringstream temp;
+            for (int i = numBytesRead; i < s.length(); i++) {
+                uint8_t byte = buffer[i];
+                temp << "buffer[" << i << "] = " << buffer[i] << ", byte = " << byte;
+            }
+            DEBUG_LOG(temp.str());
+        }
         // for(int i = 0; i < numBytesRead; i++) {
         //   if (buffer[i] == '\r')
         //     ss << "\\r";
