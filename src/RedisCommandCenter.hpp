@@ -206,7 +206,7 @@ namespace RCC {
       char buffer[bufferSize];
       int retryCount = 3;
       int numBytes;
-      for (int& replicaSocketFD : replicaSocketFDSet) {
+      for (int replicaSocketFD : replicaSocketFDSet) {
         // send single command to all replicas
         numBytes = utility::writeToSocketFD(replicaSocketFD, buffer, bufferSize, commandRespStr, retryCount);
         if (numBytes > 0) {
