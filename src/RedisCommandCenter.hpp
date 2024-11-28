@@ -253,8 +253,8 @@ namespace RCC {
     std::string _processSingleCommand(const std::string& command) {
       std::stringstream ss;
       // for (auto& c : commandVec)
-          ss << "\"" << command << "\" | ";
-      DEBUG_LOG("before command = " + ss.str());
+      // ss << "\"" << command << "\" | ";
+      // DEBUG_LOG("before command = " + ss.str());
       std::vector<std::string> commandVec = utility::split(command, " ");
       ss.clear();
       for (auto& c : commandVec)

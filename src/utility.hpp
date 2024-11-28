@@ -58,20 +58,41 @@ namespace utility {
 
     std::string printExact(const std::string& sampleRespStr) {
         std::ostringstream ss;
-        ss << "strLength=" << sampleRespStr.length() << ", \"";
+        ss << "strLength=" << sampleRespStr.length() << ", {[\"";
         for(auto& c : sampleRespStr) {
-            if (c == '\r') {
-                ss << "\\r";
-            }
-            else if (c == '\n') {
-                ss << "\\n";
-            }
-            else
+            if (std::isprint(c)) {
                 ss << c;
+            }
+            else {
+                switch(c) {
+                    case '\r' : ss << "\\r"; break;
+                    case '\n' : ss << "\\n"; break;
+                    case '\t' : ss << "\\t"; break;
+                    default : ss << "\\x" << std::setw(2) << std::setfill(0) << std::hex << static_cast<int>(c);
+                }
+            }
         }
-        ss << "\"";
+        ss << "\"]}";
         return ss.str();
     }
+
+
+    // std::string printExact(const std::string& sampleRespStr) {
+    //     std::ostringstream ss;
+    //     ss << "strLength=" << sampleRespStr.length() << ", \"";
+    //     for(auto& c : sampleRespStr) {
+    //         if (c == '\r') {
+    //             ss << "\\r";
+    //         }
+    //         else if (c == '\n') {
+    //             ss << "\\n";
+    //         }
+    //         else
+    //             ss << c;
+    //     }
+    //     ss << "\"";
+    //     return ss.str();
+    // }
     // *3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n6380\r\n
 
     int readFromSocketFD(int& sockFD, char* buffer, const int& bufferSize, const int& retryCount) {

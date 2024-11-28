@@ -125,7 +125,7 @@ namespace resp {
       while(!isParsedRespBuffer()) {
         commandsVec.push_back(parseNextRespTypeData());
       }
-      DEBUG_LOG("Successfully parsed respBuffer");
+      // DEBUG_LOG("Successfully parsed respBuffer");
       return 0;
     }
 
