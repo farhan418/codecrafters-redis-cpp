@@ -201,14 +201,14 @@ namespace RCC {
 
   private:
 
-    int sendCommandToAllReplicas(int& socketFD, const std::string& commandRespStr) {
+    int sendCommandToAllReplicas(const std::string& commandRespStr) {
       const int bufferSize = 1024;
       char buffer[bufferSize];
       int retryCount = 3;
       int numBytes;
       for (auto& replicaSocketFD : replicaSocketFDSet) {
         // send single command to all replicas
-        numBytes = utility::writeToSocketFD(socketFD, buffer, bufferSize, commandRespStr, retryCount);
+        numBytes = utility::writeToSocketFD(replicaSocketFD, buffer, bufferSize, commandRespStr, retryCount);
         if (numBytes > 0) {
           DEBUG_LOG("successfully sent " + std::to_string(numBytes) + "bytes to socket=" + std::to_string(socketFD) + ", command : " + utility::printExact(commandRespStr));
         }
@@ -553,7 +553,9 @@ namespace RCC {
         return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
       }
 
-      if (0 == sendCommandToAllReplicas(socketFD, resp::RespParser::serialize(commandVec, resp::RespType::Array))) {
+      std::string sss = resp::RespParser::serialize(commandVec, resp::RespType::Array);
+      DEBUG_LOG(utility::printExact(sss));
+      if (0 == sendCommandToAllReplicas(sss)) {
         DEBUG_LOG("successfully sent command to all replicas");
       }
       else {
