@@ -247,54 +247,60 @@ namespace RCC {
     // }
 
 
-    std::vector<std::string> _process(const std::vector<std::string>& command) {
+    std::vector<std::string> _process(const std::vector<std::string>& commandVec) {
       std::stringstream ss;
-      for (auto& c : command)
-          ss << c << "|, ";
-      DEBUG_LOG(ss.str());
+      for (auto& c : commandVec)
+          ss << "\"" << c << "\" | ";
+      DEBUG_LOG("before commandVec = " + ss.str());
+      commandVec = utility::split(commandVec, " ");
+      ss.clear();
+      for (auto& c : commandVec)
+        ss << "\"" << c << "\" | ";
+      DEBUG_LOG("before commandVec = " + ss.str());
+      // commandVec = utility::split(commandVec, " 
 
-      // command PING
-      if (utility::compareCaseInsensitive("PING", command[0])) {
+      // commandVec PING
+      if (utility::compareCaseInsensitive("PING", commandVec[0])) {
         return _commandPING();
       }
-      // command ECHO  
-      else if (utility::compareCaseInsensitive("ECHO", command[0])) {
-        return _commandECHO(command);
+      // commandVec ECHO  
+      else if (utility::compareCaseInsensitive("ECHO", commandVec[0])) {
+        return _commandECHO(commandVec);
       }
       // command SET, SET key value PX ms
-      else if (utility::compareCaseInsensitive("SET", command[0])) {
-        return _commandSET(command);   
+      else if (utility::compareCaseInsensitive("SET", commandVec[0])) {
+        return _commandSET(commandVec);   
       }
       // command GET key
-      else if (utility::compareCaseInsensitive("GET", command[0])) {
-        return _commandGET(command);
+      else if (utility::compareCaseInsensitive("GET", commandVec[0])) {
+        return _commandGET(commandVec);
       }
       // command CONFIG GET
-      else if (command.size() >= 2 && 
-              utility::compareCaseInsensitive("CONFIG", command[0]) &&
-              utility::compareCaseInsensitive("GET", command[1])) {
-          return _commandCONFIG_GET(command);
+      else if (commandVec.size() >= 2 && 
+              utility::compareCaseInsensitive("CONFIG", commandVec[0]) &&
+              utility::compareCaseInsensitive("GET", commandVec[1])) {
+          return _commandCONFIG_GET(commandVec);
       }
       // command KEYS
-      else if (command.size() >= 2 && 
-              utility::compareCaseInsensitive("KEYS", command[0])) {
-        return _commandKEYS(command);
+      else if (commandVec.size() >= 2 && 
+              utility::compareCaseInsensitive("KEYS", commandVec[0])) {
+        return _commandKEYS(commandVec);
       }
       // command INFO, INFO <section>
-      else if (utility::compareCaseInsensitive("INFO", command[0])) {
-        return _commandINFO(command);
+      else if (utility::compareCaseInsensitive("INFO", commandVec[0])) {
+        return _commandINFO(commandVec);
       }
       // command REPLCONF listening-port <replicaListenerPort>, REPLCONF capa psync2
-      else if (utility::compareCaseInsensitive("REPLCONF", command[0])) {
-        return _commandREPLCONF(command);
+      else if (utility::compareCaseInsensitive("REPLCONF", commandVec[0])) {
+        return _commandREPLCONF(commandVec);
       }
       // command PSYNC ? -1
-      else if (utility::compareCaseInsensitive("PSYNC", command[0])) {
-        return _commandPSYNC(command);
+      else if (utility::compareCaseInsensitive("PSYNC", commandVec[0])) {
+        return _commandPSYNC(commandVec);
       }
       // Invalid command
       else {
-        std::string errStr("err invalid command : " + command[0]);
+        std::string errStr("err invalid command : " + commandVec[0]);
         return {resp::RespParser::serialize({errStr}, resp::RespType::SimpleError)};
       }
     }
