@@ -479,23 +479,24 @@ namespace RCC {
 
       // generate rdb file if PSYNC ? -1 
       if ("?" == command[1]) {
-        std::string rdbFileName = "rdbFile_" + masterReplid;
-        _generateRDBFile(RDB_FILE_DIR + rdbFileName);
+        // std::string rdbFileName = "rdbFile_" + masterReplid;
+        // _generateRDBFile(RDB_FILE_DIR + rdbFileName);
 
-        std::ifstream rdbFile(RDB_FILE_DIR + rdbFileName, std::ios::binary);
-        if (!rdbFile) {
-          response = "failed to open file : " + utility::printExact(rdbFileName);
-          DEBUG_LOG(response);
-          reply.push_back(resp::RespParser::serialize({response}, resp::RespType::SimpleError));
-        }
+        // std::ifstream rdbFile(RDB_FILE_DIR + rdbFileName, std::ios::binary);
+        // if (!rdbFile) {
+        //   response = "failed to open file : " + utility::printExact(rdbFileName);
+        //   DEBUG_LOG(response);
+        //   reply.push_back(resp::RespParser::serialize({response}, resp::RespType::SimpleError));
+        // }
         // get the file size
-        rdbFile.seekg(0, std::ios::end);
-        std::streamsize fileSize = rdbFile.tellg();
-        rdbFile.seekg(0, std::ios::beg);
-        DEBUG_LOG("opened file in binary mode : " + utility::printExact(rdbFileName) + ", fileSize = " + std::to_string(fileSize));
+        // rdbFile.seekg(0, std::ios::end);
+        // std::streamsize fileSize = rdbFile.tellg();
+        // rdbFile.seekg(0, std::ios::beg);
+        // DEBUG_LOG("opened file in binary mode : " + utility::printExact(rdbFileName) + ", fileSize = " + std::to_string(fileSize));
 
-        std::ostringstream rdbFileContent;
-        rdbFileContent << "$" << fileSize << "\r\n" << generateEmptyRdbFileContent();
+        // std::ostringstream rdbFileContent;
+        std::string rdbFileContnet = generateEmptyRdbFileContent();
+        rdbFileContent = "$" + std::to_string(fileSize) + "\r\n" + rdbFileContent;
         // const std::size_t bufferSize = 4096;
         // char buffer[bufferSize];
         // while (rdbFile.read(buffer, bufferSize)) {
@@ -507,8 +508,8 @@ namespace RCC {
         // DEBUG_LOG("closing rdb file : " + utility::printExact(rdbFileName));
         // rdbFile.close();
         // reply.push_back(rdbFileContent.str());
-        DEBUG_LOG("file content : " + rdbFileContent.str())
-        response += rdbFileContent.str();
+        DEBUG_LOG("file content : " + rdbFileContent);
+        response += rdbFileContent;
       }
       // return reply;
       return response;
@@ -543,7 +544,7 @@ namespace RCC {
         emptyRdbFileContent += static_cast<unsigned char>(byte);
       }
       DEBUG_LOG("successfully generated empty rdb content : " + utility::printExact(emptyRdbFileContent));
-      return 0;
+      return emptyRdbFileContent;
     }
 
     int _generateRDBFile(const std::string& rdbFileName) {
