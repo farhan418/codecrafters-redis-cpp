@@ -124,7 +124,7 @@ namespace RCC {
       std::vector<std::string> command;
       respParser.parseCommands(command); 
       // process the commands
-      std::vector<std::string> responseStrVec = processCommands(command);
+      std::vector<std::string> responseStrVec = processCommands(currentSocketFD, command);
       for (auto& responseStr : responseStrVec) {
         DEBUG_LOG("processed commands one by one, respective responseStr : " + utility::printExact(responseStr))
       }
@@ -485,7 +485,7 @@ namespace RCC {
       }
       // command SET, SET key value PX ms
       else if (utility::compareCaseInsensitive("SET", commandVec[0])) {
-        return _commandSET(commandVec);   
+        return _commandSET(socketFD, commandVec);   
       }
       // command GET key
       else if (utility::compareCaseInsensitive("GET", commandVec[0])) {
