@@ -484,14 +484,15 @@ namespace RCC {
 
         std::ifstream rdbFile(RDB_FILE_DIR + rdbFileName, std::ios::binary);
         if (!rdbFile) {
-          DEBUG_LOG("failed to open file : " + RDB_FILE_DIR + rdbFileName);
-          response = "failed to open file : " + RDB_FILE_DIR + rdbFileName;
+          response = "failed to open file : " + utility::printExact(rdbFileName);
+          DEBUG_LOG(response);
           reply.push_back(resp::RespParser::serialize({response}, resp::RespType::SimpleError));
         }
         // get the file size
         rdbFile.seekg(0, std::ios::end);
         std::streamsize fileSize = rdbFile.tellg();
         rdbFile.seekg(0, std::ios::beg);
+        DEBUG_LOG("opened file in binary mode : " + utility::printExact(rdbFileName) + ", fileSize = " + std::to_string(fileSize));
 
         std::ostringstream rdbFileContent;
         rdbFileContent << "$" << fileSize << "\r\n";
@@ -502,6 +503,7 @@ namespace RCC {
         }
         rdbFile.close();
         // reply.push_back(rdbFileContent.str());
+        DEBUG_LOG("file content : " + rdbFileContent.str())
         response += rdbFileContent.str();
       }
       // return reply;
@@ -561,3 +563,4 @@ namespace RCC {
 };
 
 #endif  // REDISCOMMANDCENTER_HPP
++FULLRESYNC 8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb 0\r\n
