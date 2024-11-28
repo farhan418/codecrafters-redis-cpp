@@ -266,8 +266,8 @@ namespace resp {
       }
       return respBuffer.substr(tempIndex, crlfIndex - tempIndex);
     }
-    "*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n6380\r\n"
-                 456789011213
+    // "*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n6380\r\n"
+                //  456789011213
     std::string parseBulkString() {
       size_t crlfIndex = respBuffer.find(RespConstants::CRLF, respBufferIndex);
       if (crlfIndex == std::string::npos) {
