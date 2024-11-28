@@ -496,7 +496,7 @@ namespace RCC {
 
         // std::ostringstream rdbFileContent;
         std::string rdbFileContent = generateEmptyRdbFileContent();
-        rdbFileContent = "$" + std::to_string(fileSize) + "\r\n" + rdbFileContent;
+        rdbFileContent = "$" + std::to_string(rdbFileContent.length()) + "\r\n" + rdbFileContent;
         // const std::size_t bufferSize = 4096;
         // char buffer[bufferSize];
         // while (rdbFile.read(buffer, bufferSize)) {
