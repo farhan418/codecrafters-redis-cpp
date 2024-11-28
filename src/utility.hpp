@@ -104,6 +104,7 @@ namespace utility {
         }
 
         if (isSuccessfullyRead) {
+            buffer[numBytesRead] = '\0';
             std::stringstream ss;
             ss << "read " << numBytesRead << " bytes : " << utility::printExact(buffer);
             std::string s(buffer);
@@ -132,6 +133,7 @@ namespace utility {
             return numBytesRead;
         }
 
+        buffer[numBytesRead] = '\0';
         std::stringstream ss;
         ss << "read " << numBytesRead << " bytes : " << utility::printExact(buffer);
         std::string s(buffer);
@@ -143,16 +145,6 @@ namespace utility {
             }
             DEBUG_LOG(temp.str());
         }
-        // for(int i = 0; i < numBytesRead; i++) {
-        //   if (buffer[i] == '\r')
-        //     ss << "\\r";
-        //   else if (buffer[i] == '\n') 
-        //     ss << "\\n";
-        //   else
-        //     ss << buffer[i];
-        //   if (i == numBytesRead)
-        //     break;
-        // }
         DEBUG_LOG(ss.str());
         return numBytesRead;
     }
