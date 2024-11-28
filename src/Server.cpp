@@ -98,8 +98,8 @@ int main(int argc, char **argv) {
 
   if (auto dir = arg_parser.present("--dir")) {
     if (auto dbfilename = arg_parser.present("--dbfilename")) {
-      RCC::RedisCommandCenter::set_config_kv("dir", *dir);
-      RCC::RedisCommandCenter::set_config_kv("dbfilename", *dbfilename);
+      RCC::RedisCommandCenter::setConfigKv("dir", *dir);
+      RCC::RedisCommandCenter::setConfigKv("dbfilename", *dbfilename);
       RCC::RedisCommandCenter::read_rdb_file();
     }
     else {

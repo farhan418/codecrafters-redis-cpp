@@ -71,7 +71,7 @@ namespace RCC {
       std::vector<std::string> responseStrVec = _process(commands);
       std::stringstream ss;
       ss << "processed command = \"";
-      for (auto& c : command)
+      for (auto& c : commands)
         ss << c << " ";
       ss << "\", responseStr : ";
       for (auto& responseStr : responseStrVec) {
@@ -98,6 +98,9 @@ namespace RCC {
   private:
 
     int _doReplicaMasterHandshake(int& serverConnectorSocketFD, resp::RespParser& respParser) {
+      std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa", "PSYNC ? -1"};
+      std::vector<std::string> expectedResultVec{"PONG", "OK", "OK", "FULLRESYNC abcdefghijklmnopqrstuvwxyz1234567890ABCD 0"};
+      
       auto listeningPortNumber = getConfigKv("listening-port");
       if (listeningPortNumber.has_value())
         handShakeCommands[1] += " " + (*listeningPortNumber);
@@ -106,8 +109,6 @@ namespace RCC {
       if (capa.has_value())
         handShakeCommands[2] += " " + (*capa);
   
-      std::vector<std::string> handShakeCommands{"PING", "REPLCONF listening-port", "REPLCONF capa", "PSYNC ? -1"};
-      std::vector<std::string> expectedResultVec{"PONG", "OK", "OK", "FULLRESYNC abcdefghijklmnopqrstuvwxyz1234567890ABCD 0"};
       std::ostringstream respStrHandShakeCommandsToSend;
       std::ostringstream respStrExpectedHandShakeResponse;
       std::vector<std::string> commandVec;
@@ -144,7 +145,6 @@ namespace RCC {
       numBytes = utility::readFromSocketFD(serverConnectorSocketFD, buffer, bufferSize, retryCount);
       if (numBytes > 0) {
         DEBUG_LOG("successfully read command : " + utility::printExact(buffer));
-        break;
       }
       else if (numBytes == 0) {
         DEBUG_LOG("Error reading from socket : connection closed\n");
@@ -168,10 +168,10 @@ namespace RCC {
       // if (!isCase3Matching || !utility::compareCaseInsensitive(resp::RespParser::serialize(utility::split(expectedResultVec[i]), receiveDataType), response)) {
       // }
       if (isExpectedResponse) {
-        DEBUG_LOG("got reply to " + handShakeCommands[i] + " as expected, handshake successful");
+        DEBUG_LOG("got reply to handShakeCommands as expected, handshake successful");
       }
       else {
-        DEBUG_LOG("error occurred while replica master handshake - response not as expected");
+        DEBUG_LOG("error occurred while replica master handshake - response not as expected, response : " + utility::printExact(response));
       }
       // }
       return 0;
@@ -322,12 +322,12 @@ namespace RCC {
     }
 
     std::vector<std::string> _commandSET(const std::vector<std::string>& command) {
+      std::string response;
       if (command.size() < 3) {
         response = "few arguments provided for SET command.";
         return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
       }
 
-      std::string response;
       resp::RespType dataType;
       uint64_t expiry_time_ms = UINT64_MAX;
       if (5 == command.size() && utility::compareCaseInsensitive("PX", command[3])) {
@@ -346,12 +346,12 @@ namespace RCC {
     }
 
     std::vector<std::string> _commandGET(const std::vector<std::string>& command) {
+      std::string response;
       if (command.size() < 2) {
         response = "-few arguments provided for GET command.";
         return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
       }
       
-      std::string response;
       std::vector<std::string> reply;
       auto result = redis_data_store_obj.get_kv(command[1]);
       if (result.has_value()) {
@@ -365,6 +365,7 @@ namespace RCC {
     }
 
     std::vector<std::string> _commandCONFIG_GET(const std::vector<std::string>& command) {
+      std::string response;
       if (command.size() < 3) {
         response = "few arguments provided for CONFIG GET command.";
         return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
@@ -393,7 +394,7 @@ namespace RCC {
       // redis_data_store_obj.display_all_key_value_pairs();
       if (0 != redis_data_store_obj.get_keys_with_pattern(reply, command[1])) {
         response = "error occurred while fetching keys";
-        return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
+        return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
         // throw std::runtime_error("error occurred while fetching keys");
       }
       std::stringstream ss;  
