@@ -508,7 +508,7 @@ namespace RCC {
         // DEBUG_LOG("closing rdb file : " + utility::printExact(rdbFileName));
         // rdbFile.close();
         // reply.push_back(rdbFileContent.str());
-        DEBUG_LOG("file content : " + rdbFileContent);
+        DEBUG_LOG("file content : " + utility::printExact(rdbFileContent));
         response += rdbFileContent;
       }
       // return reply;
