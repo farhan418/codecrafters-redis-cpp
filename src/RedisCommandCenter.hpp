@@ -67,14 +67,17 @@ namespace RCC {
       return 0;
     }
 
-    std::vector<std::string> process(const std::vector<std::string>& commands) {
+    std::vector<std::string> processCommands(const std::vector<std::string>& commands) {
       std::stringstream ss;
       ss << "processing command = \"";
       for (auto& c : commands)
         ss << "\"" << c << "\" | ";
       DEBUG_LOG(ss.str());
 
-      std::vector<std::string> responseStrVec = _process(commands);
+      std::vector<std::string> responseStrVec;
+      for (auto& command : commands) {
+        responseStrVec.push_back(_process(commands));
+      }
       ss.clear();
       ss << "responseStr : ";
       for (auto& responseStr : responseStrVec) {
@@ -247,16 +250,16 @@ namespace RCC {
     // }
 
 
-    std::vector<std::string> _process(const std::vector<std::string>& commandVec) {
+    std::vector<std::string> _process(std::string& command) {
       std::stringstream ss;
-      for (auto& c : commandVec)
-          ss << "\"" << c << "\" | ";
-      DEBUG_LOG("before commandVec = " + ss.str());
-      commandVec = utility::split(commandVec[0], " ");
+      // for (auto& c : commandVec)
+          ss << "\"" << command << "\" | ";
+      DEBUG_LOG("before command = " + ss.str());
+      std::vector<std::string> commandVec = utility::split(command, " ");
       ss.clear();
       for (auto& c : commandVec)
         ss << "\"" << c << "\" | ";
-      DEBUG_LOG("before commandVec = " + ss.str());
+      DEBUG_LOG("after commandVec = " + ss.str());
       // commandVec = utility::split(commandVec, " 
 
       // commandVec PING

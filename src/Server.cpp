@@ -184,7 +184,7 @@ int clientHandler(int currentSocketFD, resp::RespParser& respParser, RCC::RedisC
   std::vector<std::string> command;
   respParser.parseCommands(command); 
   // process the commands
-  std::vector<std::string> responseStrVec = rcc.process(command);
+  std::vector<std::string> responseStrVec = rcc.processCommands(command);
   for (auto& responseStr : responseStrVec) {
     numBytes = utility::writeToSocketFD(currentSocketFD, buffer, bufferSize, responseStr);
     if (numBytes < 0) {
