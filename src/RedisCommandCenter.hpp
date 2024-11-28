@@ -201,16 +201,16 @@ namespace RCC {
 
   private:
 
-    int sendCommandToAllReplicas(int& socketFD, const std::string& singleCommandToSend) {
+    int sendCommandToAllReplicas(int& socketFD, const std::string& commandRespStr) {
       const int bufferSize = 1024;
       char buffer[bufferSize];
       int retryCount = 3;
       int numBytes;
       for (auto& replicaSocketFD : replicaSocketFDSet) {
         // send single command to all replicas
-        numBytes = utility::writeToSocketFD(socketFD, buffer, bufferSize, singleCommandToSend, retryCount);
+        numBytes = utility::writeToSocketFD(socketFD, buffer, bufferSize, commandRespStr, retryCount);
         if (numBytes > 0) {
-          DEBUG_LOG("successfully sent command : " + utility::printExact(singleCommandToSend));
+          DEBUG_LOG("successfully sent " + std::to_string(numBytes) + "bytes to socket=" + std::to_string(socketFD) + ", command : " + utility::printExact(commandRespStr));
         }
         else if (numBytes == 0){
           DEBUG_LOG("writing to replica socket(" + std::to_string(socketFD) + ") during handshake failed : connection closed");
@@ -546,14 +546,14 @@ namespace RCC {
       return resp::RespParser::serialize({response}, dataType);
     }
 
-    std::string _commandSET(int& socketFD, const std::vector<std::string>& command) {
+    std::string _commandSET(int& socketFD, const std::vector<std::string>& commandVec) {
       std::string response;
-      if (command.size() < 3) {
+      if (commandVec.size() < 3) {
         response = "few arguments provided for SET command.";
         return resp::RespParser::serialize({response}, resp::RespType::SimpleError);
       }
 
-      if (0 == sendCommandToAllReplicas(socketFD, resp::RespParser::serialize(command, resp::RespType::Array))) {
+      if (0 == sendCommandToAllReplicas(socketFD, resp::RespParser::serialize(commandVec, resp::RespType::Array))) {
         DEBUG_LOG("successfully sent command to all replicas");
       }
       else {
@@ -562,11 +562,11 @@ namespace RCC {
 
       resp::RespType dataType;
       uint64_t expiry_time_ms = UINT64_MAX;
-      if (5 == command.size() && utility::compareCaseInsensitive("PX", command[3])) {
-        expiry_time_ms = std::stol(command[4]);
+      if (5 == commandVec.size() && utility::compareCaseInsensitive("PX", commandVec[3])) {
+        expiry_time_ms = std::stol(commandVec[4]);
       }
       
-      if (0 == redis_data_store_obj.set_kv(command[1], command[2], expiry_time_ms)) {
+      if (0 == redis_data_store_obj.set_kv(commandVec[1], commandVec[2], expiry_time_ms)) {
         response = "OK";
         dataType = resp::RespType::SimpleString;
       }
