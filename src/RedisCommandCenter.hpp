@@ -252,7 +252,7 @@ namespace RCC {
       for (auto& c : commandVec)
           ss << "\"" << c << "\" | ";
       DEBUG_LOG("before commandVec = " + ss.str());
-      commandVec = utility::split(commandVec, " ");
+      commandVec = utility::split(commandVec[0], " ");
       ss.clear();
       for (auto& c : commandVec)
         ss << "\"" << c << "\" | ";
