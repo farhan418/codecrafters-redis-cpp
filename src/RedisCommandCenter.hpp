@@ -500,6 +500,7 @@ namespace RCC {
         char buffer[bufferSize];
         while (rdbFile.read(buffer, bufferSize)) {
             // rdbFileContent.write(buffer, rdbFile.gcount());
+            DEBUG_LOG("rdbFile.gcount()=" + std::to_string(rdbFile.gcount()));
             for (int i = 0; i < rdbFile.gcount(); i++)
               rdbFileContent << buffer[i];
         }
