@@ -180,7 +180,7 @@ namespace RCC {
       // }
 
       // process the commands
-      std::vector<std::string> responseStrVec = processCommands(command);
+      std::vector<std::string> responseStrVec = processCommands(currentSocketFD, command);
       for (auto& responseStr : responseStrVec) {
         numBytes = utility::writeToSocketFD(currentSocketFD, buffer, bufferSize, responseStr);
         if (numBytes < 0) {
