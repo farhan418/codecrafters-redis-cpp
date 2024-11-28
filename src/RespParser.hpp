@@ -325,7 +325,7 @@ namespace resp {
       DEBUG_LOG("arrayLength = " + std::to_string(arrayLength) + ", respBufferIndex=" + std::to_string(respBufferIndex));
 
       std::ostringstream command;
-      command << "[";
+      // command << "[";
       for (size_t i = 0; i < arrayLength /*&& (!isParsedRespBuffer())*/; i++) {
         if (i != 0)
             command << " ";
@@ -333,7 +333,7 @@ namespace resp {
         
         // std::cout << command.str() << std::endl;
       }
-      command << "]";
+      // command << "]";
       if (!isRespTypeCharOrEndOfRespBuffer()) {
         DEBUG_LOG("PARSEERR data does not conform to RESP Array encoding");
         respBufferIndex = respBuffer.length();
