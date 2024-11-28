@@ -498,12 +498,20 @@ namespace RCC {
         rdbFileContent << "$" << fileSize << "\r\n";
         const std::size_t bufferSize = 4096;
         char buffer[bufferSize];
+        if (rdbFile.read(buffer, bufferSize)) {
+            rdbFileContent.write(buffer, rdbFile.gcount());
+            DEBUG_LOG(rdbFileContent.str());
+        }
+        else {
+          DEBUG_LOG("nothing read");
+        }
         while (rdbFile.read(buffer, bufferSize)) {
             // rdbFileContent.write(buffer, rdbFile.gcount());
             DEBUG_LOG("rdbFile.gcount()=" + std::to_string(rdbFile.gcount()));
             for (int i = 0; i < rdbFile.gcount(); i++)
               rdbFileContent << buffer[i];
         }
+        DEBUG_LOG("closing rdb file : " + utility::printExact(rdbFileName));
         rdbFile.close();
         // reply.push_back(rdbFileContent.str());
         DEBUG_LOG("file content : " + rdbFileContent.str())
