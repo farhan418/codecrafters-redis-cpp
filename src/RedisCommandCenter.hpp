@@ -68,14 +68,17 @@ namespace RCC {
     }
 
     std::vector<std::string> process(const std::vector<std::string>& commands) {
-      std::vector<std::string> responseStrVec = _process(commands);
       std::stringstream ss;
-      ss << "processed command = \"";
+      ss << "processing command = \"";
       for (auto& c : commands)
-        ss << c << " ";
-      ss << "\", responseStr : ";
+        ss << "\"" << c << "\" | ";
+      DEBUG_LOG(ss.str());
+
+      std::vector<std::string> responseStrVec = _process(commands);
+      ss.clear();
+      ss << "responseStr : ";
       for (auto& responseStr : responseStrVec) {
-        ss << utility::printExact(responseStr);
+        ss << "\"" << utility::printExact(responseStr) << "\" | ";
       }
       // for (auto& responseStr : responseStrVec)
       //   ss << "\n" << responseStr;
@@ -397,7 +400,7 @@ namespace RCC {
         return {resp::RespParser::serialize({response}, resp::RespType::SimpleError)};
         // throw std::runtime_error("error occurred while fetching keys");
       }
-      std::stringstream ss;  
+      std::stringstream ss;
       for(auto& e : reply) 
         ss << e << ",| ";
       DEBUG_LOG(ss.str());

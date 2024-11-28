@@ -104,7 +104,9 @@ namespace utility {
         }
 
         if (isSuccessfullyRead) {
-            buffer[numBytesRead] = '\0';
+            if (numBytesRead < bufferSize) {
+                buffer[numBytesRead] = '\0';
+            }
             std::stringstream ss;
             ss << "read " << numBytesRead << " bytes : " << utility::printExact(buffer);
             std::string s(buffer);
@@ -133,7 +135,9 @@ namespace utility {
             return numBytesRead;
         }
 
-        buffer[numBytesRead] = '\0';
+        if (numBytesRead < bufferSize) {
+            buffer[numBytesRead] = '\0';
+        }
         std::stringstream ss;
         ss << "read " << numBytesRead << " bytes : " << utility::printExact(buffer);
         std::string s(buffer);
