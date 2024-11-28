@@ -105,17 +105,17 @@ namespace utility {
 
         if (isSuccessfullyRead) {
             std::stringstream ss;
-            ss << "read " << numBytesRead << " bytes : ";
-            for(int i = 0; i < numBytesRead; i++) {
-            if (buffer[i] == '\r')
-                ss << "\\r";
-            else if (buffer[i] == '\n') 
-                ss << "\\n";
-            else
-                ss << buffer[i];
-            if (i == numBytesRead)
-                break;
-            }
+            ss << "read " << numBytesRead << " bytes : " << utility::printExact(buffer);
+            // for(int i = 0; i < numBytesRead; i++) {
+            // if (buffer[i] == '\r')
+            //     ss << "\\r";
+            // else if (buffer[i] == '\n') 
+            //     ss << "\\n";
+            // else
+            //     ss << buffer[i];
+            // if (i == numBytesRead)
+            //     break;
+            // }
             DEBUG_LOG(ss.str());
         }
         return numBytesRead;
@@ -133,17 +133,17 @@ namespace utility {
         }
 
         std::stringstream ss;
-        ss << "read " << numBytesRead << " bytes : ";
-        for(int i = 0; i < numBytesRead; i++) {
-          if (buffer[i] == '\r')
-            ss << "\\r";
-          else if (buffer[i] == '\n') 
-            ss << "\\n";
-          else
-            ss << buffer[i];
-          if (i == numBytesRead)
-            break;
-        }
+        ss << "read " << numBytesRead << " bytes : " << utility::printExact(buffer);
+        // for(int i = 0; i < numBytesRead; i++) {
+        //   if (buffer[i] == '\r')
+        //     ss << "\\r";
+        //   else if (buffer[i] == '\n') 
+        //     ss << "\\n";
+        //   else
+        //     ss << buffer[i];
+        //   if (i == numBytesRead)
+        //     break;
+        // }
         DEBUG_LOG(ss.str());
         return numBytesRead;
     }
@@ -180,7 +180,7 @@ namespace utility {
 
         if (isSuccessfullyWritten) {
             std::stringstream ss;
-            ss << "sent " << numBytesWritten << " bytes : " << buffer;
+            ss << "sent " << numBytesWritten << " bytes : " << utility::printExact(buffer);
             DEBUG_LOG(ss.str());
         }
         return numBytesWritten;
@@ -203,7 +203,7 @@ namespace utility {
         }
 
         std::stringstream ss;
-        ss << "sent " << numBytesWritten << " bytes : " << buffer;
+        ss << "sent " << numBytesWritten << " bytes : " << utility::printExact(buffer);
         DEBUG_LOG(ss.str());
         return numBytesWritten;
     }
