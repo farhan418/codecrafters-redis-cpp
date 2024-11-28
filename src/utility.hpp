@@ -57,7 +57,7 @@ namespace utility {
     }
 
     std::string printExact(const std::string& sampleRespStr) {
-        std::stringstream ss("\"");
+        std::ostringstream ss("\"");
         for(auto& c : sampleRespStr) {
             if (c == '\r') {
                 ss << "\\r";
