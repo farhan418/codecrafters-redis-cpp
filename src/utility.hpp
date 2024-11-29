@@ -172,7 +172,7 @@ namespace utility {
             DEBUG_LOG(temp.str());
         }
         else {
-            DEBUG_LOG("numBytesRead=" + std::to_string(numBytesRead) + ", buffer length = " + std::to_string(s.length));
+            DEBUG_LOG("numBytesRead=" + std::to_string(numBytesRead) + ", buffer length = " + std::to_string(s.length()));
         }
 
         std::stringstream ss;
