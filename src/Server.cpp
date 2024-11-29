@@ -194,7 +194,6 @@ int main(int argc, char **argv) {
           DEBUG_LOG(utility::colourize("Successfully handled client", utility::cc::GREEN));
         }
       }
-      
     }  // looping through all FDs which are ready to be read from or write to
   } // infinite for loop
 
