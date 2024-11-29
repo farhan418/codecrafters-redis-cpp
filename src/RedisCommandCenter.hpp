@@ -138,7 +138,24 @@ namespace RCC {
       return _doReplicaMasterHandshake(serverConnectorSocketFD);
     }
 
+    bool canReadFromSocket(int socketFD) {
+            // returns true if socket is open else returns false
+            if (socketFD < 0)
+                return false;  // socket is invalid or closed
+
+            char buffer;
+            size_t result = recv(socketFD, &buffer, sizeof(buffer), MSG_PEEK | MSG_DONTWAIT);
+            if ( (result == -1) && (errno == EBADF)) {
+                return false;  // socket is closed
+            }
+            return true;  // socket is open
+        }
+
     int receiveCommandsFromMaster(int& masterConnectorSocketFD, pm::PollManager& pollManager) {
+      if (!canReadFromSocket(masterConnectorSocketFD)) {
+        return -1;
+      }
+      
       const uint16_t bufferSize = 1024;  // 1KB buffer to use when reading from or writing to socket
       char buffer[bufferSize];
 

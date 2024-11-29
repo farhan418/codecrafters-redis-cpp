@@ -130,7 +130,8 @@ int main(int argc, char **argv) {
       }
       else {
         isConnectedToMasterServer = false;  
-        isHandShakeSuccessful = false;  
+        isHandShakeSuccessful = false;
+        masterConnectorSocketFD = -1;
         DEBUG_LOG(utility::colourize("replica failed to connect to master server", utility::cc::RED));
       }
     }
@@ -185,7 +186,7 @@ int main(int argc, char **argv) {
             DEBUG_LOG(msg);
           }
           else {
-            DEBUG_LOG(utility::colourize("Failed to receive commands from master", utility::cc::RED));
+            DEBUG_LOG(utility::colourize("No command to be read now from master", utility::cc::RED));
           }
         }
       }
