@@ -172,7 +172,7 @@ namespace utility {
                     temp << ", buffer[" << i << "] = " << buffer[i] << ", byte = " << static_cast<int>(byte) << "| ";
                     // temp << "buffer[" << i << "] = " << buffer[i] << ", byte = " << byte;
                 }
-                DEBUG_LOG(utility::colourize(temp.str(), utility::cc::RED));
+                DEBUG_LOG(utility::colourize(temp.str(), utility::cc::YELLOW));
             }
         }
         return numBytesRead;

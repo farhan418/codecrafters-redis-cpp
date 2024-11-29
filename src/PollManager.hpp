@@ -135,7 +135,7 @@ namespace pm {
                         std::stringstream ss;  
                         ss << "pollserver: new connection from \""<< remoteIP;
                         ss << "\" on socketFD = " << newSocketFD;
-                        DEBUG_LOG(utility::colourize(ss.str(), utility::cc::RED));
+                        DEBUG_LOG(utility::colourize(ss.str(), utility::cc::GREEN));
                     }  // if it is listener socket with POLLIN
                 }  // if an element of pollfdArr has some event
             }  // for loop iterating pollfdArr
