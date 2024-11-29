@@ -157,10 +157,11 @@ namespace utility {
         }
 
         if (numBytesRead < bufferSize) {
-            buffer[numBytesRead] = '\0';
+            for (size_t i = numBytesRead; i < bufferSize; i++)
+                buffer[i] = '\0';
         }
-        std::stringstream ss;
-        ss << "read from socket " << sockFD << ", " << numBytesRead << " bytes : " << utility::printExact(buffer);
+
+        // if buffer has garbage value after index numBytes
         std::string s(buffer);
         if (numBytesRead != s.length()) {
             std::ostringstream temp;
@@ -170,7 +171,14 @@ namespace utility {
             }
             DEBUG_LOG(temp.str());
         }
+        else {
+            DEBUG_LOG("numBytesRead=" + std::to_string(numBytesRead) + ", buffer length = " + std::to_string(s.length));
+        }
+
+        std::stringstream ss;
+        ss << "read from socket " << sockFD << ", " << numBytesRead << " bytes : " << utility::printExact(buffer);
         DEBUG_LOG(ss.str());
+
         return numBytesRead;
     }
 

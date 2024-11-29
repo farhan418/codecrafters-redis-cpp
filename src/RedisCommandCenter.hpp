@@ -332,7 +332,7 @@ namespace RCC {
         // send single command
         numBytes = utility::writeToSocketFD(serverConnectorSocketFD, buffer, bufferSize, singleCommandToSend, retryCount);
         if (numBytes > 0) {
-          DEBUG_LOG("successfully sent command : \"" + handShakeCommands[i] + "\"");
+          // DEBUG_LOG("successfully sent command : \"" + handShakeCommands[i] + "\"");
         }
         else if (numBytes == 0){
           DEBUG_LOG("writing to socket during handshake failed : connection closed");
