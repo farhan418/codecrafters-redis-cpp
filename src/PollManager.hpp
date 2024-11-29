@@ -364,28 +364,29 @@ namespace pm {
             if (pollfdArrSize <= 0 || socketFD == listenerSocketFD || socketFD == connectorSocketFD)
                 return -1;
 
-            int index = 0;
-            while(index < pollfdArrSize) {
-                if (pollfdArr[index].fd == socketFD)
-                    break;
-                index++;
-            }
+            DEBUG_LOG(utility::colourize("NOT DELETING SOCKET=" + std::to_string(socketFD), utility::cc::BLUE));
+            // int index = 0;
+            // while(index < pollfdArrSize) {
+            //     if (pollfdArr[index].fd == socketFD)
+            //         break;
+            //     index++;
+            // }
 
-            if ((index != pollfdArrSize) && _isSocketOpen(pollfdArr[index].fd)) {
-                close(pollfdArr[index].fd);
-            }
+            // if ((index != pollfdArrSize) && _isSocketOpen(pollfdArr[index].fd)) {
+            //     close(pollfdArr[index].fd);
+            // }
 
-            pollfdArr[index] = pollfdArr[pollfdArrSize-1];
-            pollfdArrSize--;
+            // pollfdArr[index] = pollfdArr[pollfdArrSize-1];
+            // pollfdArrSize--;
 
-            int temp = (pollfdArrCapacity-pollfdArrSize)/100;
-            if (temp >= 2) {
-                temp--;
-                pollfdArrCapacity = pollfdArrCapacity - (100*temp);
-                pollfdArr = static_cast<struct pollfd*>(realloc(pollfdArr, (sizeof(struct pollfd) * pollfdArrCapacity)));
-                DEBUG_LOG("updted pollfdArr and pollfdArrCapacity = " + std::to_string(pollfdArrCapacity));
-            }
-            DEBUG_LOG(utility::colourize("deleted socketFD=" + std::to_string(socketFD) + ", pollfdArrSize=" + std::to_string(pollfdArrSize), utility::cc::RED));
+            // int temp = (pollfdArrCapacity-pollfdArrSize)/100;
+            // if (temp >= 2) {
+            //     temp--;
+            //     pollfdArrCapacity = pollfdArrCapacity - (100*temp);
+            //     pollfdArr = static_cast<struct pollfd*>(realloc(pollfdArr, (sizeof(struct pollfd) * pollfdArrCapacity)));
+            //     DEBUG_LOG("updted pollfdArr and pollfdArrCapacity = " + std::to_string(pollfdArrCapacity));
+            // }
+            // DEBUG_LOG(utility::colourize("deleted socketFD=" + std::to_string(socketFD) + ", pollfdArrSize=" + std::to_string(pollfdArrSize), utility::cc::RED));
             return 0;
         }
 
