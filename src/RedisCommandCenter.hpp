@@ -155,6 +155,9 @@ namespace RCC {
       if (!canReadFromSocket(masterConnectorSocketFD)) {
         return -1;
       }
+      else {
+        DEBUG_LOG(utility::colourize("Data available from master", utility::cc::BLUE));
+      }
       
       const uint16_t bufferSize = 1024;  // 1KB buffer to use when reading from or writing to socket
       char buffer[bufferSize];
