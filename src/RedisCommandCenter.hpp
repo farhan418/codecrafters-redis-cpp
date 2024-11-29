@@ -372,7 +372,7 @@ namespace RCC {
             isExpectedResponse = false;
           }
         }
-        else if /*i==3 - PSYNC command*/ {
+        else /*i==3 - PSYNC command*/ {
           std::vector<std::string> responseVec = utility::split(buffer, " ");
           bool isCase3Matching = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
           isCase3Matching = isCase3Matching && (responseVec[1].length() == 40);
@@ -739,7 +739,7 @@ namespace RCC {
       // so add it to replicaSocketFDSet
       replicaSocketFDSet.insert(socketFD);
       std::ostringstream oss; 
-      oss << "replicaSocketFDSet = {" 
+      oss << "replicaSocketFDSet = {";
       for (auto& fd : replicaSocketFDSet) {
         oss << fd << ", ";
       }
