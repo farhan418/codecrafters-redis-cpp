@@ -230,7 +230,7 @@ namespace utility {
             memcpy(buffer, content.c_str(), content.length());
             numBytesWritten = write(sockFD, buffer, content.length());
             if (numBytesWritten == 0) {
-                DEBUG_LOG(utility::colourize("error while writing to socket " + std::to_string(sockFD) + " : connection closed (0 returned)", utility::cc::RED);
+                DEBUG_LOG(utility::colourize("error while writing to socket " + std::to_string(sockFD) + " : connection closed (0 returned)", utility::cc::RED));
                 break;
             }
             else if (numBytesWritten < 0) {
