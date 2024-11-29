@@ -54,7 +54,8 @@ namespace pm {
             out << "\nsocketBacklogCount : " << socketBacklogCount;
             out << "\nisSocketNonBlocking : " << isSocketNonBlocking;
             out << "\nisReuseSocket : " << isReuseSocket;
-            return out.str();
+
+            return utility::colourize(out.str(), utility::Colour::YELLOW);
         }
 
         std::string socketHostOrIP;  // valid inputs - localhost, www.example.com, 16.2.4.74
@@ -76,7 +77,7 @@ namespace pm {
         {
             pollfdArr = static_cast<struct pollfd*>(calloc(pollfdArrCapacity, sizeof(struct pollfd)));
             if (pollfdArr == NULL) {
-                DEBUG_LOG("calloc : memory allocation failed");
+                DEBUG_LOG(utility::colourize("calloc : memory allocation failed", utility::Colour::RED);
                 exit(1);
             }
             DEBUG_LOG("Polling Manager Object created.");
@@ -233,7 +234,7 @@ namespace pm {
             if (p == NULL) {
                 return -1;
             }
-            
+
             char remoteIP[INET6_ADDRSTRLEN];
             if (NULL == inet_ntop(p->ai_family, _getInAddr((struct sockaddr*)p->ai_addr), remoteIP, INET6_ADDRSTRLEN)) {
                 DEBUG_LOG("failed to convert address to human readable form");

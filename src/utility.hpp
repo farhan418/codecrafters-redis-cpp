@@ -23,6 +23,37 @@ std::cerr << "\n[" << std::chrono::system_clock::to_time_t(std::chrono::system_c
 
 namespace utility {
 
+    enum class Colour : uint8_t {
+        RED = 31,
+        GREEN = 32,
+        YELLOW = 33,
+        BLUE = 34
+    };
+
+    namespace cc {  // cc - console colours
+        const std::string RED = "\033[31m";
+        const std::string GREEN = "\033[32m";
+        const std::string YELLOW = "\033[33m";
+        const std::string BLUE = "\033[34m";
+        const std::string RESET = "\033[0m";
+    };
+
+    std::string colourize(std::string str, Colour& colour) {
+        if (colour == Colour::RED) {
+            str = cc::RED + str + cc::RESET;
+        }
+        else if (colour == Colour::GREEN) {
+            str = cc::GREEN + str + cc::RESET;
+        }
+        else if (colour == Colour::YELLOW) {
+            str = cc::YELLOW + str + cc::RESET;
+        }
+        else if (colour == Colour::BLUE) {
+            str = cc::BLUE + str + cc::RESET;
+        }
+        return str;
+    }
+
     std::vector<std::string> split(const std::string& str, const std::string& delimeter = "\r\n") {
         std::vector<std::string> result;
         std::regex re(delimeter);
