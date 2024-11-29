@@ -102,7 +102,7 @@ namespace RCC {
     int connectToMasterServer(int& masterConnectorSocketFD, std::string replicaof, pm::PollManager& pollManager) {
       std::vector<std::string> hostPortVec = utility::split(replicaof, " ");
       DEBUG_LOG("hostPortVec[0]=" + hostPortVec[0] + ", hostPortVec[1]=" + hostPortVec[1]);
-      SocketSetting socketSetting;
+      pm::SocketSetting socketSetting;
       socketSetting.socketHostOrIP = hostPortVec[0];
       socketSetting.socketPortOrService = hostPortVec[1];
       socketSetting.socketDomain = AF_INET;
