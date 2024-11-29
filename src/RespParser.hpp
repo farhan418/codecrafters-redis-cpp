@@ -349,8 +349,6 @@ namespace resp {
   };
 };
 
-
-
 // int testRespParser(resp::RespParser& respParser, const std::string& sampleRespStr) {
 //     std::cout << "\nSample RESP string input : ";
 //     printExact(sampleRespStr);
@@ -485,7 +483,6 @@ namespace resp {
 //     return 0;
 // }
 // #endif  // RESPPARSER_HPP
-
 
 // namespace resp {
 //   enum class RespType : unsigned char {
