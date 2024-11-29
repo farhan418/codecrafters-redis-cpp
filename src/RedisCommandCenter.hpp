@@ -345,7 +345,7 @@ namespace RCC {
         // reading response
         numBytes = utility::readFromSocketFD(serverConnectorSocketFD, buffer, bufferSize, retryCount);
         if (numBytes > 0) {
-          DEBUG_LOG("successfully read reply for handShakeCommand=\"" + handShakeCommands[i] + "\", reply = " + utility::printExact(buffer));
+          // DEBUG_LOG("successfully read reply for handShakeCommand=\"" + handShakeCommands[i] + "\", reply = " + utility::printExact(buffer));
         }
         else if (numBytes == 0) {
           DEBUG_LOG("Error reading from socket : connection closed\n");

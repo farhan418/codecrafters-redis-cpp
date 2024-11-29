@@ -152,7 +152,7 @@ namespace utility {
         int numBytesRead = read(sockFD, buffer, bufferSize);
 
         if (numBytesRead <= 0) {
-            DEBUG_LOG("connection closed (if 0 returned) or Error reading from socket: " + std::to_string(sockFD) + " (if -ve returned.)\n");
+            DEBUG_LOG("numBytesRead=" + std::to_string(numBytesRead) + ", connection closed (if 0 returned) or Error reading from socket: " + std::to_string(sockFD) + " (if -ve returned.)\n");
             return numBytesRead;
         }
 
