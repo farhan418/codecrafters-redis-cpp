@@ -99,23 +99,57 @@ namespace RCC {
         return -1;
     }
 
+    int connectToMasterServer(int& masterConnecterSocketFD, std::string replicaof, pm::PollManager& pollManager) {
+      std::vector<std::string> hostPortVec = utility::split(replicaof, " ");
+      DEBUG_LOG("hostPortVec[0]=" + hostPortVec[0] + ", hostPortVec[1]=" + hostPortVec[1]);
+      SocketSetting socketSetting;
+      socketSetting.socketHostOrIP = hostPortVec[0];
+      socketSetting.socketPortOrService = hostPortVec[1];
+      socketSetting.socketDomain = AF_INET;
+      socketSetting.isReuseSocket = false;
+      socketSetting.isSocketNonBlocking = false;
+      DEBUG_LOG("connector socket setting: " + socketSetting.getSocketSettingsString());
+      // int counter = 0;
+      // while (counter < 3) {
+      masterConnectorSocketFD = pollManager.createConnectorSocket(socketSetting);
+        // counter++;
+        // if (masterConnectorSocketFD > 0)
+          // break;
+      // }
+      if (masterConnectorSocketFD < 1) {
+        DEBUG_LOG("failed to connect to master : " + (*replicaof));
+        return -1;
+      }
+      else {
+        DEBUG_LOG("successfully created master connector socket : " + std::to_string(masterConnectorSocketFD) + ", starting handshake...");
+        if (0 == doReplicaMasterHandshake(masterConnectorSocketFD)) {
+          DEBUG_LOG("successfully done handshake with master");
+        }
+        else {
+          DEBUG_LOG("failed to do handshake with master, master connector socket : " + std::to_string(masterConnectorSocketFD));
+          return -1;
+        }
+      }
+      return 0;
+    }
+
     int doReplicaMasterHandshake(int& serverConnectorSocketFD) {
       return _doReplicaMasterHandshake(serverConnectorSocketFD);
     }
 
-    int receiveCommandsFromMaster(int currentSocketFD, pm::PollManager& pollManager) {
+    int receiveCommandsFromMaster(int& masterConnectorSocketFD, pm::PollManager& pollManager) {
       const uint16_t bufferSize = 1024;  // 1KB buffer to use when reading from or writing to socket
       char buffer[bufferSize];
 
-      int numBytes = utility::readFromSocketFD(currentSocketFD, buffer, bufferSize);
+      int numBytes = utility::readFromSocketFD(masterConnectorSocketFD, buffer, bufferSize);
       if (numBytes == 0) {  // if 0 bytes read, it means connection closed
         DEBUG_LOG("Failed to read message from socket : connection closed\n");
-        pollManager.deleteSocketFDFromPollfdArr(currentSocketFD);
-        replicaSocketFDSet.erase(currentSocketFD);
+        pollManager.deleteSocketFDFromPollfdArr(masterConnectorSocketFD);
+        replicaSocketFDSet.erase(masterConnectorSocketFD);
         return 0;
       }
       else if (numBytes < 0) {
-        DEBUG_LOG("Failed to read message from socket.\n");
+        DEBUG_LOG("Failed to read message from socket = " + std::to_string(masterConnecterSocketFD));
         return -1;
       } 
 
@@ -124,12 +158,10 @@ namespace RCC {
       std::vector<std::string> command;
       respParser.parseCommands(command); 
       // process the commands
-      std::vector<std::string> responseStrVec = processCommands(currentSocketFD, command);
+      std::vector<std::string> responseStrVec = processCommands(masterConnectorSocketFD, command);
       for (auto& responseStr : responseStrVec) {
-        DEBUG_LOG("processed commands one by one, respective responseStr : " + utility::printExact(responseStr))
+        DEBUG_LOG("processed commands one by one (not sending response to master only updating ), respective responseStr : " + utility::printExact(responseStr))
       }
-      // } // while loop to process all tokens (even multiple commands)
-      // close(currentSocketFD);  // PollManager should close connection
       return 0;
     }
 

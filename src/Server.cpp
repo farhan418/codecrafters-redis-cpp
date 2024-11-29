@@ -59,40 +59,42 @@ int main(int argc, char **argv) {
     rcc.setSlaveInfo(*replicaof, listeningPortNumber, "psync2");
     DEBUG_LOG("this server is a replica of " + (*replicaof));
     isSlaveServer = true;
-    if (0 != socketSetting.resetSocketSettings()) {
-      DEBUG_LOG("error resetting socketSetting");
-    }
-    std::vector<std::string> hostPortVec = utility::split(*replicaof, " ");
-    DEBUG_LOG("hostPortVec[0]=" + hostPortVec[0] + ", hostPortVec[1]=" + hostPortVec[1]);
-    socketSetting.socketHostOrIP = hostPortVec[0];
-    socketSetting.socketPortOrService = hostPortVec[1];
-    socketSetting.socketDomain = AF_INET;
-    socketSetting.isReuseSocket = false;
-    socketSetting.isSocketNonBlocking = false;
-    DEBUG_LOG("connector socket setting: " + socketSetting.getSocketSettingsString());
-    int counter = 0;
-    while (counter < 3) {
-      masterConnectorSocketFD = pollManager.createConnectorSocket(socketSetting);
-      counter++;
-      if (masterConnectorSocketFD > 0)
-        break;
-    }
-    if (masterConnectorSocketFD < 1) {
-      DEBUG_LOG("failed to connect to master : " + (*replicaof));
-    }
-    else {
-      DEBUG_LOG("successfully connected to master : " + (*replicaof));
-      if (0 == rcc.doReplicaMasterHandshake(masterConnectorSocketFD)) {
-        DEBUG_LOG("successfully done handshake with master");
-        isHandShakeSuccessful = true;
-        isConnectedToMasterServer = true;
-      }
-      else {
-        DEBUG_LOG("failed to do handshake with master");
-        isHandShakeSuccessful = false;
-        isConnectedToMasterServer = false;
-      }
-    }
+    //start
+    // if (0 != socketSetting.resetSocketSettings()) {
+    //   DEBUG_LOG("error resetting socketSetting");
+    // }
+    // std::vector<std::string> hostPortVec = utility::split(*replicaof, " ");
+    // DEBUG_LOG("hostPortVec[0]=" + hostPortVec[0] + ", hostPortVec[1]=" + hostPortVec[1]);
+    // socketSetting.socketHostOrIP = hostPortVec[0];
+    // socketSetting.socketPortOrService = hostPortVec[1];
+    // socketSetting.socketDomain = AF_INET;
+    // socketSetting.isReuseSocket = false;
+    // socketSetting.isSocketNonBlocking = false;
+    // DEBUG_LOG("connector socket setting: " + socketSetting.getSocketSettingsString());
+    // int counter = 0;
+    // while (counter < 3) {
+    //   masterConnectorSocketFD = pollManager.createConnectorSocket(socketSetting);
+    //   counter++;
+    //   if (masterConnectorSocketFD > 0)
+    //     break;
+    // }
+    // if (masterConnectorSocketFD < 1) {
+    //   DEBUG_LOG("failed to connect to master : " + (*replicaof));
+    // }
+    // else {
+    //   DEBUG_LOG("successfully connected to master : " + (*replicaof));
+    //   if (0 == rcc.doReplicaMasterHandshake(masterConnectorSocketFD)) {
+    //     DEBUG_LOG("successfully done handshake with master");
+    //     isHandShakeSuccessful = true;
+    //     isConnectedToMasterServer = true;
+    //   }
+    //   else {
+    //     DEBUG_LOG("failed to do handshake with master");
+    //     isHandShakeSuccessful = false;
+    //     isConnectedToMasterServer = false;
+    //   }
+    // }
+    //end
   }
   else {  // means master server & by default isSlaveServer = false; isConnectedToMasterServer = false;
     RCC::RedisCommandCenter::setMasterInfo();
@@ -116,6 +118,19 @@ int main(int argc, char **argv) {
 
   // infinite loop to poll sockets and listen form new connections and server connected sockets
   for(;;) {
+    if (isSlaveServer && !isConnectedToMasterServer) {
+      if (0 == rcc.connectToMasterServer(masterConnecterSocketFD, *replicaof, pollManager)) {
+        isConnectedToMasterServer = true;
+        isHandShakeSuccessful = true;
+        DEBUG_LOG("replica SUCCESSFULLY to connect to master server");
+      }
+      else {
+        isConnectedToMasterServer = false;  
+        isHandShakeSuccessful = false;  
+        DEBUG_LOG("replica failed to connect to master server");
+      }
+    }
+
     readySocketPollfdVec.clear();
     if (0 != pollManager.pollSockets(timeout_ms, readySocketPollfdVec)) {
       DEBUG_LOG("encountered error while polling");
@@ -126,9 +141,6 @@ int main(int argc, char **argv) {
     }  
 
     for(const struct pollfd& pfd : readySocketPollfdVec) {
-      // ss.clear();
-      // ss << "\nhandling socketFD : " << pfd.fd;
-      // DEBUG_LOG(ss.str());
 
       if (pfd.fd != masterConnectorSocketFD) {
         // if here => not master socket but client socket
@@ -147,20 +159,20 @@ int main(int argc, char **argv) {
       }
       else {
         // this block handles replication (if current running server is a replica of another server)
-        if ((!isHandShakeSuccessful) || (!isConnectedToMasterServer)) {
-          // do handshake if not connected to master server
-          if (0 == rcc.doReplicaMasterHandshake(masterConnectorSocketFD)) {
-            DEBUG_LOG("successfully done handshake with master");
-            isHandShakeSuccessful = true;
-            isConnectedToMasterServer = true;
-          }
-          else {
-            DEBUG_LOG("failed to do handshake with master");
-            isHandShakeSuccessful = false;
-            isConnectedToMasterServer = false;
-          }
-        }
-        else {
+        // if ((!isHandShakeSuccessful) || (!isConnectedToMasterServer)) {
+        //   // do handshake if not connected to master server
+        //   if (0 == rcc.doReplicaMasterHandshake(masterConnectorSocketFD)) {
+        //     DEBUG_LOG("successfully done handshake with master");
+        //     isHandShakeSuccessful = true;
+        //     isConnectedToMasterServer = true;
+        //   }
+        //   else {
+        //     DEBUG_LOG("failed to do handshake with master");
+        //     isHandShakeSuccessful = false;
+        //     isConnectedToMasterServer = false;
+        //   }
+        // }
+        if (isConnectedToMasterServer) {
           // if handshake is successful and current server (replica) is connected to master
           // listen to master (masterConnectorSocketFD) for commands
           // if (0 == receiveCommandsFromMaster(masterConnectorSocketFD, respParser, rcc, pollManager)) {

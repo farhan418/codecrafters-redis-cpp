@@ -133,9 +133,10 @@ namespace utility {
             std::string s(buffer);
             if (numBytesRead != s.length()) {
                 std::ostringstream temp;
+                temp << "numBytesRead=" << numBytesRead << ", s.length()=" << s.length() << ", s = " << utility::printExact(s);
                 for (int i = numBytesRead; i < s.length(); i++) {
                     uint8_t byte = buffer[i];
-                    temp << "buffer[" << i << "] = " << buffer[i] << ", byte = " << static_cast<int>(byte) << "| ";
+                    temp << ", buffer[" << i << "] = " << buffer[i] << ", byte = " << static_cast<int>(byte) << "| ";
                     // temp << "buffer[" << i << "] = " << buffer[i] << ", byte = " << byte;
                 }
                 DEBUG_LOG(temp.str());
