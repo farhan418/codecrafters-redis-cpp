@@ -57,15 +57,15 @@ int main(int argc, char **argv) {
   std::string replicaof = arg_parser.get<std::stirng>("--replicaof").value_or("NA");
   // if (auto replicaof = arg_parser.present("--replicaof")) {
   if (replicaof != "NA") {
-    // RCC::RedisCommandCenter::setSlaveInfo(*replicaof, listeningPortNumber, "psync2");
-    rcc.setSlaveInfo(*replicaof, listeningPortNumber, "psync2");
-    DEBUG_LOG("this server is a replica of " + (*replicaof));
+    // RCC::RedisCommandCenter::setSlaveInfo(replicaof, listeningPortNumber, "psync2");
+    rcc.setSlaveInfo(replicaof, listeningPortNumber, "psync2");
+    DEBUG_LOG("this server is a replica of " + (replicaof));
     isSlaveServer = true;
     //start
     // if (0 != socketSetting.resetSocketSettings()) {
     //   DEBUG_LOG("error resetting socketSetting");
     // }
-    // std::vector<std::string> hostPortVec = utility::split(*replicaof, " ");
+    // std::vector<std::string> hostPortVec = utility::split(replicaof, " ");
     // DEBUG_LOG("hostPortVec[0]=" + hostPortVec[0] + ", hostPortVec[1]=" + hostPortVec[1]);
     // socketSetting.socketHostOrIP = hostPortVec[0];
     // socketSetting.socketPortOrService = hostPortVec[1];
@@ -81,10 +81,10 @@ int main(int argc, char **argv) {
     //     break;
     // }
     // if (masterConnectorSocketFD < 1) {
-    //   DEBUG_LOG("failed to connect to master : " + (*replicaof));
+    //   DEBUG_LOG("failed to connect to master : " + (replicaof));
     // }
     // else {
-    //   DEBUG_LOG("successfully connected to master : " + (*replicaof));
+    //   DEBUG_LOG("successfully connected to master : " + (replicaof));
     //   if (0 == rcc.doReplicaMasterHandshake(masterConnectorSocketFD)) {
     //     DEBUG_LOG("successfully done handshake with master");
     //     isHandShakeSuccessful = true;
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
   // infinite loop to poll sockets and listen form new connections and server connected sockets
   for(;;) {
     if (isSlaveServer && !isConnectedToMasterServer) {
-      if (0 == rcc.connectToMasterServer(masterConnectorSocketFD, *replicaof, pollManager)) {
+      if (0 == rcc.connectToMasterServer(masterConnectorSocketFD, replicaof, pollManager)) {
         isConnectedToMasterServer = true;
         isHandShakeSuccessful = true;
         DEBUG_LOG("replica SUCCESSFULLY to connect to master server");
