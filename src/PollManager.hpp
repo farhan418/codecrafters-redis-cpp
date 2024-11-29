@@ -229,7 +229,11 @@ namespace pm {
 
                 break;  // socket creation was successful
             }
-
+            
+            if (p == NULL) {
+                return -1;
+            }
+            
             char remoteIP[INET6_ADDRSTRLEN];
             if (NULL == inet_ntop(p->ai_family, _getInAddr((struct sockaddr*)p->ai_addr), remoteIP, INET6_ADDRSTRLEN)) {
                 DEBUG_LOG("failed to convert address to human readable form");
@@ -238,9 +242,6 @@ namespace pm {
             ss << "client: connecting to : " << remoteIP;
             DEBUG_LOG(ss.str());
 
-            if (p == NULL) {
-                return -1;
-            }
             servinfo = p = NULL;
             freeaddrinfo(servinfo); // All done with this
             
