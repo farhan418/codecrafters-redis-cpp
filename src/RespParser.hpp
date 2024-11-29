@@ -192,31 +192,31 @@ namespace resp {
         DEBUG_LOG(utility::colourize("PARSEERR parsing error occurred due to invalid index (index out of bounds)", utility::cc::RED));
         return RespConstants::NULL_BULK_STRING;
       }
-      DEBUG_LOG(utility::colourize("in parseNextRespTypeData(), respBufferIndex=" + std::to_string(respBufferIndex), utility::cc::YELLOW));
+      // DEBUG_LOG(utility::colourize("in parseNextRespTypeData(), respBufferIndex=" + std::to_string(respBufferIndex), utility::cc::YELLOW));
       if (respBuffer[respBufferIndex] == static_cast<unsigned char>(RespType::SimpleString)) {
-        DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing SimpleString", utility::cc::YELLOW));
+        // DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing SimpleString", utility::cc::YELLOW));
         return parseSimpleString();
       }
       else if (respBuffer[respBufferIndex] == static_cast<unsigned char>(RespType::SimpleError)) {
-        DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing SimpleError", utility::cc::YELLOW));
+        // DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing SimpleError", utility::cc::YELLOW));
         return parseSimpleError();
       }
       else if (respBuffer[respBufferIndex] == static_cast<unsigned char>(RespType::Integer)) {
-        DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing Integer", utility::cc::YELLOW));
+        // DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing Integer", utility::cc::YELLOW));
         return parseInteger();
       }
       else if (respBuffer[respBufferIndex] == static_cast<unsigned char>(RespType::BulkString)) {
-        DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing BulkString", utility::cc::YELLOW));
+        // DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing BulkString", utility::cc::YELLOW));
         return parseBulkString();
       }
       else if (respBuffer[respBufferIndex] == static_cast<unsigned char>(RespType::Array)) {
-        DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing Array", utility::cc::YELLOW));
+        // DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ", parsing Array", utility::cc::YELLOW));
         return parseArray();
       }
       else {
         std::string errMsg = "respBuffer[" + std::to_string(respBufferIndex) + "]=" + respBuffer[respBufferIndex] + ",unsupported type";
-        DEBUG_LOG(utility::colourize(errMsg, utility::cc::RED));
-        throw std::runtime_error (errMsg);
+        // DEBUG_LOG(utility::colourize(errMsg, utility::cc::RED));
+        // throw std::runtime_error (errMsg);
         return RespConstants::NULL_BULK_STRING;
       }
     }
