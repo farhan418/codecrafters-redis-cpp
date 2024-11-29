@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
   serverListenerSocketFD = pollManager.createListenerSocket(socketSetting);
 
   // if current server is replica, then store info in config_kv and connect to master by creating a new socket
-  std::string replicaof = arg_parser.get<std::string>("--replicaof").value_or("NA");
+  std::string replicaof = arg_parser.get<std::string>("--replicaof");
   // if (auto replicaof = arg_parser.present("--replicaof")) {
   if (replicaof != "NA") {
     // RCC::RedisCommandCenter::setSlaveInfo(replicaof, listeningPortNumber, "psync2");
