@@ -189,7 +189,7 @@ namespace resp {
         this function deserializes the next RESP data in respBuffer
       */
       if (isParsedRespBuffer()) {
-        DEBUG_LOG(utility::colourize("PARSEERR parsing error occurred due to invalid index (index out of bounds)"), utility::cc::RED);
+        DEBUG_LOG(utility::colourize("PARSEERR parsing error occurred due to invalid index (index out of bounds)", utility::cc::RED));
         return RespConstants::NULL_BULK_STRING;
       }
       DEBUG_LOG("in parseNextRespTypeData(), respBufferIndex=" + std::to_string(respBufferIndex));

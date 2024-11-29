@@ -181,7 +181,8 @@ int main(int argc, char **argv) {
           // listen to master (masterConnectorSocketFD) for commands
           // if (0 == receiveCommandsFromMaster(masterConnectorSocketFD, respParser, rcc, pollManager)) {
           if (0 == rcc.receiveCommandsFromMaster(masterConnectorSocketFD, pollManager)) {
-            DEBUG_LOG(utility::colourize("successfully received from master and updated state", utility::cc::GREEN));
+            std::string msg = utility::colourize("successfully received from master and updated state", utility::cc::GREEN);
+            DEBUG_LOG(msg);
           }
           else {
             DEBUG_LOG(utility::colourize("Failed to receive commands from master", utility::cc::RED));
