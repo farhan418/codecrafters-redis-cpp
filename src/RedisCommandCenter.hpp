@@ -738,6 +738,7 @@ namespace RCC {
       }
       oss << "}";
       DEBUG_LOG(oss.str());
+      DEBUG_LOG("returning PSYNC response = " + utility::printExact(response));
       return response;
     }
 

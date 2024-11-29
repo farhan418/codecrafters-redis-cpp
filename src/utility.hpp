@@ -58,7 +58,7 @@ namespace utility {
 
     std::string printExact(const std::string& sampleRespStr) {
         std::ostringstream ss;
-        ss << "strLength=" << sampleRespStr.length() << ", {[\"";
+        ss << "strNumBytes=" << sampleRespStr.length() << ", \"";
         for(auto& c : sampleRespStr) {
             if (std::isprint(c)) {
                 ss << c;
@@ -72,7 +72,7 @@ namespace utility {
                 }
             }
         }
-        ss << "\"]}";
+        ss << "\"";
         return ss.str();
     }
 
