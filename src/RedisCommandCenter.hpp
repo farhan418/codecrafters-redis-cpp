@@ -149,7 +149,7 @@ namespace RCC {
         return 0;
       }
       else if (numBytes < 0) {
-        DEBUG_LOG("Failed to read message from socket = " + std::to_string(masterConnecterSocketFD));
+        DEBUG_LOG("Failed to read message from socket = " + std::to_string(masterConnectorSocketFD));
         return -1;
       } 
 
