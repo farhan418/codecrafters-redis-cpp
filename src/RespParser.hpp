@@ -180,7 +180,7 @@ namespace resp {
             // DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "] = " + respBuffer[respBufferIndex] + " is valid state");
             return true;
         }
-        DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "] = " + respBuffer[respBufferIndex] + " is invalid state"), utility::Colour::RED);
+        DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "] = " + respBuffer[respBufferIndex] + " is invalid state", utility::Colour::RED));
         return false;
     }
     
