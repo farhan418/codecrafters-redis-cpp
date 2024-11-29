@@ -167,7 +167,7 @@ namespace RCC {
       int numBytes = utility::readFromSocketFD(masterConnectorSocketFD, buffer, bufferSize);
       if (numBytes == 0) {  // if 0 bytes read, it means connection closed
         DEBUG_LOG("Failed to read message from socket : connection closed\n");
-        pollManager.deleteSocketFDFromPollfdArr(masterConnectorSocketFD);
+        // pollManager.deleteSocketFDFromPollfdArr(masterConnectorSocketFD);
         replicaSocketFDSet.erase(masterConnectorSocketFD);
         return 0;
       }
@@ -244,7 +244,7 @@ namespace RCC {
         }
         else if (numBytes == 0) {  // if 0 bytes, it means connection closed
           DEBUG_LOG("Failed to write message to socket(" + std::to_string(currentSocketFD) + ") : connection closed\n");
-          pollManager.deleteSocketFDFromPollfdArr(currentSocketFD);
+          // pollManager.deleteSocketFDFromPollfdArr(currentSocketFD);
           replicaSocketFDSet.erase(currentSocketFD);
           return 0;
         }
