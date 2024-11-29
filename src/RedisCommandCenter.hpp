@@ -386,7 +386,7 @@ namespace RCC {
         // }
 
         if (isExpectedResponse) {
-          DEBUG_LOG("got reply to handShakeCommand as expected");
+          DEBUG_LOG("got reply to handShakeCommand as expected, handShakeCommand=\"" + handShakeCommands[i] + "\"");
         }
         else {
           DEBUG_LOG("error occurred while replica master handshake - response not as expected, response : " + utility::printExact(response));
