@@ -345,7 +345,7 @@ namespace RCC {
         // reading response
         numBytes = utility::readFromSocketFD(serverConnectorSocketFD, buffer, bufferSize, retryCount);
         if (numBytes > 0) {
-          // DEBUG_LOG("successfully read reply for handShakeCommand=\"" + handShakeCommands[i] + "\", reply = " + utility::printExact(buffer));
+          DEBUG_LOG("successfully read reply for handShakeCommand=\"" + handShakeCommands[i] + "\", reply = " + utility::printExact(buffer));
         }
         else if (numBytes == 0) {
           DEBUG_LOG("Error reading from socket : connection closed\n");
@@ -373,25 +373,20 @@ namespace RCC {
           std::ostringstream oss;
           for (int i = 0; i < responseVec.size(); i++)
             oss << "responseVec["<< i << "]=\"" << responseVec[i] << "\", "; 
-          // DEBUG_LOG("case 3 : PSYNC COMMAND comparing : " + oss.str());
+          DEBUG_LOG("case 3 : PSYNC COMMAND comparing : " + oss.str());
           bool isExpectedResponse = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
           isExpectedResponse = isExpectedResponse && (responseVec[1].length() == 40);
           isExpectedResponse = isExpectedResponse && (responseVec.size() >= 3);
         }
 
         if (isExpectedResponse) {
-          DEBUG_LOG("got reply to handShakeCommand as expected, handShakeCommand=\"" + handShakeCommands[i] + "\"");
+          // DEBUG_LOG("got reply to handShakeCommand as expected, handShakeCommand=\"" + handShakeCommands[i] + "\"");
         }
         else {
           DEBUG_LOG("error occurred while replica master handshake - response not as expected, response : " + utility::printExact(response));
+          return -1;
         }
-
       }
-      
-      // for (int i = 0; i < handShakeCommands.size(); i++) {
-      // std::string str = resp::RespParser::serialize(utility::split(handShakeCommands[i], " "), sendDataType);
-      
-      // }
       return 0;
     }
 
