@@ -129,7 +129,7 @@ namespace utility {
                 buffer[numBytesRead] = '\0';
             }
             std::stringstream ss;
-            ss << "read " << numBytesRead << " bytes : " << utility::printExact(buffer);
+            ss << "read from socket " << sockFD << ", " << numBytesRead << " bytes : " << utility::printExact(buffer);
             std::string s(buffer);
             if (numBytesRead != s.length()) {
                 std::ostringstream temp;
@@ -160,7 +160,7 @@ namespace utility {
             buffer[numBytesRead] = '\0';
         }
         std::stringstream ss;
-        ss << "read " << numBytesRead << " bytes : " << utility::printExact(buffer);
+        ss << "read from socket " << sockFD << ", " << numBytesRead << " bytes : " << utility::printExact(buffer);
         std::string s(buffer);
         if (numBytesRead != s.length()) {
             std::ostringstream temp;
@@ -206,7 +206,7 @@ namespace utility {
 
         if (isSuccessfullyWritten) {
             std::stringstream ss;
-            ss << "sent " << numBytesWritten << " bytes : " << utility::printExact(buffer);
+            ss << "sent to socket " << sockFD << ", " << numBytesWritten << " bytes : " << utility::printExact(buffer);
             DEBUG_LOG(ss.str());
         }
         return numBytesWritten;
@@ -229,7 +229,7 @@ namespace utility {
         }
 
         std::stringstream ss;
-        ss << "sent " << numBytesWritten << " bytes : " << utility::printExact(buffer);
+        ss << "sent to socket " << sockFD << ", " << numBytesWritten << " bytes : " << utility::printExact(buffer);
         DEBUG_LOG(ss.str());
         return numBytesWritten;
     }
