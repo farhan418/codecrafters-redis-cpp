@@ -305,7 +305,8 @@ int process_cmdline_args(int argc, char** argv, argparse::ArgumentParser& argume
     // .scan<'d', int>();
 
   argument_parser.add_argument("--replicaof")
-    .help("this server is a slave of which server, mention \"<master_host> <master_port>\"");
+    .help("this server is a slave of which server, mention \"<master_host> <master_port>\"")
+    .default_value("NA");
 
   try {
     // DEBUG_LOG("in try block");
