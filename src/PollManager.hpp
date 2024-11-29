@@ -79,7 +79,7 @@ namespace pm {
                 DEBUG_LOG("calloc : memory allocation failed");
                 exit(1);
             }
-            DEBUG_LOG("\nPolling Manager Object created.");
+            DEBUG_LOG("Polling Manager Object created.");
         }
 
         ~PollManager() {
@@ -180,7 +180,7 @@ namespace pm {
             hints.ai_family = socketSetting.socketDomain;  // IPv4 / IPv6
             hints.ai_socktype = socketSetting.socketType;  // TCP
 
-            DEBUG_LOG("in private _createConnectorSocket");
+            // DEBUG_LOG("in private _createConnectorSocket");
 
             int rv = getaddrinfo(socketSetting.socketHostOrIP.c_str(), socketSetting.socketPortOrService.c_str(), &hints, &servinfo);
             if (rv != 0) {
@@ -193,7 +193,7 @@ namespace pm {
             DEBUG_LOG("done getaddrinfo, rv = " + std::to_string(rv));
             for(p = servinfo; p != NULL; p = p->ai_next) {
                 std::stringstream ss1;
-                ss1 << "\np->ai_family=" << p->ai_family << ", p->ai_socktype=" << p->ai_socktype << ", p->ai_protocol=" << p->ai_protocol;
+                ss1 << "p->ai_family=" << p->ai_family << ", p->ai_socktype=" << p->ai_socktype << ", p->ai_protocol=" << p->ai_protocol;
                 DEBUG_LOG(ss1.str());
             }
             
@@ -245,7 +245,7 @@ namespace pm {
             freeaddrinfo(servinfo); // All done with this
             
             if (_addSocketFDToPollfdArr(connectorSocketFD, POLLIN | POLLOUT) != 0) {
-                DEBUG_LOG("failed to add connectorSocketFD to pollfdArr");
+                DEBUG_LOG("failed to add connectorSocketFD=" + std::to_string(connectorSocketFD) + " to pollfdArr");
                 return -1;
             }
             return 0;
@@ -319,7 +319,7 @@ namespace pm {
             }
             
             if (_addSocketFDToPollfdArr(listenerSocketFD, POLLIN /*| POLLINOUT*/) != 0) {
-                DEBUG_LOG("failed to add listenerSocketFD to pollfdArr");
+                DEBUG_LOG("failed to add listenerSocketFD=" + std::to_string(listenerSocketFD) + " to pollfdArr");
                 return 1;
             }
             return 0;
@@ -352,7 +352,7 @@ namespace pm {
             pollfdArr[pollfdArrSize].fd = newSocketFD;
             pollfdArr[pollfdArrSize].events = events;
             pollfdArrSize++;
-            DEBUG_LOG("pollfdArrSize=" + std::to_string(pollfdArrSize));
+            DEBUG_LOG("added socketFD=" + std::to_string(newSocketFD) + " to pollfdArr, pollfdArrSize=" + std::to_string(pollfdArrSize));
             return 0;
         }
 
@@ -381,7 +381,7 @@ namespace pm {
                 pollfdArr = static_cast<struct pollfd*>(realloc(pollfdArr, (sizeof(struct pollfd) * pollfdArrCapacity)));
                 DEBUG_LOG("updted pollfdArr and pollfdArrCapacity = " + std::to_string(pollfdArrCapacity));
             }
-            DEBUG_LOG("pollfdArrSize=" + std::to_string(pollfdArrSize));
+            DEBUG_LOG("deleted socketFD=" + std::to_string(socketFD) + ", pollfdArrSize=" + std::to_string(pollfdArrSize));
             return 0;
         }
 
