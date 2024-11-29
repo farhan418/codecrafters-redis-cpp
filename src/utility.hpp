@@ -38,7 +38,7 @@ namespace utility {
         const std::string RESET = "\033[0m";
     };
 
-    std::string colourize(std::string str, std::string& colour) {
+    std::string colourize(std::string str, std::string colour) {
         // if (colour == Colour::RED) {
         //     str = cc::RED + str + cc::RESET;
         // }

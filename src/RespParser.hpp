@@ -342,7 +342,6 @@ namespace resp {
       }
       return command.str();
     }
-
     // member variables
     std::string respBuffer;
     unsigned int respBufferIndex;
