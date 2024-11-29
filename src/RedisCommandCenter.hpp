@@ -116,6 +116,7 @@ namespace RCC {
         // if (masterConnectorSocketFD > 0)
           // break;
       // }
+      DEBUG_LOG("masterConnectorSocketFD=" + std::to_string(masterConnectorSocketFD));
       if (masterConnectorSocketFD < 1) {
         DEBUG_LOG("failed to connect to master : " + replicaof);
         return -1;
