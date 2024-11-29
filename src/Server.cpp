@@ -119,7 +119,7 @@ int main(int argc, char **argv) {
   // infinite loop to poll sockets and listen form new connections and server connected sockets
   for(;;) {
     if (isSlaveServer && !isConnectedToMasterServer) {
-      if (0 == rcc.connectToMasterServer(masterConnecterSocketFD, *replicaof, pollManager)) {
+      if (0 == rcc.connectToMasterServer(masterConnectorSocketFD, *replicaof, pollManager)) {
         isConnectedToMasterServer = true;
         isHandShakeSuccessful = true;
         DEBUG_LOG("replica SUCCESSFULLY to connect to master server");
