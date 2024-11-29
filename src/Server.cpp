@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 
   // creating listener socket irrespective of the fact current server is replica or master
   socketSetting.socketPortOrService = listeningPortNumber;  // rest members default value, see definition of struct SocketSetting
-  DEBUG_LOG(utility::colourize("listener socket setting : " + socketSetting.getSocketSettingsString(), utility::Colour::GREEN));
+  DEBUG_LOG(utility::colourize("listener socket setting : " + socketSetting.getSocketSettingsString(), utility::cc::GREEN));
   serverListenerSocketFD = pollManager.createListenerSocket(socketSetting);
 
   // if current server is replica, then store info in config_kv and connect to master by creating a new socket
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
   if (replicaof != "NA") {
     // RCC::RedisCommandCenter::setSlaveInfo(replicaof, listeningPortNumber, "psync2");
     rcc.setSlaveInfo(replicaof, listeningPortNumber, "psync2");
-    DEBUG_LOG(utility::colourize("this server is a replica of " + (replicaof), utility::Colour::GREEN));
+    DEBUG_LOG(utility::colourize("this server is a replica of " + (replicaof), utility::cc::GREEN));
     isSlaveServer = true;
     //start
     // if (0 != socketSetting.resetSocketSettings()) {
@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
     }
     else {
       // continue without reading RDB file, graceful handling
-      DEBUG_LOG(utility::colourize("--dir flag not provided not read rdb file", utility::Colour::YELLOW));
+      DEBUG_LOG(utility::colourize("--dir flag not provided not read rdb file", utility::cc::YELLOW));
     }
   }
 
@@ -126,22 +126,22 @@ int main(int argc, char **argv) {
       if (0 == rcc.connectToMasterServer(masterConnectorSocketFD, replicaof, pollManager)) {
         isConnectedToMasterServer = true;
         isHandShakeSuccessful = true;
-        DEBUG_LOG(utility::colourize("replica SUCCESSFULLY to connect to master server", utility::Colour::GREEN));
+        DEBUG_LOG(utility::colourize("replica SUCCESSFULLY to connect to master server", utility::cc::GREEN));
       }
       else {
         isConnectedToMasterServer = false;  
         isHandShakeSuccessful = false;  
-        DEBUG_LOG(utility::colourize("replica failed to connect to master server", utility::Colour::RED));
+        DEBUG_LOG(utility::colourize("replica failed to connect to master server", utility::cc::RED));
       }
     }
 
     readySocketPollfdVec.clear();
     if (0 != pollManager.pollSockets(timeout_ms, readySocketPollfdVec)) {
-      DEBUG_LOG(utility::colourize("encountered error while polling", utility::Colour::RED));
+      DEBUG_LOG(utility::colourize("encountered error while polling", utility::cc::RED));
     }
     counter++;
     if ((counter % 100000) == 0) {
-      DEBUG_LOG(utility::colourize("polled sockets, now looping...", utility::Colour::YELLOW));
+      DEBUG_LOG(utility::colourize("polled sockets, now looping...", utility::cc::YELLOW));
     }  
 
     for(const struct pollfd& pfd : readySocketPollfdVec) {
@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
           ss << "error while handling socketFD = " << pfd.fd;
           ss << ", serverListenerSocketFD = " << serverListenerSocketFD;
           ss << ", masterConnectorSocketFD = " << masterConnectorSocketFD;
-          DEBUG_LOG(utility::colourize(ss.str(), utility::Colour::RED));
+          DEBUG_LOG(utility::colourize(ss.str(), utility::cc::RED));
           continue;
         }
       }
@@ -181,10 +181,10 @@ int main(int argc, char **argv) {
           // listen to master (masterConnectorSocketFD) for commands
           // if (0 == receiveCommandsFromMaster(masterConnectorSocketFD, respParser, rcc, pollManager)) {
           if (0 == rcc.receiveCommandsFromMaster(masterConnectorSocketFD, pollManager)) {
-            DEBUG_LOG(utility::colourize("successfully received from master and updated state", utility::Colour::GREEN));
+            DEBUG_LOG(utility::colourize("successfully received from master and updated state", utility::cc::GREEN));
           }
           else {
-            DEBUG_LOG(utility::colourize("Failed to receive commands from master", utility::Colour::RED));
+            DEBUG_LOG(utility::colourize("Failed to receive commands from master", utility::cc::RED));
           }
         }
       }

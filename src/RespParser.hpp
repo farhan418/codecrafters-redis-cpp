@@ -149,7 +149,7 @@ namespace resp {
       }
       else {
         std::string errMsg = "SERIALIZEERR error serializing data";
-        DEBUG_LOG(utility::colourize(errMsg, utility::Colour::RED));
+        DEBUG_LOG(utility::colourize(errMsg, utility::cc::RED));
         return serialize({errMsg}, RespType::SimpleError);
       }
     }
@@ -180,7 +180,7 @@ namespace resp {
             // DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "] = " + respBuffer[respBufferIndex] + " is valid state");
             return true;
         }
-        DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "] = " + respBuffer[respBufferIndex] + " is invalid state", utility::Colour::RED));
+        DEBUG_LOG(utility::colourize("respBuffer[" + std::to_string(respBufferIndex) + "] = " + respBuffer[respBufferIndex] + " is invalid state", utility::cc::RED));
         return false;
     }
     
@@ -189,7 +189,7 @@ namespace resp {
         this function deserializes the next RESP data in respBuffer
       */
       if (isParsedRespBuffer()) {
-        DEBUG_LOG(utility::colourize("PARSEERR parsing error occurred due to invalid index (index out of bounds)"), utility::Colour::RED);
+        DEBUG_LOG(utility::colourize("PARSEERR parsing error occurred due to invalid index (index out of bounds)"), utility::cc::RED);
         return RespConstants::NULL_BULK_STRING;
       }
       DEBUG_LOG("in parseNextRespTypeData(), respBufferIndex=" + std::to_string(respBufferIndex));

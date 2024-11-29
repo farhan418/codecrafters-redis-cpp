@@ -38,20 +38,20 @@ namespace utility {
         const std::string RESET = "\033[0m";
     };
 
-    std::string colourize(std::string str, Colour& colour) {
-        if (colour == Colour::RED) {
-            str = cc::RED + str + cc::RESET;
-        }
-        else if (colour == Colour::GREEN) {
-            str = cc::GREEN + str + cc::RESET;
-        }
-        else if (colour == Colour::YELLOW) {
-            str = cc::YELLOW + str + cc::RESET;
-        }
-        else if (colour == Colour::BLUE) {
-            str = cc::BLUE + str + cc::RESET;
-        }
-        return str;
+    std::string colourize(std::string str, std::string& colour) {
+        // if (colour == Colour::RED) {
+        //     str = cc::RED + str + cc::RESET;
+        // }
+        // else if (colour == Colour::GREEN) {
+        //     str = cc::GREEN + str + cc::RESET;
+        // }
+        // else if (colour == Colour::YELLOW) {
+        //     str = cc::YELLOW + str + cc::RESET;
+        // }
+        // else if (colour == Colour::BLUE) {
+        //     str = cc::BLUE + str + cc::RESET;
+        // }
+        return colour + str + cc::RESET;
     }
 
     std::vector<std::string> split(const std::string& str, const std::string& delimeter = "\r\n") {
