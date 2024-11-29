@@ -374,7 +374,7 @@ namespace RCC {
           for (int i = 0; i < responseVec.size(); i++)
             oss << "responseVec["<< i << "]=\"" << responseVec[i] << "\", "; 
           DEBUG_LOG("case 3 : PSYNC COMMAND comparing : " + oss.str());
-          bool isExpectedResponse = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
+          isExpectedResponse = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
           isExpectedResponse = isExpectedResponse && (responseVec[1].length() == 40);
           isExpectedResponse = isExpectedResponse && (responseVec.size() >= 3);
         }
