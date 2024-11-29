@@ -71,7 +71,7 @@ namespace RCC {
     std::vector<std::string> processCommands(int& socketFD, const std::vector<std::string>& commands) {
       // socketFD is the socket which sent commands (to be used if it is replica)
       std::stringstream ss;
-      ss << "processing command = \"";
+      ss << "processing command = ";
       for (auto& c : commands)
         ss << "\"" << c << "\" | ";
       DEBUG_LOG(ss.str());
@@ -210,7 +210,7 @@ namespace RCC {
         // send single command to all replicas
         numBytes = utility::writeToSocketFD(replicaSocketFD, buffer, bufferSize, commandRespStr, retryCount);
         if (numBytes > 0) {
-          DEBUG_LOG("successfully sent " + std::to_string(numBytes) + "bytes to socket=" + std::to_string(replicaSocketFD) + ", command : " + utility::printExact(commandRespStr));
+          DEBUG_LOG("successfully sent " + std::to_string(numBytes) + " bytes to socket=" + std::to_string(replicaSocketFD) + ", command : " + utility::printExact(commandRespStr));
         }
         else if (numBytes == 0){
           DEBUG_LOG("writing to replica socket(" + std::to_string(replicaSocketFD) + ") during handshake failed : connection closed");
@@ -372,8 +372,8 @@ namespace RCC {
             isExpectedResponse = false;
           }
         }
-        else if ((i==3/*PSYNC command*/)) {
-          std::vector<std::string> responseVec = utility::split(buffer);
+        else if /*i==3 - PSYNC command*/ {
+          std::vector<std::string> responseVec = utility::split(buffer, " ");
           bool isCase3Matching = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
           isCase3Matching = isCase3Matching && (responseVec[1].length() == 40);
           isCase3Matching = isCase3Matching && (responseVec.size() == 3);
@@ -382,7 +382,7 @@ namespace RCC {
         // }
 
         if (isExpectedResponse) {
-          DEBUG_LOG("got reply to handShakeCommands as expected, handshake successful");
+          DEBUG_LOG("got reply to handShakeCommand as expected");
         }
         else {
           DEBUG_LOG("error occurred while replica master handshake - response not as expected, response : " + utility::printExact(response));
@@ -738,6 +738,13 @@ namespace RCC {
       // if reached here, it means master is connected with the replica which sent : 1) PING 2) REPLCONF ... 3) REPLCONF ... 4) PSYNC ? -1
       // so add it to replicaSocketFDSet
       replicaSocketFDSet.insert(socketFD);
+      std::ostringstream oss; 
+      oss << "replicaSocketFDSet = {" 
+      for (auto& fd : replicaSocketFDSet) {
+        oss << fd << ", ";
+      }
+      oss << "}";
+      DEBUG_LOG(oss.str());
       return response;
     }
 

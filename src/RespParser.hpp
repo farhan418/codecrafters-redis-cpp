@@ -163,7 +163,7 @@ namespace resp {
       */
       // DEBUG_LOG(utility::printExact(respBuffer));
         if (isParsedRespBuffer()) {
-          DEBUG_LOG("respBuffer was parsed completely");
+          // DEBUG_LOG("respBuffer was parsed completely");
             return true;
         }
 
@@ -177,7 +177,7 @@ namespace resp {
             || ch == static_cast<unsigned char>(RespType::Array)
         )
         {
-            DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "] = " + respBuffer[respBufferIndex] + " is valid state");
+            // DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "] = " + respBuffer[respBufferIndex] + " is valid state");
             return true;
         }
         DEBUG_LOG("respBuffer[" + std::to_string(respBufferIndex) + "] = " + respBuffer[respBufferIndex] + " is invalid state");
@@ -292,7 +292,7 @@ namespace resp {
       ++respBufferIndex;  // moving to the first digit of bufferLength
       uint16_t length = std::stol(respBuffer.substr(respBufferIndex, crlfIndex - respBufferIndex));
       respBufferIndex = crlfIndex + 2;  // moving to the first char of bulkString
-      DEBUG_LOG("bulkStringLength = " + std::to_string(length) + ", respBufferIndex=" + std::to_string(respBufferIndex));
+      // DEBUG_LOG("bulkStringLength = " + std::to_string(length) + ", respBufferIndex=" + std::to_string(respBufferIndex));
       
       std::ostringstream ss;
       bool isError = false;
@@ -304,33 +304,12 @@ namespace resp {
         isError = true;
         respBufferIndex = respBuffer.length();
       }
-      // for (size_t i = 0; i < length && (!isParsedRespBuffer()); i++) {
-        // ss << respBuffer[respBufferIndex++];//*2\r\n$5\r\nhello\r\n$5\r\nworld\r\n
-      // }
-      DEBUG_LOG("parsed bulk string : " + ss.str() + ", respBufferIndex=" + std::to_string(respBufferIndex) + ", isError=" + std::to_string(isError));
-    //   respBufferIndex += 2;
-    //   if ((!isParsedRespBuffer()) && respBufferIndex != respBuffer.find(RespConstants::CRLF, respBufferIndex)) {
-    //     /*
-    //         scenaria when the index is not set to 1 position after next \r\n i.e. after end of bulk string
-    //     */
-    //     DEBUG_LOG("PARSEERR data does not conform to RESP BulkString encoding");
-    //     respBufferIndex = respBuffer.length();
-    //     return RespConstants::NULL_BULK_STRING;
-    //   }
+      // DEBUG_LOG("parsed bulk string : " + ss.str() + ", respBufferIndex=" + std::to_string(respBufferIndex) + ", isError=" + std::to_string(isError));
       if (!isRespTypeCharOrEndOfRespBuffer() || isError) {
         DEBUG_LOG("PARSEERR data does not conform to RESP BulkString encoding");
         return RespConstants::NULL_BULK_STRING;
       }
       return ss.str();
-      // crlfIndex = respBuffer.find(RespConstants::CRLF, respBufferIndex);
-      // if (crlfIndex == std::string::npos || (length != crlfIndex - respBufferIndex)) {
-      //   DEBUG_LOG("PARSEERR data does not conform to RESP BulkString encoding");
-      //   return RespConstants::NULL_BULK_STRING;
-      // }
-
-      // size_t tempIndex = respBufferIndex;
-      // respBufferIndex = crlfIndex + 2;
-      // return respBuffer.substr(tempIndex, crlfIndex - tempIndex);
     }
 
     std::string parseArray() {
@@ -344,7 +323,7 @@ namespace resp {
       ++respBufferIndex;
       size_t arrayLength = std::stol(respBuffer.substr(respBufferIndex, crlfIndex - respBufferIndex));
       respBufferIndex = crlfIndex + 2;
-      DEBUG_LOG("arrayLength = " + std::to_string(arrayLength) + ", respBufferIndex=" + std::to_string(respBufferIndex));
+      // DEBUG_LOG("arrayLength = " + std::to_string(arrayLength) + ", respBufferIndex=" + std::to_string(respBufferIndex));
 
       std::ostringstream command;
       // command << "[";
