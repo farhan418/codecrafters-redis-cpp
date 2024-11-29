@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
   if (replicaof != "NA") {
     // RCC::RedisCommandCenter::setSlaveInfo(replicaof, listeningPortNumber, "psync2");
     rcc.setSlaveInfo(replicaof, listeningPortNumber, "psync2");
-    DEBUG_LOG(utility::colourize("this server is a replica of " + (replicaof), utility::cc::GREEN));
+    DEBUG_LOG(utility::colourize("this server is a replica of " + replicaof, utility::cc::GREEN));
     isSlaveServer = true;
     //start
     // if (0 != socketSetting.resetSocketSettings()) {
@@ -140,6 +140,7 @@ int main(int argc, char **argv) {
     if (0 != pollManager.pollSockets(timeout_ms, readySocketPollfdVec)) {
       DEBUG_LOG(utility::colourize("encountered error while polling", utility::cc::RED));
     }
+
     counter++;
     if ((counter % 100000) == 0) {
       DEBUG_LOG(utility::colourize("polled sockets, now looping...", utility::cc::YELLOW));
@@ -147,22 +148,7 @@ int main(int argc, char **argv) {
 
     for(const struct pollfd& pfd : readySocketPollfdVec) {
 
-      if (pfd.fd != masterConnectorSocketFD) {
-        // if here => not master socket but client socket
-        // client can be any redis client or even a replica server
-        // this block handles clients
-        // pm::printPollFD(pfd);
-        // if (clientHandler(pfd.fd, respParser, rcc, pollManager, replicaSocketsSet) != 0) {
-        if (rcc.clientHandler(pfd.fd, pollManager) != 0) {
-          ss.clear();
-          ss << "error while handling socketFD = " << pfd.fd;
-          ss << ", serverListenerSocketFD = " << serverListenerSocketFD;
-          ss << ", masterConnectorSocketFD = " << masterConnectorSocketFD;
-          DEBUG_LOG(utility::colourize(ss.str(), utility::cc::RED));
-          continue;
-        }
-      }
-      else {
+      if (pfd.fd == masterConnectorSocketFD) {
         // this block handles replication (if current running server is a replica of another server)
         // if ((!isHandShakeSuccessful) || (!isConnectedToMasterServer)) {
         //   // do handshake if not connected to master server
@@ -190,6 +176,25 @@ int main(int argc, char **argv) {
           }
         }
       }
+      else {
+        // if here => not master socket but client socket
+        // client can be any redis client or even a replica server
+        // this block handles clients
+        // pm::printPollFD(pfd);
+        // if (clientHandler(pfd.fd, respParser, rcc, pollManager, replicaSocketsSet) != 0) {
+        if (rcc.clientHandler(pfd.fd, pollManager) != 0) {
+          ss.clear();
+          ss << "error while handling socketFD = " << pfd.fd;
+          ss << ", serverListenerSocketFD = " << serverListenerSocketFD;
+          ss << ", masterConnectorSocketFD = " << masterConnectorSocketFD;
+          DEBUG_LOG(utility::colourize(ss.str(), utility::cc::RED));
+          continue;
+        }
+        else {
+          DEBUG_LOG(utility::colourize("Successfully handled client", utility::cc::GREEEN));
+        }
+      }
+      
     }  // looping through all FDs which are ready to be read from or write to
   } // infinite for loop
 
