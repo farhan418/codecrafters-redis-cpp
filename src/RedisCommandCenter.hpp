@@ -99,7 +99,7 @@ namespace RCC {
         return -1;
     }
 
-    int connectToMasterServer(int& masterConnecterSocketFD, std::string replicaof, pm::PollManager& pollManager) {
+    int connectToMasterServer(int& masterConnectorSocketFD, std::string replicaof, pm::PollManager& pollManager) {
       std::vector<std::string> hostPortVec = utility::split(replicaof, " ");
       DEBUG_LOG("hostPortVec[0]=" + hostPortVec[0] + ", hostPortVec[1]=" + hostPortVec[1]);
       SocketSetting socketSetting;
@@ -117,7 +117,7 @@ namespace RCC {
           // break;
       // }
       if (masterConnectorSocketFD < 1) {
-        DEBUG_LOG("failed to connect to master : " + (*replicaof));
+        DEBUG_LOG("failed to connect to master : " + replicaof);
         return -1;
       }
       else {
