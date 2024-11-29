@@ -188,7 +188,7 @@ namespace RCC {
           return -1;
         }
         else if (numBytes == 0) {  // if 0 bytes, it means connection closed
-          DEBUG_LOG("Failed to write message to socket : connection closed\n");
+          DEBUG_LOG("Failed to write message to socket(" + std::to_string(currentSocketFD) + ") : connection closed\n");
           pollManager.deleteSocketFDFromPollfdArr(currentSocketFD);
           replicaSocketFDSet.erase(currentSocketFD);
           return 0;
