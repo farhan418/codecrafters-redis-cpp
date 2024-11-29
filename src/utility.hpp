@@ -142,11 +142,11 @@ namespace utility {
             //     return numBytesRead;
             // }
             if (numBytesRead == 0) {
-                DEBUG_LOG("error while reading from socket " + std::to_string(sockFD) + " : connection closed (0 returned)");
+                DEBUG_LOG(utility::colourize("error while reading from socket " + std::to_string(sockFD) + " : connection closed (0 returned)", utility::cc::RED));
                 break;
             }
             else if (numBytesRead < 0) {
-                DEBUG_LOG("Error reading from socket: " + std::to_string(sockFD) + " (return value is -ve)\n");
+                DEBUG_LOG(utility::colourize("Error reading from socket: " + std::to_string(sockFD) + " (return value is -ve)", utility::cc::RED));
             }
             else {
                 isSuccessfullyRead = true;
@@ -156,11 +156,13 @@ namespace utility {
         }
 
         if (isSuccessfullyRead) {
-            if (numBytesRead < bufferSize) {
-                buffer[numBytesRead] = '\0';
-            }
+            for (size_t i = numBytesRead; i < bufferSize; i++)
+                buffer[i] = '\0';
+            
             std::stringstream ss;
             ss << "read from socket " << sockFD << ", " << numBytesRead << " bytes : " << utility::printExact(buffer);
+            DEBUG_LOG(utility::colourize(ss.str(), utility::cc::GREEN));
+            
             std::string s(buffer);
             if (numBytesRead != s.length()) {
                 std::ostringstream temp;
@@ -170,9 +172,8 @@ namespace utility {
                     temp << ", buffer[" << i << "] = " << buffer[i] << ", byte = " << static_cast<int>(byte) << "| ";
                     // temp << "buffer[" << i << "] = " << buffer[i] << ", byte = " << byte;
                 }
-                DEBUG_LOG(temp.str());
+                DEBUG_LOG(utility::colourize(temp.str(), utility::cc::RED));
             }
-            DEBUG_LOG(ss.str());
         }
         return numBytesRead;
     }
@@ -184,14 +185,12 @@ namespace utility {
         int numBytesRead = read(sockFD, buffer, bufferSize);
 
         if (numBytesRead <= 0) {
-            DEBUG_LOG("numBytesRead=" + std::to_string(numBytesRead) + ", connection closed (if 0 returned) or Error reading from socket: " + std::to_string(sockFD) + " (if -ve returned.)\n");
+            DEBUG_LOG(utility::colourize("numBytesRead=" + std::to_string(numBytesRead) + ", connection closed (if 0 returned) or Error reading from socket: " + std::to_string(sockFD) + " (if -ve returned.)", utility::cc::RED));
             return numBytesRead;
         }
 
-        if (numBytesRead < bufferSize) {
-            for (size_t i = numBytesRead; i < bufferSize; i++)
-                buffer[i] = '\0';
-        }
+        for (size_t i = numBytesRead; i < bufferSize; i++)
+            buffer[i] = '\0';
 
         // if buffer has garbage value after index numBytes
         std::string s(buffer);
@@ -204,12 +203,12 @@ namespace utility {
             DEBUG_LOG(temp.str());
         }
         else {
-            DEBUG_LOG("numBytesRead=" + std::to_string(numBytesRead) + ", buffer length = " + std::to_string(s.length()));
+            DEBUG_LOG(utility::colourize("numBytesRead=" + std::to_string(numBytesRead) + ", buffer length = " + std::to_string(s.length()), utility::cc::YELLOW));
         }
 
         std::stringstream ss;
         ss << "read from socket " << sockFD << ", " << numBytesRead << " bytes : " << utility::printExact(buffer);
-        DEBUG_LOG(ss.str());
+        DEBUG_LOG(utility::colourize(ss.str(), utility::cc::YELLOW));
 
         return numBytesRead;
     }
@@ -218,7 +217,7 @@ namespace utility {
         // writes to a socket fd and returns number of bytes sent
         
         if (content.length() > bufferSize) {
-            DEBUG_LOG("content.length() > bufferSize : use sendall()");
+            DEBUG_LOG(utility::colourize("content.length() > bufferSize : use sendall()", utility::cc::RED));
             return -1;
         }
 
@@ -231,11 +230,11 @@ namespace utility {
             memcpy(buffer, content.c_str(), content.length());
             numBytesWritten = write(sockFD, buffer, content.length());
             if (numBytesWritten == 0) {
-                DEBUG_LOG("error while writing to socket " + std::to_string(sockFD) + " : connection closed (0 returned)");
+                DEBUG_LOG(utility::colourize("error while writing to socket " + std::to_string(sockFD) + " : connection closed (0 returned)", utility::cc::RED);
                 break;
             }
             else if (numBytesWritten < 0) {
-                DEBUG_LOG("Error writing to socket: " + std::to_string(sockFD) + " (return value is -ve)\n");
+                DEBUG_LOG(utility::colourize("Error writing to socket: " + std::to_string(sockFD) + " (return value is -ve)\n", utility::cc::RED));
             }
             else {
                 isSuccessfullyWritten = true;
@@ -247,7 +246,7 @@ namespace utility {
         if (isSuccessfullyWritten) {
             std::stringstream ss;
             ss << "sent to socket " << sockFD << ", " << numBytesWritten << " bytes : " << utility::printExact(buffer);
-            DEBUG_LOG(ss.str());
+            DEBUG_LOG(utility::colourize(ss.str(), utility::cc::YELLOW));
         }
         return numBytesWritten;
     }
@@ -256,7 +255,7 @@ namespace utility {
         // writes to a socket fd and returns number of bytes sent
         
         if (content.length() > bufferSize) {
-            DEBUG_LOG("content.length() > bufferSize : use sendall()");
+            DEBUG_LOG(utility::colourize("content.length() > bufferSize : use sendall()", utility::cc::RED));
             return -1;
         }
 
@@ -264,13 +263,13 @@ namespace utility {
         memcpy(buffer, content.c_str(), content.length());
         int numBytesWritten = write(sockFD, buffer, content.length());
         if (numBytesWritten <= 0) {
-            DEBUG_LOG("connection closed (if 0 returned) or Error writing to socket: " + std::to_string(sockFD) + " (if -ve returned)\n");
+            DEBUG_LOG(utility::colourize("connection closed (if 0 returned) or Error writing to socket: " + std::to_string(sockFD) + " (if -ve returned)", utility::cc::RED));
             return numBytesWritten;
         }
 
         std::stringstream ss;
         ss << "sent to socket " << sockFD << ", " << numBytesWritten << " bytes : " << utility::printExact(buffer);
-        DEBUG_LOG(ss.str());
+        DEBUG_LOG(utility::colourize(ss.str(), utility::cc::YELLOW));
         return numBytesWritten;
     }
 
