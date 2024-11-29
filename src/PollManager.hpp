@@ -55,7 +55,7 @@ namespace pm {
             out << "\nisSocketNonBlocking : " << isSocketNonBlocking;
             out << "\nisReuseSocket : " << isReuseSocket;
 
-            return utility::colourize(out.str(), utility::Colour::YELLOW);
+            return out.str();
         }
 
         std::string socketHostOrIP;  // valid inputs - localhost, www.example.com, 16.2.4.74
@@ -77,10 +77,10 @@ namespace pm {
         {
             pollfdArr = static_cast<struct pollfd*>(calloc(pollfdArrCapacity, sizeof(struct pollfd)));
             if (pollfdArr == NULL) {
-                DEBUG_LOG(utility::colourize("calloc : memory allocation failed", utility::Colour::RED);
+                DEBUG_LOG(utility::colourize("calloc : memory allocation failed", utility::cc::RED));
                 exit(1);
             }
-            DEBUG_LOG("Polling Manager Object created.");
+            DEBUG_LOG(utility::colourize("Polling Manager Object created.", utility::cc::YELLOW));
         }
 
         ~PollManager() {
@@ -95,7 +95,7 @@ namespace pm {
         int pollSockets(int timeout_ms, std::vector<struct pollfd>& readyFDsVec) {
             static long long pollCount = 0;
             if (poll(pollfdArr, pollfdArrSize, timeout_ms) == -1) {
-                DEBUG_LOG("poll failed");
+                DEBUG_LOG(utility::colourize("poll failed", utility::cc::RED));
                 return -1;
             }
              
@@ -119,23 +119,23 @@ namespace pm {
                         socklen_t addrLen = sizeof(remoteAddr);
                         int newSocketFD = accept(listenerSocketFD, (struct sockaddr*)&remoteAddr, &addrLen);
                         if (newSocketFD == -1) {
-                            DEBUG_LOG("Error accepting client connection request");
+                            DEBUG_LOG(utility::colourize("Error accepting client connection request", utility::cc::RED));
                             continue;  // continue to next socketFD in pollfdArr
                         }
                         // add the new socket to polling array 
                         if (_addSocketFDToPollfdArr(newSocketFD, POLLIN /*| POLLINOUT*/) != 0) {
-                            DEBUG_LOG("failed to add newSocketFD to pollfdArr");
+                            DEBUG_LOG(utility::colourize("failed to add newSocketFD to pollfdArr", utility::cc::RED));
                             continue;
                         }
                         // print client address
                         char remoteIP[INET6_ADDRSTRLEN];
                         if (NULL == inet_ntop(remoteAddr.ss_family, _getInAddr((struct sockaddr*)&remoteAddr), remoteIP, INET6_ADDRSTRLEN)) {
-                            DEBUG_LOG("failed to convert address to human readable form");
+                            DEBUG_LOG(utility::colourize("failed to convert address to human readable form", utility::cc::RED));
                         }
                         std::stringstream ss;  
                         ss << "pollserver: new connection from \""<< remoteIP;
                         ss << "\" on socketFD = " << newSocketFD;
-                        DEBUG_LOG(ss.str());
+                        DEBUG_LOG(utility::colourize(ss.str(), utility::cc::RED));
                     }  // if it is listener socket with POLLIN
                 }  // if an element of pollfdArr has some event
             }  // for loop iterating pollfdArr
@@ -144,26 +144,26 @@ namespace pm {
 
         int createConnectorSocket(const struct SocketSetting& socketSetting) {
             // returns connectorSocketFD (negative means failed, >0 means created successfully)
-            DEBUG_LOG("in public createConnectorSocket");
+            // DEBUG_LOG("in public createConnectorSocket");
             if (0 != _createConnectorSocket(socketSetting)) {
-                DEBUG_LOG("failed to create connector socket");
+                DEBUG_LOG(utility::colourize("failed to create connector socket", utility::cc::RED));
                 return -1;
             }
             std::stringstream ss;  
             ss << "Successfully created connectorSocketFD = " << connectorSocketFD;
-            DEBUG_LOG(ss.str());
+            DEBUG_LOG(utility::colourize(ss.str(), utility::cc::GREEN));
             return connectorSocketFD;
         }
 
         int createListenerSocket(const struct SocketSetting& socketSetting) {
             // returns listenerSocketFD (negative means failed, >0 means created successfully)
             if (0 != _createListenerSocket(socketSetting)) {
-                DEBUG_LOG("failed to create listener socket");
+                DEBUG_LOG(utility::colourize("failed to create listener socket", utility::cc::RED));
                 return -1;
             }
             std::stringstream ss;  
             ss << "Successfully created listenerSocketFD = " << listenerSocketFD;
-            DEBUG_LOG(ss.str());
+            DEBUG_LOG(utility::colourize(ss.str(), utility::cc::GREEN));
             return listenerSocketFD;
         }
 
@@ -188,41 +188,41 @@ namespace pm {
                 const int bufSize = 256;
                 char charBuf[bufSize];
                 snprintf(charBuf, bufSize, "pollserver: %s\n", gai_strerror(rv));
-                DEBUG_LOG(charBuf);
+                DEBUG_LOG(utility::colourize(charBuf, utility::cc::RED));
                 return -1;
             }
-            DEBUG_LOG("done getaddrinfo, rv = " + std::to_string(rv));
+            DEBUG_LOG(utility::colourize("done getaddrinfo, rv = " + std::to_string(rv), utility::cc::YELLOW));
             for(p = servinfo; p != NULL; p = p->ai_next) {
                 std::stringstream ss1;
                 ss1 << "p->ai_family=" << p->ai_family << ", p->ai_socktype=" << p->ai_socktype << ", p->ai_protocol=" << p->ai_protocol;
-                DEBUG_LOG(ss1.str());
+                DEBUG_LOG(utility::colourize(ss1.str(), utility::cc::YELLOW));
             }
             
             for(p = servinfo; p != NULL; p = p->ai_next) {
                 connectorSocketFD = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
                 if (-1 == connectorSocketFD) {
-                    DEBUG_LOG("connectorSocketFD creation failed...");
+                    DEBUG_LOG(utility::colourize("connectorSocketFD creation failed...", utility::cc::RED));
                     continue;
                 }
-                DEBUG_LOG("connector socket creation in progress...");
+                DEBUG_LOG(utility::colourize("connector socket creation in progress...", utility::cc::YELLOW));
 
                 if (socketSetting.isSocketNonBlocking) {
                     int flags = fcntl(connectorSocketFD, F_GETFL, 0);
                     if (flags < 0) {
-                        DEBUG_LOG("fcntl(connectorSocketFD, F_GETFL, 0) failed");
+                        DEBUG_LOG(utility::colourize("fcntl(connectorSocketFD, F_GETFL, 0) failed", utility::cc::RED));
                         flags = 0;
                     }
                     if (fcntl(connectorSocketFD, F_SETFL, flags | O_NONBLOCK) < 0) {
-                        DEBUG_LOG("fcntl(connectorSocketFD, F_SETFL, flags | O_NONBLOCK) failed");
+                        DEBUG_LOG(utility::colourize("fcntl(connectorSocketFD, F_SETFL, flags | O_NONBLOCK) failed", utility::cc::RED));
                     }
-                    DEBUG_LOG("made connector socket Non blocking...");
+                    DEBUG_LOG(utility::colourize("made connector socket Non blocking...", utility::cc::YELLOW));
                 }
                 else {
-                    DEBUG_LOG("creating connector socket in blocking mode");
+                    DEBUG_LOG(utility::colourize("creating connector socket in blocking mode", utility::cc::YELLOW));
                 }
 
                 if (connect(connectorSocketFD, p->ai_addr, p->ai_addrlen) == -1) {
-                    DEBUG_LOG("client: connect failed");
+                    DEBUG_LOG(utility::colourize("client: connect failed", utility::cc::RED));
                     close(connectorSocketFD);
                     connectorSocketFD = -1;
                     continue;
@@ -237,17 +237,17 @@ namespace pm {
 
             char remoteIP[INET6_ADDRSTRLEN];
             if (NULL == inet_ntop(p->ai_family, _getInAddr((struct sockaddr*)p->ai_addr), remoteIP, INET6_ADDRSTRLEN)) {
-                DEBUG_LOG("failed to convert address to human readable form");
+                DEBUG_LOG(utility::colourize("failed to convert address to human readable form", utility::cc::RED));
             }
             std::stringstream ss;  
             ss << "client: connecting to : " << remoteIP;
-            DEBUG_LOG(ss.str());
+            DEBUG_LOG(utility::colourize(ss.str(), utility::cc::YELLOW));
 
             servinfo = p = NULL;
             freeaddrinfo(servinfo); // All done with this
             
             if (_addSocketFDToPollfdArr(connectorSocketFD, POLLIN | POLLOUT) != 0) {
-                DEBUG_LOG("failed to add connectorSocketFD=" + std::to_string(connectorSocketFD) + " to pollfdArr");
+                DEBUG_LOG(utility::colourize("failed to add connectorSocketFD=" + std::to_string(connectorSocketFD) + " to pollfdArr", utility::cc::RED));
                 return -1;
             }
             return 0;
@@ -267,7 +267,7 @@ namespace pm {
                 const int bufSize = 256;
                 char charBuf[bufSize];
                 snprintf(charBuf, bufSize, "pollserver: %s\n", gai_strerror(rv));
-                DEBUG_LOG(charBuf);
+                DEBUG_LOG(utility::colourize(charBuf, utility::cc::RED));
                 return -1;
             }
             
@@ -280,18 +280,18 @@ namespace pm {
                 if (socketSetting.isSocketNonBlocking) {
                     int flags = fcntl(listenerSocketFD, F_GETFL, 0);
                     if (flags < 0) {
-                        DEBUG_LOG("fcntl(listenerSocketFD, F_GETFL, 0) failed");
+                        DEBUG_LOG(utility::colourize("fcntl(listenerSocketFD, F_GETFL, 0) failed", utility::cc::RED));
                         flags = 0;
                     }
                     if (fcntl(listenerSocketFD, F_SETFL, flags | O_NONBLOCK) < 0) {
-                        DEBUG_LOG("fcntl(listenerSocketFD, F_SETFL, flags | O_NONBLOCK) failed");
+                        DEBUG_LOG(utility::colourize("fcntl(listenerSocketFD, F_SETFL, flags | O_NONBLOCK) failed", utility::cc::RED));
                     }
                 }
 
                 if (socketSetting.isReuseSocket) {
                     int reuse = static_cast<int>(socketSetting.isReuseSocket);
                     if (setsockopt(listenerSocketFD, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int)) < 0) {
-                        DEBUG_LOG("setsockopt failed\n");
+                        DEBUG_LOG(utility::colourize("setsockopt failed", utility::cc::RED));
                         close(listenerSocketFD);
                         listenerSocketFD = -1;
                         continue;
@@ -316,12 +316,12 @@ namespace pm {
             ai = p = NULL;
 
             if (listen(listenerSocketFD, socketSetting.socketBacklogCount) != 0) {
-                DEBUG_LOG("listen failed\n");
+                DEBUG_LOG(utility::colourize("listen failed", utility::cc::RED));
                 return 1;
             }
             
             if (_addSocketFDToPollfdArr(listenerSocketFD, POLLIN /*| POLLINOUT*/) != 0) {
-                DEBUG_LOG("failed to add listenerSocketFD=" + std::to_string(listenerSocketFD) + " to pollfdArr");
+                DEBUG_LOG(utility::colourize("failed to add listenerSocketFD=" + std::to_string(listenerSocketFD) + " to pollfdArr", utility::cc::RED));
                 return 1;
             }
             return 0;
@@ -346,7 +346,7 @@ namespace pm {
                 pollfdArrCapacity += 100;
                 pollfdArr = static_cast<struct pollfd*>(realloc(pollfdArr, (sizeof(struct pollfd) * pollfdArrCapacity)));
                 if (pollfdArr == NULL) {
-                    DEBUG_LOG("realloc : encountered error while resizing pollfdArr");
+                    DEBUG_LOG(utility::colourize("realloc : encountered error while resizing pollfdArr", utility::cc::RED));
                     return -1;
                 }
             }
@@ -383,7 +383,7 @@ namespace pm {
                 pollfdArr = static_cast<struct pollfd*>(realloc(pollfdArr, (sizeof(struct pollfd) * pollfdArrCapacity)));
                 DEBUG_LOG("updted pollfdArr and pollfdArrCapacity = " + std::to_string(pollfdArrCapacity));
             }
-            DEBUG_LOG("deleted socketFD=" + std::to_string(socketFD) + ", pollfdArrSize=" + std::to_string(pollfdArrSize));
+            DEBUG_LOG(utility::colourize("deleted socketFD=" + std::to_string(socketFD) + ", pollfdArrSize=" + std::to_string(pollfdArrSize), utility::cc::RED));
             return 0;
         }
 
