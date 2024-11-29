@@ -191,7 +191,7 @@ int main(int argc, char **argv) {
           continue;
         }
         else {
-          DEBUG_LOG(utility::colourize("Successfully handled client", utility::cc::GREEEN));
+          DEBUG_LOG(utility::colourize("Successfully handled client", utility::cc::GREEN));
         }
       }
       
