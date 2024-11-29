@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
   pm::SocketSetting socketSetting;  // struct object to pass socket settings to PollManager obj 
   pm::PollManager pollManager;  // object to manage and poll() sockets
   RCC::RedisCommandCenter rcc;  // to execute Redis commands
-  const int timeout_ms = 500;  // 0 means non blocking; if > 0 then poll() in pm::PollManager::pollSockets() will block for timeout_ms seconds
+  const int timeout_ms = 1000;  // 0 means non blocking; if > 0 then poll() in pm::PollManager::pollSockets() will block for timeout_ms seconds
   // std::vector<struct pollfd> readySocketPollfdVec;  // to get list of sockets which are ready to readFrom or writeTo
   bool isSlaveServer = false;  // to track if current server running is replica or master
   bool isHandShakeSuccessful = false;  // true if replica has done the handshake with the master else false
