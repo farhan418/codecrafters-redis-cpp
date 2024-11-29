@@ -108,10 +108,12 @@ namespace pm {
                 if (pollfdArr[i].revents & (POLLIN | POLLOUT)) {
                     if (pollfdArr[i].fd != listenerSocketFD) {
                         // DEBUG_LOG("a socketFD is ready : " + std::to_string(pollfdArr[i].fd));
-                        if (_isSocketOpen(pollfdArr[i].fd))
+                        if (_isSocketOpen(pollfdArr[i].fd)) {
                             readyFDsVec.push_back(pollfdArr[i]);  // if the socket can be read from, push to the ready list
-                        else
+                        }
+                        else {
                             _deleteSocketFDFromPollfdArr(pollfdArr[i].fd);  // delete if the socket cannot be read from
+                        }
                     }
                     else if (/*(pollfdArr[i].fd == listenerSocketFD) &&*/ (pollfdArr[i].revents & POLLIN)) {
                         // if listener is ready to read, it means a new client connection
@@ -329,7 +331,7 @@ namespace pm {
 
         bool _isSocketOpen(int socketFD) {
             // returns true if socket is open else returns false
-            if (socketFD == -1)
+            if (socketFD < 0)
                 return false;  // socket is invalid or closed
 
             char buffer;
@@ -359,7 +361,7 @@ namespace pm {
         }
 
         int _deleteSocketFDFromPollfdArr(int socketFD) {
-            if (pollfdArrSize <= 0)
+            if (pollfdArrSize <= 0 || socketFD == listenerSocketFD || socketFD == connectorSocketFD)
                 return -1;
 
             int index = 0;

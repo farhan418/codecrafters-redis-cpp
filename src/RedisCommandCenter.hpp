@@ -146,7 +146,7 @@ namespace RCC {
             const int bufferSize = 1024; 
             char buffer[bufferSize];
             size_t result = recv(socketFD, &buffer, bufferSize, MSG_PEEK | MSG_DONTWAIT);
-            DEBUG_LOG(utility::colourize(utility::printExact(buffer), utility::cc::BLUE));
+            DEBUG_LOG(utility::colourize(utility::printExact("socketFD="+std::to_string(socketFD)+std::string(buffer)), utility::cc::BLUE));
             if ( (result == -1) && (errno == EBADF)) {
                 return false;  // socket is closed
             }
