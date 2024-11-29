@@ -373,10 +373,14 @@ namespace RCC {
           }
         }
         else /*i==3 - PSYNC command*/ {
-          std::vector<std::string> responseVec = utility::split(buffer, " ");
-          bool isCase3Matching = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
-          isCase3Matching = isCase3Matching && (responseVec[1].length() == 40);
-          isCase3Matching = isCase3Matching && (responseVec.size() == 3);
+          std::vector<std::string> responseVec = utility::split(response, " ");
+          std::ostringstream oss;
+          for (int i = 0; i < responseVec.size(); i++)
+            oss << "responseVec["<< i << "]=\"" << responseVec[i] << "\", "; 
+          DEBUG_LOG("case 3 : PSYNC COMMAND comparing : " + oss.str());
+          bool isExpectedResponse = utility::compareCaseInsensitive("+FULLRESYNC", responseVec[0]);
+          isExpectedResponse = isExpectedResponse && (responseVec[1].length() == 40);
+          isExpectedResponse = isExpectedResponse && (responseVec.size() == 3);
         }
         // if (!isCase3Matching || !utility::compareCaseInsensitive(resp::RespParser::serialize(utility::split(expectedResultVec[i]), receiveDataType), response)) {
         // }
