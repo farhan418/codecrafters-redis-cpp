@@ -107,7 +107,7 @@ namespace RCC {
       socketSetting.socketPortOrService = hostPortVec[1];
       socketSetting.socketDomain = AF_INET;
       socketSetting.isReuseSocket = false;
-      socketSetting.isSocketNonBlocking = false;
+      socketSetting.isSocketNonBlocking = true;
       DEBUG_LOG("connector socket setting: " + socketSetting.getSocketSettingsString());
       // int counter = 0;
       // while (counter < 3) {
